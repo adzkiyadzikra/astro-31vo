@@ -260,8 +260,8 @@ const latihanDasar: LatihanSoal[] = [
     type: "pgk",
     soal: "Perhatikan pernyataan-pernyataan berikut!",
     pernyataan: [
-      "$0,45 < 78\\%$",
-      "$78\\% < 0,85$",
+      "$0,45 < \\dfrac{39}{50}$",
+      "$\\dfrac{39}{50} < 0,85$",
       "$0,85 < \\dfrac{7}{8}$",
       "$\\dfrac{7}{8} > 0,9$",
     ],
@@ -285,46 +285,31 @@ const latihanDasar: LatihanSoal[] = [
   {
     no: 6,
     type: "pgkbs",
-    soal: "Sebuah toko memberikan diskon $20\\%$ untuk tas seharga Rp250.000,00. Setelah diskon, dikenakan pajak layanan sebesar $10\\%$ dari harga setelah diskon. Tentukan Benar atau Salah untuk setiap pernyataan berikut.",
-    pernyataan: [
-      "Besar diskon adalah Rp50.000,00.",
-      "Harga tas setelah diskon adalah Rp200.000,00.",
-      "Harga yang harus dibayar setelah pajak adalah Rp220.000,00.",
-    ],
-    jawabanBS: ["B", "B", "B"],
-    pembahasan:
-      "(1) Diskon $=20\\%\\times\\text{Rp}250.000,00=\\text{Rp}50.000,00$ ✓ BENAR\n" +
-      "(2) Harga setelah diskon $=\\text{Rp}250.000,00-\\text{Rp}50.000,00=\\text{Rp}200.000,00$ ✓ BENAR\n" +
-      "(3) Pajak $=10\\%\\times\\text{Rp}200.000,00=\\text{Rp}20.000,00$, sehingga total bayar $=\\text{Rp}220.000,00$ ✓ BENAR",
+soal: "TKA Matematika 2026 — Buah merupakan salah satu sumber vitamin C. Perhatikan tabel berikut! Buah A: berat 118,4 gr, air 96,3 mL; Buah B: berat 130,7 gr, air 150 mL; Buah C: berat 130,55 gr, air 140 mL; Buah D: berat 96,255 gr, air 118,15 mL. Buah yang diteliti pertama adalah buah yang memiliki berat terbesar dan kandungan air paling banyak. Buah tersebut adalah ...",
+    options: ["Buah A", "Buah B", "Buah C", "Buah D"],
+    jawaban: "B",
+    pembahasan: "Buah B memiliki berat terbesar (130,7 gram) dan kandungan air paling banyak (150 mL). Jadi jawabannya B.",
   },
 
   // ─── 7 · PG ───────────────────────────────────────────────────────────────
   {
     no: 7,
     type: "pg",
-    soal: "Hasil dari $\\dfrac{\\dfrac{2}{1} - \\dfrac{3}{4}}{\\dfrac{1}{1} + \\dfrac{4}{2}}$ adalah ...",
-    options: [
-      "$\\dfrac{5}{12}$",
-      "$\\dfrac{7}{12}$",
-      "$\\dfrac{5}{9}$",
-      "$\\dfrac{9}{5}$",
-    ],
+soal: "Hasil dari $\\dfrac{\\frac{3}{4}-\\frac{1}{2}}{\\frac{1}{3}+\\frac{1}{2}}$ adalah ...",
+    options: ["$\\dfrac{3}{10}$", "$\\dfrac{1}{5}$", "$\\dfrac{5}{3}$", "$\\dfrac{2}{5}$"],
     jawaban: "A",
-    pembahasan:
-      "Pembilang: $2 - \\frac{3}{4} = \\frac{8}{4} - \\frac{3}{4} = \\frac{5}{4}$\n" +
-      "Penyebut: $1 + \\frac{4}{2} = 1 + 2 = 3$\n\n" +
-      "Hasil: $\\dfrac{\\frac{5}{4}}{3} = \\frac{5}{4} \\times \\frac{1}{3} = \\frac{5}{12}$ → A",
+    pembahasan: "Pembilang $=\\frac{3}{4}-\\frac{1}{2}=\\frac{1}{4}$. Penyebut $=\\frac{1}{3}+\\frac{1}{2}=\\frac{5}{6}$. Jadi hasilnya $\\frac{1}{4}\\div\\frac{5}{6}=\\frac{3}{10}$; opsi perlu disesuaikan dengan hasil ini."
   },
 
   // ─── 8 · PGK ──────────────────────────────────────────────────────────────
   {
     no: 8,
     type: "pgk",
-    soal: "Pak Hari mempunyai sejumlah uang. Seperlimanya untuk membeli kaos, duapertiganya untuk membeli baju, dan sisanya Rp60.000,00 untuk membeli topi.\nPerhatikan pernyataan-pernyataan berikut!",
+    soal: "Pak Ihsan mempunyai sejumlah uang. Seperlimanya untuk membeli kaos, duapertiganya untuk membeli baju, dan sisanya Rp60.000,00 untuk membeli topi.\nPerhatikan pernyataan-pernyataan berikut!",
     pernyataan: [
       "Bagian uang untuk kaos dan baju adalah $\\dfrac{13}{15}$ dari total",
       "Sisa uang yang digunakan untuk topi adalah $\\dfrac{2}{15}$ dari total",
-      "Total uang Pak Hari adalah Rp450.000,00",
+      "Total uang Pak Ihsan adalah Rp450.000,00",
       "Uang yang digunakan membeli kaos adalah Rp75.000,00",
     ],
     options: [
@@ -364,41 +349,26 @@ const latihanDasar: LatihanSoal[] = [
   {
     no: 10,
     type: "pg",
-    soal: "Pada kegiatan sosial diterima terigu sebanyak $21\\frac{3}{4}$ kg dan $23\\frac{1}{4}$ kg. Setiap warga menerima $2\\frac{1}{2}$ kg. Banyak warga yang menerima terigu tersebut adalah ...",
-    options: ["21 orang", "20 orang", "18 orang", "15 orang"],
-    jawaban: "C",
-    pembahasan:
-      "Total terigu:\n" +
-      "$21\\frac{3}{4}+23\\frac{1}{4}=21+23+\\frac{3}{4}+\\frac{1}{4}=44+1=45$ kg\n\n" +
-      "Banyak warga:\n" +
-      "$45\\div2\\frac{1}{2}=45\\div\\frac{5}{2}=45\\times\\frac{2}{5}=18$ orang → C",
+soal: "Ibu Nayra menerima gaji kotor Rp15.000.000 setiap bulan. Ia menggunakan $\\frac{1}{3}$ untuk makan dan minum, $\\frac{1}{4}$ untuk kredit rumah, dan $\\frac{1}{12}$ untuk listrik, internet, dan air. Sisanya ditabung. Jumlah tabungan darurat selama setahun adalah ...",
+    options: ["Rp30.000.000", "Rp60.000.000", "Rp90.000.000", "Rp120.000.000"],
+    jawaban: "B",
+    pembahasan: "Bagian tabungan $=1-\\left(\\frac{1}{3}+\\frac{1}{4}+\\frac{1}{12}\\right)=\\frac{1}{3}$. Tabungan per bulan $=\\frac{1}{3}\\times15.000.000=5.000.000$. Selama setahun $=12\\times5.000.000=60.000.000$, jadi jawaban B.",
   },
 
   // ─── 11 · PGK ─────────────────────────────────────────────────────────────
   {
     no: 11,
-    type: "pgk",
-    soal: "Diberikan $P=\\dfrac{5}{6}+\\dfrac{1}{4}$, $Q=\\dfrac{7}{8}-\\dfrac{1}{3}$, $R=\\dfrac{2}{3}\\times\\dfrac{9}{4}$, dan $S=\\dfrac{5}{6}\\div\\dfrac{10}{9}$. Pilihlah semua pernyataan yang benar.",
+    type: "pgkbs",
+    soal: "Tabel kandungan nutrisi per 100 gram daging sapi: energi 250 kkal, protein 26 gram, lemak 15 gram, zat besi 2,6 mg. Lemak meningkat 40% jika digoreng. Tentukan Benar atau Salah untuk setiap pernyataan berikut.",
     pernyataan: [
-      "$P=\\dfrac{13}{12}$",
-      "$Q=\\dfrac{13}{24}$",
-      "$R=\\dfrac{3}{2}$",
-      "$S=\\dfrac{2}{3}$",
+      "Energi dan zat besi pada 400 gram berturut-turut 1.000 kkal dan 10,4 mg.",
+      "Menggoreng meningkatkan lemak menjadi 21 gram per 100 gram.",
+      "Kebutuhan minimal 78 gram protein dipenuhi dengan minimal 300 gram daging.",
     ],
-    options: [
-      "(1) dan (2)",
-      "(1), (2), dan (3)",
-      "(1), (3), dan (4)",
-      "(2), (3), dan (4)",
-    ],
-    jawaban: "B",
-    jawabanPGK: [0, 1, 2],
-    pembahasan:
-      "$P=\\frac{5}{6}+\\frac{1}{4}=\\frac{10}{12}+\\frac{3}{12}=\\frac{13}{12}$ ✓\n" +
-      "$Q=\\frac{7}{8}-\\frac{1}{3}=\\frac{21}{24}-\\frac{8}{24}=\\frac{13}{24}$ ✓\n" +
-      "$R=\\frac{2}{3}\\times\\frac{9}{4}=\\frac{18}{12}=\\frac{3}{2}$ ✓\n" +
-      "$S=\\frac{5}{6}\\div\\frac{10}{9}=\\frac{5}{6}\\times\\frac{9}{10}=\\frac{3}{4}$, bukan $\\frac{2}{3}$ ✗\n\n" +
-      "Pernyataan yang benar adalah (1), (2), dan (3) → B.",
+    jawabanBS: ["B", "B", "B"],
+    options: [],
+    jawaban: "",
+    pembahasan: "(1) 400 gram mengandung 1.000 kkal dan 10,4 mg zat besi: BENAR. (2) $15\\times1,4=21$ gram: BENAR. (3) $78\\div26=3$, jadi minimal 300 gram: BENAR."
   },
 
   // ─── 12 · PGKBS ───────────────────────────────────────────────────────────
@@ -437,7 +407,7 @@ const latihanDasar: LatihanSoal[] = [
       "$A<B$",
       "$B<C$",
       "$D>C$",
-      "$A+D=-\\dfrac{1}{10}$",
+      "$A>D$",
     ],
     options: [
       "(1) dan (2)",
@@ -719,8 +689,8 @@ Berdasarkan teks tersebut, tentukan Benar atau Salah untuk setiap pernyataan ber
     type: "pgk",
     soal: `Perhatikan teks berikut untuk menjawab soal nomor 28 dan 29.
 
-Persediaan Beras Bu Kartika
-Bu Kartika mencatat harga pembelian 100 kg beras sebesar Rp1.200.000,00. Untuk acara syukuran, ia perlu menyediakan beras untuk 75 tamu. Setiap tamu mendapat $0{,}12$ kg beras. Beras untuk acara dibeli sebagai persediaan tambahan dengan harga per kilogram yang sama.
+Persediaan Beras Bu Alya
+Bu Alya mencatat harga pembelian 100 kg beras sebesar Rp1.200.000,00. Untuk acara syukuran, ia perlu menyediakan beras untuk 75 tamu. Setiap tamu mendapat $0{,}12$ kg beras. Beras untuk acara dibeli sebagai persediaan tambahan dengan harga per kilogram yang sama.
 
 Berdasarkan teks tersebut, pilihlah semua pernyataan yang benar.`,
     pernyataan: [
@@ -749,7 +719,7 @@ Berdasarkan teks tersebut, pilihlah semua pernyataan yang benar.`,
   {
     no: 29,
     type: "pg",
-    soal: "Berdasarkan teks Persediaan Beras Bu Kartika (soal 28), biaya pembelian beras tambahan untuk acara syukuran adalah ....",
+    soal: "Berdasarkan teks Persediaan Beras Bu Alya (soal 28), biaya pembelian beras tambahan untuk acara syukuran adalah ....",
     options: [
       "A. Rp96.000",
       "B. Rp108.000",
@@ -768,12 +738,15 @@ Berdasarkan teks tersebut, pilihlah semua pernyataan yang benar.`,
   },
 ];
 
+const nomorDihapus = new Set([13, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 29]);
+const latihanDasarTampil = latihanDasar.filter((soal) => !nomorDihapus.has(soal.no));
+
 const BilanganRasionalPage = () => (
   <TKAPemantapanLayout
     title="BILANGAN RASIONAL"
     materiSections={materiSections}
     contohSoal={contohSoal}
-    latihanDasar={latihanDasar}
+    latihanDasar={latihanDasarTampil}
   />
 );
 
