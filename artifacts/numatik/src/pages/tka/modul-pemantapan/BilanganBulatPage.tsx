@@ -1900,21 +1900,23 @@ const BilanganBulatPage = () => {
             </p>
             <TFTable qn={21} rows={[
               { key: "a", text: <span>Hasil dari <InlineMath math="3 \diamond (-4)" /> adalah <InlineMath math="-23" />.</span>, correct: "Benar" },
-              { key: "b", text: <span>Jika <InlineMath math="x = -2" />, hasil dari <InlineMath math="x \diamond 6" /> adalah <InlineMath math="-2" />.</span>, correct: "Salah" },
-              { key: "c", text: <span>Hasil dari <InlineMath math="5 \diamond (-1)" /> adalah <InlineMath math="-27" />.</span>, correct: "Benar" },
+              { key: "b", text: <span><InlineMath math="-2 \\diamond 6" /> adalah <InlineMath math="-2" />.</span>, correct: "Salah" },
+              { key: "c", text: <span>Hasil dari <InlineMath math="5 \\diamond (-1)" /> adalah <InlineMath math="-27" />.</span>, correct: "Benar" },
+              { key: "d", text: <span><InlineMath math="2 \\times 3^3" /> adalah <InlineMath math="54" />.</span>, correct: "Benar" },
             ]} />
             <PembahasanBtn n={21} />
             {expandedPembahasan.has(21) && (
               <div className="mt-3 space-y-2">
-                <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Salah &nbsp;|&nbsp; (c) Benar</PBJawaban>
+                <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Salah &nbsp;|&nbsp; (c) Benar &nbsp;|&nbsp; (d) Benar</PBJawaban>
                 <PBKonsep>
-                  <p>Rumus: <InlineMath math="a \diamond b = (-5) \times a + 2 \times b" /></p>
+                  <p>Rumus: <InlineMath math="a \\diamond b = (-5) \\times a + 2 \\times b" /></p>
                   <p>Substitusikan nilai yang diberikan ke rumus tersebut, perhatikan tanda.</p>
                 </PBKonsep>
                 <PBSteps>
                   <S n={1}><p>(a) <InlineMath math="3\diamond(-4)=(-5)(3)+2(-4)=-15+(-8)=-23" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                   <S n={2}><p>(b) <InlineMath math="(-2)\diamond6=(-5)(-2)+2(6)=10+12=22\neq-2" /> → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
-                  <S n={3}><p>(c) <InlineMath math="5\diamond(-1)=(-5)(5)+2(-1)=-25+(-2)=-27" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={3}><p>(c) <InlineMath math="5\\diamond(-1)=(-5)(5)+2(-1)=-25+(-2)=-27" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={4}><p>(d) <InlineMath math="2\\times3^3=2\\times27=54" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                 </PBSteps>
               </div>
             )}
@@ -1935,7 +1937,7 @@ const BilanganBulatPage = () => {
             <PembahasanBtn n={22} />
             {expandedPembahasan.has(22) && (
               <div className="mt-3 space-y-2">
-                <PBJawaban>Pernyataan (1), (2), dan (3) benar</PBJawaban>
+                <PBJawaban>Pernyataan (1), (2), (3), dan (4) benar</PBJawaban>
                 <PBKonsep>
                   <p>Baca data tiap gelas: X = −25°C terendah, W = 18°C tertinggi.</p>
                   <p>Selisih suhu = suhu besar − suhu kecil. Hati-hati tanda negatif.</p>
@@ -1950,10 +1952,10 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* Soal 23 dihapus sesuai susunan terbaru. */}
-          {false && <Soal n={23} tipe="BS">
+          {/* ══ SOAL 23 — BS ══ */}
+          <Soal n={23} tipe="BS">
             <p className={qText}>
-              Berdasarkan data suhu keempat gelas pada soal sebelumnya (W = <InlineMath math="18°C" />, X = <InlineMath math="25°C" />, Y = <InlineMath math="-4°C" />, Z = <InlineMath math="7°C" />), tentukan{" "}
+              Diketahui suhu keempat gelas (W = <InlineMath math="18°C" />, X = <InlineMath math="-25°C" />, Y = <InlineMath math="-4°C" />, Z = <InlineMath math="7°C" />), tentukan{" "}
               <span className={`font-bold ${isDark ? "text-green-300" : "text-green-600"}`}>Benar</span> atau{" "}
               <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>Salah</span> untuk setiap pernyataan!
             </p>
@@ -1965,18 +1967,19 @@ const BilanganBulatPage = () => {
             <PembahasanBtn n={23} />
             {expandedPembahasan.has(23) && (
               <div className="mt-3 space-y-2">
-                <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Salah &nbsp;|&nbsp; (c) Benar</PBJawaban>
+                <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Salah &nbsp;|&nbsp; (c) Salah</PBJawaban>
                 <PBKonsep>
-                  <p>Urutan suhu: Y(−4) &lt; Z(7) &lt; W(18) &lt; X(25).</p>
+                  <p>Urutan suhu dari terendah ke tertinggi adalah X(−25), Y(−4), Z(7), W(18).</p>
+                  <p>Gunakan urutan bilangan bulat pada garis bilangan untuk membandingkan suhu.</p>
                 </PBKonsep>
                 <PBSteps>
                   <S n={1}><p>(a) Y = −4 &lt; Z = 7 → Y lebih rendah → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={2}><p>(b) X − W = <InlineMath math="25 - 18 = 7°C \neq 6°C" /> → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
-                  <S n={3}><p>(c) Z(7) &lt; W(18) &lt; X(25) �� W di antara Z dan X → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={2}><p>(b) Selisih X dan W = <InlineMath math="|-25 - 18| = 43°C \\neq 6°C" /> → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
+                  <S n={3}><p>(c) W(18) lebih tinggi daripada Z(7), tetapi tidak lebih rendah daripada X(−25) → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
                 </PBSteps>
               </div>
             )}
-          </Soal>}
+          </Soal>
 
           {/* ══ SOAL 24 — PGS ══ */}
           <Soal n={24} tipe="PGS">
