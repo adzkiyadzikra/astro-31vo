@@ -6,10 +6,14 @@ export interface TkaHimpunanPembahasan {
 
 export interface TkaHimpunanSoal {
   no: number;
+  type?: "pg" | "pgk" | "pgkbs";
   soal: string;
   image?: string;
   options: string[];
   jawaban: string;
+  jawabanPGK?: number[];
+  pernyataan?: string[];
+  jawabanBS?: ("B" | "S")[];
   pembahasan: TkaHimpunanPembahasan;
 }
 
@@ -40,7 +44,7 @@ export const latihanDasarHimpunanTka: TkaHimpunanSoal[] = [
   {
     no: 2,
     soal: "Diketahui:\nS = {x | 1 $\\leq$ x $\\leq$ 10, x $\\in$ bilangan asli}\nP = {x | x $\\leq$ 6, x $\\in$ bilangan prima}\nQ = {x | 1 $\\leq$ x $\\leq$ 9, x $\\in$ bilangan genap}\nDiagram Venn untuk himpunan-himpunan di atas adalah ...",
-    options: ["A.|/himpunan-no2-opsi-a.svg","B.|/himpunan-no2-opsi-b.svg","C.|/himpunan-no2-opsi-c.svg","D.|/himpunan-no2-opsi-d.svg"],
+    options: ["A.|/himpunan-no2-opsi-a.svg","B.|/himpunan-no2-opsi-b.svg","C.|/himpunan-no2-opsi-c.svg","D.|/himpunan-no2-opsi-d.png"],
     jawaban: "B",
     pembahasan: {
       konsep: "Tentukan anggota S, P, Q dan irisan P∩Q untuk menentukan bentuk diagram Venn yang benar.",
@@ -50,7 +54,7 @@ export const latihanDasarHimpunanTka: TkaHimpunanSoal[] = [
         "Q = {2, 4, 6, 8} — genap, 1 ≤ x ≤ 9",
         "P ∩ Q = {2} — hanya 2 yang prima sekaligus genap",
         "Hanya P: {3, 5} | Hanya Q: {4, 6, 8} | Di luar keduanya: {1, 7, 9, 10}",
-        "Diagram: dua lingkaran P dan Q beririsan, dengan 2 di bagian irisan"
+        "Jawaban: B. Himpunan saling beririsan, karena P ∩ Q = {2}."
       ],
       rumus: "P ∩ Q = {x | x ∈ P dan x ∈ Q}"
     }
@@ -59,8 +63,17 @@ export const latihanDasarHimpunanTka: TkaHimpunanSoal[] = [
     no: 3,
     soal: "Perhatikan gambar diagram Venn berikut!\nPernyataan berikut yang benar adalah ....",
     image: "/himpunan-no3-diagram.svg",
-    options: ["A. $B \\cup C = \\{1, 2, 3, 4, 5, 6, 8\\}$","B. $B \\cap C = \\{2, 6, 7, 9\\}$","C. $B - C = \\{1, 3, 9\\}$","D. $C - B = \\{5, 8\\}$"],
-    jawaban: "C",
+    type: "pgk",
+    options: [],
+    pernyataan: [
+      "$B \\cup C = \\{1, 2, 3, 4, 5, 6, 8\\}$",
+      "$B \\cap C = \\{2, 6, 7, 9\\}$",
+      "$B - C = \\{1, 3, 9\\}$",
+      "$C - B = \\{5, 8\\}$",
+    ],
+    jawabanPGK: [2, 3],
+    jawaban: "",
+
     pembahasan: {
       konsep: "Baca diagram Venn dengan cermat, lalu verifikasi setiap pernyataan menggunakan definisi operasi himpunan.",
       langkah: [
@@ -109,8 +122,17 @@ export const latihanDasarHimpunanTka: TkaHimpunanSoal[] = [
   {
     no: 6,
     soal: "Diketahui himpunan\nS = {bilangan asli kurang dari 12}\nA = {bilangan ganjil kurang dari 11}\nB = {bilangan prima kurang dari 12}\nKomplemen dari $(A \\cap B)^c$ adalah ...",
-    options: ["A. {3, 5, 7}","B. {1, 2, 9, 11}","C. {4, 6, 8, 10}","D. {1, 2, 4, 6, 8, 9, 10, 11}"],
-    jawaban: "A",
+    type: "pgk",
+    options: [],
+    pernyataan: [
+      "$A - B = \\{1, 9\\}$",
+      "$B - A = \\{2, 11\\}$",
+      "$A \\cap B = \\{3, 5, 7\\}$",
+      "$(A \\cap B)^c = \\{3, 5, 7\\}$",
+    ],
+    jawabanPGK: [0, 1, 2],
+    jawaban: "",
+
     pembahasan: {
       konsep: "Komplemen dari komplemen suatu himpunan adalah himpunan itu sendiri: $((H)^c)^c = H$.",
       langkah: [
@@ -125,26 +147,19 @@ export const latihanDasarHimpunanTka: TkaHimpunanSoal[] = [
     }
   },
   {
-    no: 7,
-    soal: "Jika K = {x | 5 $\\leq$ x $\\leq$ 9, x $\\in$ bilangan asli} dan L = {x | 7 $\\leq$ x $\\leq$ 13, x $\\in$ bilangan cacah}\nmaka $K \\cup L$ = ...",
-    options: ["A. {5, 6, 7, 8, 9, 10, 11, 12, 13}","B. {5, 6, 7, 8, 9, 10, 11, 12}","C. {6, 7, 8, 9, 10}","D. {7, 8, 9, 10}"],
-    jawaban: "A",
-    pembahasan: {
-      konsep: "Gabungan K∪L memuat semua anggota K atau L, tanpa pengulangan.",
-      langkah: [
-        "K = {5, 6, 7, 8, 9} — bilangan asli, 5 ≤ x ≤ 9",
-        "L = {7, 8, 9, 10, 11, 12, 13} — bilangan cacah, 7 ≤ x ≤ 13",
-        "K ∪ L = gabungan semua anggota K atau L (tanpa duplikat)",
-        "K ∪ L = {5, 6, 7, 8, 9, 10, 11, 12, 13}"
-      ],
-      rumus: "K ∪ L = {x | x ∈ K atau x ∈ L}"
-    }
-  },
-  {
     no: 8,
     soal: "Diketahui himpunan D = {bilangan genap antara 3 dan 14}, himpunan L = {bilangan prima kurang dari 8}, himpunan semesta S = {bilangan asli kurang dari 14}. Komplemen dari $D \\cup L$ adalah ...",
-    options: ["A. {2, 3, 5, 7}","B. {1, 9, 11, 13}","C. {1, 4, 6, 8, 9, 10, 11, 12, 13}","D. {2, 3, 4, 5, 6, 7, 8, 10, 12}"],
-    jawaban: "B",
+    type: "pgk",
+    options: [],
+    pernyataan: [
+      "$(D - L)^c = \\{1, 2, 3, 5, 7, 9, 11, 13\\}$",
+      "$(D \\cap L)^c = S$",
+      "$(L - D)^c = \\{1, 4, 6, 8, 9, 10, 11, 12, 13\\}$",
+      "$(D \\cup L)^c = \\{1, 9, 11, 13\\}$",
+    ],
+    jawabanPGK: [0, 1, 2, 3],
+    jawaban: "",
+
     pembahasan: {
       konsep: "Komplemen dari D∪L adalah semua anggota S yang bukan anggota D maupun L.",
       langkah: [
@@ -158,27 +173,17 @@ export const latihanDasarHimpunanTka: TkaHimpunanSoal[] = [
     }
   },
   {
-    no: 9,
-    soal: "Diketahui\nS = {bilangan asli kurang dari 11}\nA = {bilangan prima kurang dari 11}\nB = {bilangan genap kurang dari 11}\nKomplemen dari $A \\cap B$ adalah ...",
-    options: ["A. {1, 2, 3, ..., 10}","B. {1, 3, 4, 5, 6, 7, 8, 9, 10}","C. {2, 3, 5, 7, 9}","D. {1, 3, 5, 7}"],
-    jawaban: "B",
-    pembahasan: {
-      konsep: "Komplemen dari A∩B adalah semua anggota S yang bukan anggota A∩B.",
-      langkah: [
-        "S = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}",
-        "A = {2, 3, 5, 7} — prima < 11",
-        "B = {2, 4, 6, 8, 10} — genap < 11",
-        "A ∩ B = {2} — satu-satunya bilangan yang prima sekaligus genap",
-        "$(A \\cap B)^c = S - \\{2\\} = \\{1, 3, 4, 5, 6, 7, 8, 9, 10\\}"
-      ],
-      rumus: "$(A \\cap B)^c = S - (A \\cap B)$"
-    }
-  },
-  {
     no: 10,
-    soal: "Diketahui\nS = {1, 2, 3, ..., 10}\nA = {x | x $\\leq$ 10, x Bilangan ganjil}\nB = {x | 1 $\\leq$ x $\\leq$ 10, x Bilangan prima}\nI. Komplemen $(A \\cap B) = \\{1, 2, 4, 6, 8, 9\\}$\nII. Komplemen $(A \\cup B) = \\{4, 6, 8, 10\\}$\nIII. Komplemen $(A - B) = \\{2, 3, 4, 5, 6, 7, 8, 10\\}$\nIV. Komplemen $(B - A) = \\{2, 11\\}$\nPernyataan yang benar di bawah ini adalah ....",
-    options: ["A. I, II, dan III","B. II dan III","C. I dan III","D. III dan IV"],
-    jawaban: "B",
+    type: "pgkbs",
+    soal: "Diketahui\nS = {1, 2, 3, ..., 10}\nA = {x | x $\\leq$ 10, x Bilangan ganjil}\nB = {x | 1 $\\leq$ x $\\leq$ 10, x Bilangan prima}\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    options: [],
+    pernyataan: [
+      "I. Komplemen $(A \\cap B) = \\{1, 2, 4, 6, 8, 9\\}$",
+      "II. Komplemen $(A \\cup B) = \\{4, 6, 8, 10\\}$",
+      "III. Komplemen $(A - B) = \\{2, 3, 4, 5, 6, 7, 8, 10\\}$",
+    ],
+    jawabanBS: ["S", "B", "B"],
+    jawaban: "",
     pembahasan: {
       konsep: "Verifikasi setiap pernyataan dengan menentukan A, B, lalu menghitung komplemen masing-masing operasi.",
       langkah: [
