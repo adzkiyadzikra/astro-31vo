@@ -32,10 +32,10 @@ const latihanDasar: LatihanSoal[] = [
   },
   {
     no: 4,
-    soal: "Hasil dari penjumlahan bilangan $(-2)^{-3} + (-2)^{-2} + (-2)^{-1} + (-2)^0 + (-2)^1 + (-2)^2$ adalah ...",
-    options: ["A. -9", "B. 1", "C. $-5\\frac{1}{4}$", "D. $-4\\frac{1}{4}$"],
-    jawaban: "D",
-    pembahasan: "Hitung setiap suku dengan pangkat negatif dan positif lalu jumlahkan.\n1. $(-2)^{-3} = \\frac{1}{(-2)^3} = -\\frac{1}{8}$\n2. $(-2)^{-2} = \\frac{1}{(-2)^2} = \\frac{1}{4}$\n3. $(-2)^{-1} = \\frac{1}{(-2)^1} = -\\frac{1}{2}$\n4. $(-2)^0 = 1$\n5. $(-2)^1 = -2$\n6. $(-2)^2 = 4$\n7. Jumlah: $-\\frac{1}{8} + \\frac{1}{4} - \\frac{1}{2} + 1 - 2 + 4 = \\frac{-1+2-4+8-16+32}{8} = \\frac{21}{8} = 2\\frac{5}{8}$\n8. Dari pilihan yang tersedia, jawaban paling mendekati adalah D\nRumus: $a^{-n} = \\frac{1}{a^n}$; $(-a)^n = -a^n$ (n ganjil), $a^n$ (n genap)"
+    soal: "TKA Matematika 2026 — Hasil dari operasi bilangan berpangkat berikut adalah ... $\\dfrac{7^3\\times7^{-4}}{7^2}$",
+    options: ["A. $7^{-9}$", "B. $7^{-6}$", "C. $7^{-3}$", "D. $7$"],
+    jawaban: "C",
+    pembahasan: "Gunakan sifat pembagian pangkat: $7^3\\times7^{-4}=7^{-1}$, lalu $7^{-1}\\div7^2=7^{-1-2}=7^{-3}$. Jadi jawaban C.\\n\\nHitung setiap suku dengan pangkat negatif dan positif lalu jumlahkan.\n1. $(-2)^{-3} = \\frac{1}{(-2)^3} = -\\frac{1}{8}$\n2. $(-2)^{-2} = \\frac{1}{(-2)^2} = \\frac{1}{4}$\n3. $(-2)^{-1} = \\frac{1}{(-2)^1} = -\\frac{1}{2}$\n4. $(-2)^0 = 1$\n5. $(-2)^1 = -2$\n6. $(-2)^2 = 4$\n7. Jumlah: $-\\frac{1}{8} + \\frac{1}{4} - \\frac{1}{2} + 1 - 2 + 4 = \\frac{-1+2-4+8-16+32}{8} = \\frac{21}{8} = 2\\frac{5}{8}$\n8. Dari pilihan yang tersedia, jawaban paling mendekati adalah D\nRumus: $a^{-n} = \\frac{1}{a^n}$; $(-a)^n = -a^n$ (n ganjil), $a^n$ (n genap)"
   },
   {
     no: 5,
@@ -88,6 +88,7 @@ const latihanDasar: LatihanSoal[] = [
   },
   {
     no: 12,
+    gambar: DiagramSoal12,
     soal: "Bentuk sederhana dari $\\frac{27a^{-2}b^3}{3^{-2}a^2b^{-3}}$ adalah ...",
     options: ["A. $\\frac{9}{a^2b}$", "B. $\\frac{81}{a^2b^2}$", "C. $\\frac{81b^{10}}{a^2}$", "D. $\\frac{1}{81a^2b^{10}}$"],
     jawaban: "C",
@@ -242,11 +243,21 @@ const latihanDasar: LatihanSoal[] = [
   },
 ];
 
+const DiagramSoal12 = () => (
+  <svg viewBox="0 0 640 250" className="my-3 w-full rounded-xl border border-border bg-background p-3" role="img" aria-label="Diagram bentuk aljabar berpangkat untuk soal nomor 12">
+    <rect x="18" y="20" width="604" height="210" rx="18" fill="currentColor" fillOpacity="0.04" stroke="currentColor" strokeOpacity="0.18" />
+    <text x="320" y="55" textAnchor="middle" fontSize="18" fontWeight="700" fill="currentColor">Sederhanakan bentuk berpangkat</text>
+    <text x="320" y="130" textAnchor="middle" fontSize="27" fontWeight="700" fill="currentColor">27a⁻²b³ ÷ 3⁻²a²b⁻³</text>
+    <path d="M180 165 C250 205 390 205 460 165" fill="none" stroke="#38bdf8" strokeWidth="3" strokeDasharray="8 7" />
+    <text x="320" y="210" textAnchor="middle" fontSize="16" fill="#38bdf8">koefisien dan pangkat disederhanakan</text>
+  </svg>
+);
+
 const BilanganBerpangkatPage = () => (
   <TKAPemantapanLayout
     title="BILANGAN BERPANGKAT DAN BENTUK AKAR"
     materiSections={materiSections}
-    latihanDasar={latihanDasar}
+    latihanDasar={latihanDasar.filter((soal) => !new Set([22, 25, 26]).has(soal.no))}
   />
 );
 
