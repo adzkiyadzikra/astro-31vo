@@ -273,6 +273,13 @@ const latihanDasar: LatihanSoal[] = [
   { no: 25, soal: "Diketahui fungsi $f(5) = 16$, maka nilai $f(2)$ jika $2f(x) = f(x+1)$ adalah...", options: ["A. 1", "B. 2", "C. 5", "D. 7"], jawaban: "B", pembahasan: "2f(x) = f(x+1) artinya setiap nilai berikutnya adalah 2 kali nilai sebelumnya.\nf(5) = 16\nf(5) = 2·f(4) → f(4) = f(5)/2 = 8\nf(4) = 2·f(3) → f(3) = 8/2 = 4\nf(3) = 2·f(2) → f(2) = 4/2 = 2 → Jawaban B" },
 ];
 
+const latihanPindahanPLSV: LatihanSoal[] = [
+  { no: 17, type: "pg", soal: "Tentukan penyelesaian $2x+5=17$.", options: ["A. 5", "B. 6", "C. 7", "D. 8"], jawaban: "B", pembahasan: "$2x=12$, maka $x=6$." },
+  { no: 18, type: "pg", soal: "Jika $3x-4>11$, maka ...", options: ["A. $x>5$", "B. $x<5$", "C. $x>7$", "D. $x<7$"], jawaban: "A", pembahasan: "$3x>15$, sehingga $x>5$." },
+  { no: 19, type: "pg", soal: "Nilai $x$ dari $5(x-2)=20$ adalah ...", options: ["A. 2", "B. 4", "C. 6", "D. 8"], jawaban: "C", pembahasan: "$x-2=4$, jadi $x=6$." },
+  { no: 20, type: "pg", soal: "Himpunan penyelesaian $x+3\\leq9$ adalah ...", options: ["A. $x\\leq6$", "B. $x\\geq6$", "C. $x<6$", "D. $x>6$"], jawaban: "A", pembahasan: "$x\\leq6$." },
+];
+
 const latihanTambahan: LatihanSoal[] = [
   { no: 26, type: "pgkbs", soal: "Diketahui relasi dari himpunan $K$ ke himpunan $L$ disajikan dalam diagram panah dengan $K = \\{3,4,5,6\\}$ dan $L = \\{5,6,7,8,10\\}$. Panah mengarah dari $3\\to5$, $4\\to6$, $5\\to7$, dan $6\\to8$. Tentukan Benar atau Salah untuk setiap pernyataan.", pernyataan: ["Domain relasi adalah $\\{3,4,5,6\\}$.", "Kodomain relasi adalah $\\{5,6,7,8\\}$.", "Range relasi adalah $\\{5,6,7,8\\}$."], jawabanBS: ["B", "S", "B"], pembahasan: "Domain adalah seluruh himpunan asal, sehingga domain = $\\{3,4,5,6\\}$.\nKodomain adalah seluruh himpunan tujuan $L=\\{5,6,7,8,10\\}$, sehingga pernyataan 2 salah.\nAnggota L yang tertunjuk panah adalah $\\{5,6,7,8\\}$, sehingga pernyataan 3 benar." },
   { no: 27, soal: "Suatu relasi $R:X\\to Y$ dinyatakan dalam himpunan pasangan berurutan $\\{(2,7),(4,11),(5,p),(7,q)\\}$. Jika aturan relasi dirumuskan dengan $f(x)=2x+3$, nilai $p+q$ adalah ....", options: ["A. $30$", "B. $32$", "C. $34$", "D. $36$"], jawaban: "A", pembahasan: "$p=f(5)=2(5)+3=13$.\n$q=f(7)=2(7)+3=17$.\n$p+q=13+17=30$.\nJawaban A." },
@@ -299,7 +306,7 @@ const RelasiFungsiPage = () => (
     contohSoal={contohSoal}
     showImageSourceLinks={false}
     imageScale="default"
-    latihanDasar={[...latihanDasar, ...latihanTambahan]}
+    latihanDasar={[...latihanDasar, ...latihanTambahan, ...latihanPindahanPLSV]}
   />
 );
 
