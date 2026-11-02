@@ -114,24 +114,20 @@ const latihanDasar: LatihanSoal[] = [
 
   // ── No. 3 — PGKBS ───────────────────────────────────────────────────────────
   {
-    no: 3, type: "pgkbs",
-    soal: "Harga 2 buku dan 1 pensil adalah Rp13.000,00. Harga 1 buku dan 2 pensil adalah Rp11.000,00. Tentukan kebenaran setiap pernyataan berikut!",
-    pernyataan: [
-      "Harga 1 buku adalah Rp5.000,00.",
-      "Harga 1 pensil adalah Rp4.000,00.",
-      "Harga 3 buku dan 2 pensil adalah Rp21.000,00.",
-    ],
-    jawabanBS: ["B", "S", "B"],
-    pembahasan: "Misalkan $b$ = harga 1 buku, $p$ = harga 1 pensil.\n$2b + p = 13.000$ dan $b + 2p = 11.000$\nKalikan persamaan (1) dengan 2: $4b + 2p = 26.000$. Kurangi (2): $3b = 15.000 \\Rightarrow b = 5.000$\n$p = 13.000 - 10.000 = 3.000$\nPernyataan (1): $b = 5.000$ → BENAR\nPernyataan (2): $p = 3.000 \\neq 4.000$ → SALAH\nPernyataan (3): $3(5.000)+2(3.000)=21.000$ → BENAR",
+    no: 3, type: "pg",
+    soal: "TKA Matematika 2026 — Jajanan Tradisional. Harga 2 kotak kue putu mayang dan 3 kotak kue pancong adalah Rp58.000,00, sedangkan 3 kotak putu mayang dan 2 kotak pancong adalah Rp62.000,00. Berapa harga 3 kotak kue putu mayang dan 1 kotak kue pancong? [IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JrFeSOoLxeTb4kTxPj7jJ87QBQ88Zw.png]",
+    options: ["A. Rp10.000,00", "B. Rp14.000,00", "C. Rp44.000,00", "D. Rp52.000,00"],
+    jawaban: "D",
+    pembahasan: "Misalkan putu mayang $=p$ dan pancong $=q$. Selesaikan SPLDV dari informasi pada soal, lalu substitusikan ke $3p+q$.",
   },
 
   // ── No. 4 — PG ──────────────────────────────────────────────────────────────
   {
     no: 4, type: "pg",
-    soal: "Diketahui $3x + 2y = 16$ dan $x - y = 2$. Nilai dari $2x + y$ adalah ...",
-    options: ["A. $8$", "B. $9$", "C. $10$", "D. $12$"],
-    jawaban: "C",
-    pembahasan: "Dari (2): $x = y + 2$. Sub ke (1): $3(y+2)+2y=16 \\Rightarrow 5y=10 \\Rightarrow y=2,\\; x=4$\n$2x + y = 8 + 2 = 10$ → Jawaban C",
+    soal: "TKA Matematika 2026 — Rino, Tiko, dan Bayu pergi ke toko buku. Rino membeli 4 buku tulis dan 3 pulpen. Tiko membeli dua kali lipat dari masing-masing jumlah Rino, dan Bayu membeli tiga kali lipat. Jika harga 1 buku = x dan 1 pulpen = y, bagaimana kalimat matematika total harga ketiganya? [IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MM5vDgp6wB35zmNNEjat3kgZC76ryd.png]",
+    options: ["A. $24x+18y$", "B. $20x+15y$", "C. $12x+9y$", "D. $4x+3y$"],
+    jawaban: "A",
+    pembahasan: "Total buku $=(4+8+12)=24$ dan total pulpen $=(3+6+9)=18$, sehingga total harga $24x+18y$.",
   },
 
   // ── No. 5 — PGK ─────────────────────────────────────────────────────────────
@@ -504,7 +500,7 @@ const latihanDasar: LatihanSoal[] = [
   },
 ];
 
-const nomorSPLDVDihapus = new Set([5, 11, 13, 14, 16, 18, 21, 22, 27, 31]);
+const nomorSPLDVDihapus = new Set([5, 6, 9, 10, 11, 13, 14, 16, 17, 18, 21, 22, 24, 27, 31]);
 const tambahanSPLDV: LatihanSoal[] = [
   // ── Soal tambahan 1 — PG ────────────────────────────────────────────────────
   {
