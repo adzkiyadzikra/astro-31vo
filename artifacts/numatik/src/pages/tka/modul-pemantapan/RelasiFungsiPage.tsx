@@ -273,6 +273,11 @@ const latihanDasar: LatihanSoal[] = [
   { no: 25, soal: "Diketahui fungsi $f(5) = 16$, maka nilai $f(2)$ jika $2f(x) = f(x+1)$ adalah...", options: ["A. 1", "B. 2", "C. 5", "D. 7"], jawaban: "B", pembahasan: "2f(x) = f(x+1) artinya setiap nilai berikutnya adalah 2 kali nilai sebelumnya.\nf(5) = 16\nf(5) = 2·f(4) → f(4) = f(5)/2 = 8\nf(4) = 2·f(3) → f(3) = 8/2 = 4\nf(3) = 2·f(2) → f(2) = 4/2 = 2 → Jawaban B" },
 ];
 
+const latihanRelasiBaru: LatihanSoal[] = [
+  { no: 4, type: "pgkbs", soal: "TKA Matematika 2026 — Perhatikan diagram panah berikut ini. Tentukan Fungsi atau Bukan Fungsi pada setiap diagram 1, diagram 2, dan diagram 3!", pernyataan: ["Diagram 1", "Diagram 2", "Diagram 3"], jawabanBS: ["B", "S", "B"], pembahasan: "Diagram merupakan fungsi jika setiap anggota domain memiliki tepat satu pasangan di kodomain." },
+  { no: 30, type: "pg", soal: "TKA Matematika 2026 — Grafik fungsi linear berikut menunjukkan hubungan biaya pemasangan dan pemakaian air.", options: ["A. Rp800.000", "B. Rp920.000", "C. Rp1.000.000", "D. Rp1.200.000"], jawaban: "B", pembahasan: "Biaya Rp920.000 sesuai titik pada grafik." },
+];
+
 const latihanPindahanPLSV: LatihanSoal[] = [
   { no: 17, type: "pg", soal: "Tentukan penyelesaian $2x+5=17$.", options: ["A. 5", "B. 6", "C. 7", "D. 8"], jawaban: "B", pembahasan: "$2x=12$, maka $x=6$." },
   { no: 18, type: "pg", soal: "Jika $3x-4>11$, maka ...", options: ["A. $x>5$", "B. $x<5$", "C. $x>7$", "D. $x<7$"], jawaban: "A", pembahasan: "$3x>15$, sehingga $x>5$." },
@@ -306,7 +311,7 @@ const RelasiFungsiPage = () => (
     contohSoal={contohSoal}
     showImageSourceLinks={false}
     imageScale="default"
-    latihanDasar={[...latihanDasar, ...latihanTambahan, ...latihanPindahanPLSV]}
+    latihanDasar={[...latihanDasar, ...latihanTambahan, ...latihanRelasiBaru, ...latihanPindahanPLSV].filter((soal) => !new Set([18, 19, 24, 25, 26, 29, 33, 35, 36]).has(soal.no)).map((soal) => ({ ...soal, no: soal.no === 15 ? 9 : soal.no }))}
   />
 );
 

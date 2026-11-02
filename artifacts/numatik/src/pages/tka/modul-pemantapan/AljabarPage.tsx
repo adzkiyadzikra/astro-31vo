@@ -31,10 +31,10 @@ const contohSoal: LatihanSoal[] = [
   },
   {
     no: 3, type: "pgkbs",
-    soal: "Teks Informasi (Untuk Soal 3 & 4)\nTaman Kota\nSebuah taman berbentuk persegi panjang memiliki ukuran lebar $(2x - 1)$ meter. Panjang taman tersebut $4$ m lebihnya dari ukuran lebarnya.\n\nBerdasarkan informasi teks di atas, tentukan kebenaran untuk setiap pernyataan berikut!",
-    pernyataan: ["a. Ukuran panjang taman adalah $(2x + 3)$ meter.", "b. Keliling taman tersebut dapat dinyatakan sebagai $(8x + 4)$ meter.", "c. Luas taman kota tersebut adalah $(4x^2 + 4x - 3)$ $m^2$."],
-    jawabanBS: ["B", "B", "B"],
-    pembahasan: "Panjang: $p=l+4=(2x-1)+4=2x+3$ (BENAR).\n\nKeliling: $K=2(p+l)=2[(2x+3)+(2x-1)]=8x+4$ (BENAR).\n\nLuas: $L=(2x+3)(2x-1)=4x^2+4x-3$ (BENAR).",
+    soal: "TKA Matematika 2026 — Diketahui bentuk aljabar berikut: $2ab-b^2+3a^2b+ab^2-5$. Tentukan Benar atau Salah pada setiap pernyataan berikut!",
+    pernyataan: ["Terdapat 2 variabel yaitu a dan b.", "Konstanta pada bentuk aljabar tersebut adalah 5.", "Bilangan 2, −1, 3, dan 1 merupakan koefisien."],
+    jawabanBS: ["B", "S", "B"],
+    pembahasan: "Variabelnya adalah a dan b. Konstanta adalah −5, sehingga pernyataan kedua salah. Koefisien suku-sukunya adalah 2, −1, 3, dan 1.",
   },
   {
     no: 4, type: "pg",
@@ -401,7 +401,7 @@ const AljabarPage = () => (
     backPath="/tka/modul-pemantapan"
     materiSections={materiSections}
     contohSoal={contohSoal}
-    latihanDasar={latihanDasarAljabar}
+    latihanDasar={latihanDasarAljabar.filter((soal) => !new Set([4, 11, 20]).has(soal.no)).map((soal) => ({ ...soal, no: soal.no === 14 ? 3 : soal.no === 15 ? 4 : soal.no === 21 ? 5 : soal.no }))}
   />
 );
 
