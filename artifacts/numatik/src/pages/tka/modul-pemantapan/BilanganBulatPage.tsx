@@ -186,6 +186,19 @@ const SubmarineDepthDiagramSVG = ({ isDark }: { isDark: boolean }) => {
   );
 };
 
+const AnimatedNumberLine = () => (
+  <svg viewBox="0 0 640 150" className="my-3 w-full rounded-xl bg-slate-950/90 p-2" role="img" aria-label="Garis bilangan dengan titik P, Q, R, dan S">
+    <line x1="45" y1="82" x2="595" y2="82" stroke="#94a3b8" strokeWidth="3" />
+    {[...Array(11)].map((_, i) => { const n = i - 5; const x = 70 + i * 50; return <g key={n}><line x1={x} y1="74" x2={x} y2="90" stroke="#cbd5e1" /><text x={x} y="108" textAnchor="middle" fill="#e2e8f0" fontSize="14">{n}</text></g>; })}
+    {[{ label: "P", n: -4, color: "#fb7185" }, { label: "Q", n: -2, color: "#facc15" }, { label: "R", n: 1, color: "#4ade80" }, { label: "S", n: 3, color: "#60a5fa" }].map(({ label, n, color }) => { const x = 70 + (n + 5) * 50; return <g key={label} className="animate-pulse"><circle cx={x} cy="82" r="9" fill={color} stroke="#fff" strokeWidth="2" /><text x={x} y="54" textAnchor="middle" fill={color} fontWeight="700" fontSize="17">{label}</text></g>; })}
+  </svg>
+);
+
+const AnimatedTemperatureGlasses = ({ variant = 0 }: { variant?: number }) => {
+  const glasses = variant === 0 ? [{ label: "A", value: "−8°C", color: "#60a5fa" }, { label: "B", value: "−2°C", color: "#facc15" }, { label: "C", value: "5°C", color: "#fb7185" }] : [{ label: "X", value: "−25°C", color: "#60a5fa" }, { label: "Y", value: "−4°C", color: "#a78bfa" }, { label: "Z", value: "7°C", color: "#fb923c" }];
+  return <div className="my-3 grid grid-cols-3 gap-2" role="img" aria-label="Animasi gelas dengan merk dan suhu"><style>{"@keyframes glass-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }"}</style>{glasses.map((glass) => <div key={glass.label} className="animate-[glass-bob_1.8s_ease-in-out_infinite] rounded-xl border border-white/15 bg-white/10 p-2 text-center"><div className="mx-auto h-14 w-10 rounded-b-xl border-2 border-white/70" style={{ background: `linear-gradient(to top, ${glass.color}99 60%, transparent 60%)` }} /><div className="mt-1 text-xs font-bold" style={{ color: glass.color }}>Gelas {glass.label}</div><div className="text-xs text-white/80">{glass.value}</div></div>)}</div>;
+};
+
 const BilanganBulatPage = () => {
   const navigate = useNavigate();
   const { isDark, theme } = useTheme();
@@ -337,7 +350,7 @@ const BilanganBulatPage = () => {
 
   // ── question wrapper ─────────────────────────────────────────────────
   const Soal = ({ n, tipe, children }: { n: number; tipe: "PGS" | "MCMA" | "BS"; children: React.ReactNode }) => {
-    const deletedNumbers = [2, 3, 4, 8, 9, 13, 14, 15, 19, 24, 33, 34];
+    const deletedNumbers = [2, 3, 4, 8, 9, 13, 14, 15, 19, 23, 24, 33, 34];
   if (deletedNumbers.includes(n)) return null;
   const displayNumber = n - deletedNumbers.filter((deletedNumber) => deletedNumber < n).length;
     const tipeColor =
@@ -1362,9 +1375,12 @@ const BilanganBulatPage = () => {
           </Soal>
 
           {/* ══ SOAL 4 — BS (dipindahkan dari nomor 6) ══ */}
-          <Soal n={4} tipe="BS">
-            <p className={qText}>
-              Tentukan <span className={`font-bold ${isDark?"text-green-300":"text-green-600"}`}>Benar</span> atau <span className={`font-bold ${isDark?"text-red-300":"text-red-600"}`}>Salah</span> setiap pernyataan tentang operasi hitung berikut!
+          <Soal n={4} tipe="PGS">
+            <span className="mb-2 inline-flex rounded-full bg-cyan-500/15 px-2 py-1 text-[10px] font-bold text-cyan-300">TKA Matematika 2026</span>
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-fJwYwaZpNUCRgwrCm39TBx4QykJI6d.png" alt="Rekomendasi suhu menyimpan makanan" className="my-3 w-full rounded-xl" />
+            <p className={qText}>Pada beberapa jenis makanan, suhu penyimpanan yang terlalu tinggi dapat menyebabkan makanan cepat basi. Berdasarkan saran FDA, berapa suhu lemari pendingin yang direkomendasikan untuk menyimpan daging ayam?</p>
+            <MCQ qn={4} correct={2} cols={1} options={["A. 18 derajat di bawah 0 °C", "B. 18 derajat di atas 0 °C", "C. 19 derajat di bawah 0 °C", "D. 19 derajat di atas 0 °C"]} />
+            <p className={qText}>Tentukan <span className={`font-bold ${isDark?"text-green-300":"text-green-600"}`}>Benar</span> atau <span className={`font-bold ${isDark?"text-red-300":"text-red-600"}`}>Salah</span> setiap pernyataan tentang operasi hitung berikut!
             </p>
             <TFTable qn={4} rows={[
               { key:"a", text: <span><InlineMath math="(-4) \times 3 + (-2) = -14" /></span>, correct: "Benar" },
@@ -1391,15 +1407,16 @@ const BilanganBulatPage = () => {
 
           {/* ══ SOAL 5 — MCMA ══ */}
           <Soal n={5} tipe="MCMA">
-            <p className={qText}>
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-imTOTpjhKU7cHYTPXByjCkE3Nr6Mfx.png" alt="Aturan penskoran kompetisi matematika" className="my-3 w-full rounded-xl" />
+            <p className={qText}>Perhatikan aturan penskoran dalam kompetisi matematika berikut. Total terdapat 40 soal. Pilih semua pengerjaan peserta yang benar.
               Manakah pernyataan-pernyataan berikut yang <span className={`font-bold ${isDark?"text-amber-300":"text-amber-600"}`}>BENAR</span> tentang bilangan bulat? Klik semua yang benar!
             </p>
             <p className={`${hint} ${isDark?"text-amber-300":"text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
             <MCMA qn={5} items={[
-              { text: "Hasil perkalian dua bilangan bulat negatif selalu positif",              benar: true  },
-              { text: "Hasil penjumlahan bilangan bulat positif dan negatif selalu negatif",   benar: false },
-              { text: "Bilangan bulat positif selalu lebih besar dari bilangan bulat negatif mana pun", benar: true  },
-              { text: "Bilangan cacah termasuk bagian dari bilangan bulat",                    benar: true  },
+              { text: "Rafasha menjawab 30 soal dan benar 20 soal, sehingga skornya adalah 50.", benar: false },
+              { text: "Risqi menjawab 25 soal dan benar 18 soal, sehingga skornya adalah 48.", benar: true },
+              { text: "Callista menjawab 28 soal dan benar 19 soal, sehingga skornya adalah 52.", benar: true },
+              { text: "Nayla menjawab 20 soal dan benar 19 soal, sehingga skornya adalah 54.", benar: false },
             ]} />
             <PembahasanBtn n={5} />
             {expandedPembahasan.has(5) && (
@@ -1412,7 +1429,7 @@ const BilanganBulatPage = () => {
                   <p>• Bilangan cacah = {"{0,1,2,3,...}"} ⊂ Bilangan Bulat</p>
                 </PBKonsep>
                 <PBSteps>
-                  <S n={1}><p>(1) <InlineMath math="(-2)\times(-3)=6>0" /> → <span className={`font-bold ${isDark?"text-green-300":"text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={1}><p>(1) <InlineMath math="(-2)\times(-3)=6>0" /> → <span className={`font-bold ${isDark?"text-green-300":"text-green-700"}`}>BENAR ���</span></p></S>
                   <S n={2}><p>(2) Contoh: <InlineMath math="10+(-3)=7>0" /> → hasilnya positif, bukan negatif → <span className={`font-bold ${isDark?"text-red-300":"text-red-600"}`}>SALAH ✗</span></p></S>
                   <S n={3}><p>(3) Contoh: <InlineMath math="1 > -100" />, <InlineMath math="5 > -1" /> — setiap bilangan positif selalu di kanan setiap bilangan negatif pada garis bilangan → <span className={`font-bold ${isDark?"text-green-300":"text-green-700"}`}>BENAR ✓</span></p></S>
                   <S n={4}><p>(4) Bilangan bulat = {"{…,−2,−1,0,1,2,…}"} mencakup 0,1,2,… → <span className={`font-bold ${isDark?"text-green-300":"text-green-700"}`}>BENAR ✓</span></p></S>
@@ -1480,8 +1497,9 @@ const BilanganBulatPage = () => {
 
           {/* ══ SOAL 8 — MCMA ══ */}
           <Soal n={8} tipe="MCMA">
+            <AnimatedNumberLine />
             <p className={qText}>
-              Sebuah lift berada di <span className={`font-bold ${isDark?"text-amber-300":"text-amber-600"}`}>lantai 3</span>. Lift naik 5 lantai, kemudian turun 8 lantai, lalu naik lagi 2 lantai.
+              Perhatikan pernyataan-pernyataan di bawah ini. Sebuah lift berada di <span className={`font-bold ${isDark?"text-amber-300":"text-amber-600"}`}>lantai 3</span>. Lift naik 5 lantai, kemudian turun 8 lantai, lalu naik lagi 2 lantai.
               Manakah pernyataan berikut yang <span className={`font-bold ${isDark?"text-amber-300":"text-amber-600"}`}>BENAR</span>?
             </p>
             <p className={`${hint} ${isDark?"text-amber-300":"text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
@@ -1612,7 +1630,7 @@ const BilanganBulatPage = () => {
             </p>
             <TFTable qn={12} rows={[
               { key:"a", text: <span>Jika suhu mula-mula <InlineMath math="-5°C" /> lalu turun <InlineMath math="3°C" />, suhu akhirnya <InlineMath math="-8°C" /></span>, correct: "Benar" },
-              { key:"b", text: <span>Selisih suhu <InlineMath math="-10°C" /> dan <InlineMath math="15°C" /> adalah <InlineMath math="5°C" /></span>,                       correct: "Salah" },
+              { key:"b", text: <span><InlineMath math="-2\diamond6=-2" /></span>, correct: "Salah" },
               { key:"c", text: <span>Suhu <InlineMath math="-3°C" /> lebih dingin dari suhu <InlineMath math="-7°C" /></span>,                                               correct: "Salah" },
             ]} />
             <PembahasanBtn n={12} />
@@ -1634,12 +1652,14 @@ const BilanganBulatPage = () => {
           </Soal>
 
           {/* ══ SOAL 13 — PGS ══ */}
-          <Soal n={13} tipe="PGS">
-            <p className={qText}>
-              Nilai dari <InlineMath math="2 - 4 + 6 - 8 + 10 - 12 + \ldots + 46 - 48 + 50" /> adalah ....
-            </p>
-            <MCQ qn={13} correct={1} options={[
-              "A. 24", "B. 26", "C. 28", "D. 30"
+          <Soal n={13} tipe="MCMA">
+            <AnimatedTemperatureGlasses />
+            <p className={qText}>Perhatikan suhu pada gelas A, B, dan C. Pilih semua pernyataan yang benar!</p>
+            <MCMA qn={13} items={[
+              { text: "Gelas A memiliki suhu terendah.", benar: true },
+              { text: "Suhu gelas B lebih tinggi daripada gelas A.", benar: true },
+              { text: "Selisih suhu gelas C dan gelas A adalah 13°C.", benar: true },
+              { text: "Gelas dengan suhu tertinggi adalah gelas C.", benar: true },
             ]} />
             <PembahasanBtn n={13} />
             {expandedPembahasan.has(13) && (
@@ -1662,8 +1682,9 @@ const BilanganBulatPage = () => {
 
           {/* ══ SOAL 14 — MCMA ══ */}
           <Soal n={14} tipe="MCMA">
+            <AnimatedTemperatureGlasses variant={1} />
             <p className={qText}>
-              Manakah pernyataan berikut yang <span className={`font-bold ${isDark?"text-amber-300":"text-amber-600"}`}>BENAR</span> tentang bilangan <InlineMath math="-36" />?
+              Tiga gelas X, Y, dan Z memiliki suhu seperti pada gambar. Tanpa mengacu pada soal sebelumnya, pilihlah semua pernyataan yang <span className={`font-bold ${isDark?"text-amber-300":"text-amber-600"}`}>BENAR</span>!
             </p>
             <p className={`${hint} ${isDark?"text-amber-300":"text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
             <MCMA qn={14} items={[
@@ -1907,9 +1928,9 @@ const BilanganBulatPage = () => {
             <p className={`${hint} ${isDark ? "text-amber-300" : "text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
             <MCMA qn={22} items={[
               { text: <span>Gelas dengan suhu air terendah adalah gelas X.</span>, benar: true },
-              { text: <span>Selisih suhu gelas X dan gelas Y adalah <InlineMath math="21°C" />.</span>, benar: true },
+              { text: <span>Hasil dari <InlineMath math="2\times5" /> adalah 10.</span>, benar: true },
               { text: <span>Urutan suhu dari terendah ke tertinggi adalah X, Y, Z, W.</span>, benar: true },
-              { text: <span>Suhu rata-rata keempat gelas adalah <InlineMath math="-1°C" />.</span>, benar: false },
+              { text: <span>Hasil dari <InlineMath math="2\times3^3" /> adalah 54.</span>, benar: true },
             ]} />
             <PembahasanBtn n={22} />
             {expandedPembahasan.has(22) && (
@@ -1929,8 +1950,8 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 23 — BS ══ */}
-          <Soal n={23} tipe="BS">
+          {/* Soal 23 dihapus sesuai susunan terbaru. */}
+          {false && <Soal n={23} tipe="BS">
             <p className={qText}>
               Berdasarkan data suhu keempat gelas pada soal sebelumnya (W = <InlineMath math="18°C" />, X = <InlineMath math="25°C" />, Y = <InlineMath math="-4°C" />, Z = <InlineMath math="7°C" />), tentukan{" "}
               <span className={`font-bold ${isDark ? "text-green-300" : "text-green-600"}`}>Benar</span> atau{" "}
@@ -1955,7 +1976,7 @@ const BilanganBulatPage = () => {
                 </PBSteps>
               </div>
             )}
-          </Soal>
+          </Soal>}
 
           {/* ══ SOAL 24 — PGS ══ */}
           <Soal n={24} tipe="PGS">
@@ -2098,7 +2119,7 @@ const BilanganBulatPage = () => {
           {/* ══ SOAL 29 — PGS ══ */}
           <Soal n={29} tipe="PGS">
             <p className={qText}>
-              Rina membeli 3 buah buku tulis seharga <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>Rp7.800 per buku</span> dan 2 buah pensil seharga <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>Rp3.200 per buah</span>. Ia membayar dengan uang <span className={`font-bold ${isDark ? "text-green-300" : "text-green-600"}`}>Rp40.000</span>. Berdasarkan taksiran (estimasi) yang paling tepat, pernyataan manakah yang benar?
+              Rina membeli 3 buah buku tulis seharga <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>Rp7.800 per buku</span> dan 2 buah pensil seharga <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>Rp2.700 per buah</span>. Ia membayar dengan uang <span className={`font-bold ${isDark ? "text-green-300" : "text-green-600"}`}>Rp40.000</span>. Berdasarkan taksiran (estimasi) yang paling tepat, pernyataan manakah yang benar?
             </p>
             <MCQ qn={29} correct={2} cols={1} options={[
               "A. Uang Rina tidak cukup untuk membayar semua barang",
@@ -2238,6 +2259,16 @@ const BilanganBulatPage = () => {
                 </PBSteps>
               </div>
             )}
+          </Soal>
+          <Soal n={36} tipe="MCMA">
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-heYkfS30KwN6x5zpdvpdO0V4eQA5LC.png" alt="Alur pelayanan pembuatan SIM baru" className="my-3 w-full rounded-xl" />
+            <p className={qText}>Satuan Lalu Lintas (Satlantas) memiliki alur pelayanan pembuatan SIM sebagai berikut. Pada pukul 10.00, Revan telah menyelesaikan tahap Ujian Teori. Tak lama kemudian, Keivan menyusul untuk mengurus SIM baru dari tahap awal. Manakah pernyataan yang benar? Pilih lebih dari satu.</p>
+            <MCMA qn={36} items={[
+              { text: "Pada pukul 10.20, Keivan masih berada di Tahap 1.", benar: true },
+              { text: "Pada pukul 10.25, Revan sedang melakukan Ujian Praktik.", benar: true },
+              { text: "Pada pukul 10.35, Keivan sedang melakukan Ujian Teori.", benar: false },
+              { text: "Pada pukul 10.40, Revan sudah selesai seluruh proses.", benar: true },
+            ]} />
           </Soal>
 
         </div>}{/* end soal-soal */}
