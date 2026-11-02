@@ -65,7 +65,11 @@ const materiSections: MateriSection[] = [
 const latihanDasar: LatihanSoal[] = latihanDasarHimpunanTka.map((item) => ({
   no: item.no,
   soal: item.image ? `${item.soal}\n[IMAGE:${item.image}]` : item.soal,
+  type: item.type,
   options: item.options,
+  pernyataan: item.pernyataan,
+  jawabanPGK: item.jawabanPGK,
+  jawabanBS: item.jawabanBS,
   optionsJsx: item.no === 1
     ? ([
         <VennOptionSvg key="A" kind="pInsideQ" />,
