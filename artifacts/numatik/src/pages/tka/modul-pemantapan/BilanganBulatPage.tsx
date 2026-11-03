@@ -1311,6 +1311,7 @@ const BilanganBulatPage = () => {
           </Soal>
 
           {/* ══ SOAL 2 — MCMA ══ */}
+          <div className="mb-8 border-t-2 border-violet-200 pt-6 dark:border-violet-800">
           <Soal n={2} tipe="MCMA">
             <p className={qText}>
               Manakah pernyataan-pernyataan berikut yang <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>BENAR</span>?
@@ -1343,6 +1344,7 @@ const BilanganBulatPage = () => {
               </div>
             )}
           </Soal>
+          </div>
 
           {/* ══ SOAL 3 — PGS ══ */}
           <Soal n={3} tipe="PGS">
@@ -1965,14 +1967,14 @@ const BilanganBulatPage = () => {
               <div className="mt-3 space-y-2">
                 <PBJawaban>Pernyataan (1), (2), (3), dan (4) benar</PBJawaban>
                 <PBKonsep>
-                  <p>Baca data tiap gelas: X = −25°C terendah, W = 18°C tertinggi.</p>
-                  <p>Selisih suhu = suhu besar − suhu kecil. Hati-hati tanda negatif.</p>
+                  <p>Bilangan negatif semakin kecil jika jaraknya semakin jauh dari nol.</p>
+                  <p><strong>Tips dan trik:</strong> tandai semua suhu pada garis bilangan, lalu baca dari kiri ke kanan.</p>
                 </PBKonsep>
                 <PBSteps>
-                  <S n={1}><p>(1) X = −25°C → nilai terkecil → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={2}><p>(2) Y − X = <InlineMath math="-4 - (-25) = 21°C" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={3}><p>(3) Urutan seharusnya X(−25), Y(−4), Z(7), W(18) → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={4}><p>(4) Rata-rata: <InlineMath math="\frac{-25+(-4)+7+18}{4}=\frac{-4}{4}=-1°C" /> → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
+                  <S n={1}><p>(1) X = −25°C, paling kiri dan paling rendah → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={2}><p>(2) <InlineMath math="2\times5=10" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={3}><p>(3) Urutan dari rendah ke tinggi: X(−25), Y(−4), Z(7), W(18) → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={4}><p>(4) <InlineMath math="2\times3^3=2\times27=54" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                 </PBSteps>
               </div>
             )}
@@ -2090,36 +2092,6 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 28 — MCMA ══ */}
-          <Soal n={28} tipe="MCMA">
-            <p className={qText}>
-              Sebuah kapal selam berada pada kedalaman <InlineMath math="8\text{ m}" /> di bawah permukaan laut. Sebuah helikopter berada tepat di atas kapal selam pada ketinggian <InlineMath math="45\text{ m}" /> dari permukaan laut. Kapal selam kemudian menyelam <InlineMath math="12\text{ m}" /> lebih dalam. Pilihlah semua pernyataan yang <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>BENAR</span>!
-            </p>
-            <p className={`${hint} ${isDark ? "text-amber-300" : "text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
-            <SubmarineDepthDiagramSVG isDark={isDark} />
-            <MCMA qn={28} items={[
-              { text: <span>Posisi awal kapal selam pada garis bilangan adalah <InlineMath math="-8" />.</span>, benar: true },
-              { text: <span>Ketinggian helikopter dari permukaan laut adalah <InlineMath math="45\text{ m}" />.</span>, benar: true },
-              { text: <span>Posisi akhir kapal selam adalah <InlineMath math="-12\text{ m}" />.</span>, benar: false },
-              { text: <span>Jarak helikopter dari posisi akhir kapal selam adalah <InlineMath math="65\text{ m}" />.</span>, benar: true },
-            ]} />
-            <PembahasanBtn n={28} />
-            {expandedPembahasan.has(28) && (
-              <div className="mt-3 space-y-2">
-                <PBJawaban>Pernyataan (1), (2), dan (4) benar</PBJawaban>
-                <PBKonsep>
-                  <p>Di bawah permukaan laut = negatif (−), di atas permukaan laut = positif (+).</p>
-                  <p>Menyelam lebih dalam = posisi semakin negatif.</p>
-                </PBKonsep>
-                <PBSteps>
-                  <S n={1}><p>(1) Kedalaman 8 m → posisi <InlineMath math="-8" /> ✓ → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={2}><p>(2) Helikopter di 45 m → sesuai data → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={3}><p>(3) Posisi akhir: <InlineMath math="-8 - 12 = -20\text{ m}" />, bukan −12 → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
-                  <S n={4}><p>(4) Jarak: <InlineMath math="45 - (-20) = 45 + 20 = 65\text{ m}" /> ✓ → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                </PBSteps>
-              </div>
-            )}
-          </Soal>
 
           {/* ══ SOAL 29 — PGS ══ */}
           <Soal n={29} tipe="PGS">
