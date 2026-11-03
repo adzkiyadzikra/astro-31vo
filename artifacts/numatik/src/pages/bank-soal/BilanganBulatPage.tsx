@@ -16,7 +16,7 @@ const toReadableMath = (math: string) =>
     .replace(/\\cdot/g, "·")
     .replace(/\\left|\\right/g, "");
 
-const TKA_QUESTION_COUNT = 23;
+const TKA_QUESTION_COUNT = 22;
 
 const tkaQuestionPrompts: OlympiadQuestion[] = [
   { no: 1, category: "TKA Bilangan Bulat · Pilihan Ganda", soal: "Hasil dari −18 + 42 ÷ (−6) × 3 adalah ....", options: ["A. −39", "B. −33", "C. 3", "D. 33"] },
@@ -112,22 +112,16 @@ const tkaQuestionPrompts: OlympiadQuestion[] = [
   },
   {
     no: 12,
-    category: "TKA Bilangan Bulat · Pilihan Ganda",
-    soal: "Pak Rudi membeli 3 kotak telur. Setiap kotak berisi 40 butir telur. Setelah berdagang, 90 butir telur terjual dan 6 butir pecah. Banyak telur yang tersisa adalah ....",
-    options: ["A. 24 butir", "B. 28 butir", "C. 30 butir", "D. 36 butir"],
-  },
-  {
-    no: 13,
     category: "TKA Bilangan Bulat · Benar/Salah",
-    soal: 'Operasi "◇" didefinisikan sebagai: kalikan bilangan pertama dengan −5, kemudian tambahkan dua kali bilangan kedua. Tentukan Benar atau Salah!',
+    soal: 'Operasi "⋄" didefinisikan sebagai: kalikan bilangan pertama dengan −5, kemudian tambahkan dua kali bilangan kedua. Tentukan Benar atau Salah!',
     options: [
-      "a. Hasil dari 3 ◇ (−4) adalah −23",
-      "b. Jika x = −2, hasil dari x ◇ 6 adalah −2",
-      "c. Hasil dari 5 ◇ (−1) adalah −27",
+      "a. Hasil dari 3 ⋄ (−4) adalah −23",
+      "b. Jika x = −2, hasil dari x ⋄ 6 adalah −2",
+      "c. Hasil dari 5 ⋄ (−1) adalah −27",
     ],
   },
   {
-    no: 14,
+    no: 13,
     category: "TKA Bilangan Bulat · Pilihan Ganda Kompleks",
     soal: "Empat gelas diberi nama W, X, Y, dan Z. Pilihlah semua pernyataan yang BENAR berdasarkan gambar!",
     diagram: "temperatureGlasses",
@@ -135,11 +129,10 @@ const tkaQuestionPrompts: OlympiadQuestion[] = [
       "Gelas dengan suhu air terendah adalah gelas X",
       "Selisih suhu gelas X dan gelas Y adalah 21°C",
       "Urutan suhu dari terendah ke tertinggi adalah X, Y, Z, W",
-      "Suhu rata-rata keempat gelas adalah −1°C",
     ],
   },
   {
-    no: 15,
+    no: 14,
     category: "TKA Bilangan Bulat · Benar/Salah",
     soal: "Berdasarkan data suhu keempat gelas (W = 18°C, X = 25°C, Y = −4°C, Z = 7°C), tentukan Benar atau Salah!",
     options: [
@@ -149,19 +142,19 @@ const tkaQuestionPrompts: OlympiadQuestion[] = [
     ],
   },
   {
-    no: 16,
+    no: 15,
     category: "TKA Bilangan Bulat · Pilihan Ganda",
     soal: "Pak Danu mencatat keuntungan dan kerugian toko selama 4 hari: untung Rp85.000, rugi Rp32.000, untung Rp64.000, dan rugi Rp45.000. Keuntungan bersih selama 4 hari adalah ....",
     options: ["A. Rp72.000", "B. Rp64.000", "C. Rp56.000", "D. Rp48.000"],
   },
   {
-    no: 17,
+    no: 16,
     category: "TKA Bilangan Bulat · Pilihan Ganda",
     soal: "Suhu udara di tepi pantai adalah 32°C, sedangkan suhu udara di puncak gunung terdekat adalah −6°C. Selisih suhu kedua tempat tersebut adalah ....",
     options: ["A. 26°C", "B. 32°C", "C. 38°C", "D. 44°C"],
   },
   {
-    no: 18,
+    no: 17,
     category: "TKA Bilangan Bulat · Pilihan Ganda Kompleks",
     soal: "Sebuah kapal selam berada pada kedalaman 8 m di bawah permukaan laut. Helikopter berada pada ketinggian 45 m. Kapal selam kemudian menyelam 12 m lebih dalam. Pilih semua pernyataan yang BENAR!",
     options: [
@@ -172,13 +165,13 @@ const tkaQuestionPrompts: OlympiadQuestion[] = [
     ],
   },
   {
-    no: 19,
+    no: 18,
     category: "TKA Bilangan Bulat · Pilihan Ganda",
     soal: "Faktorisasi prima dari 900 dapat dinyatakan dalam bentuk 2ᵃ × 3ᵇ × 5ᶜ. Nilai dari a + b + c adalah ....",
     options: ["A. 4", "B. 5", "C. 6", "D. 7"],
   },
   {
-    no: 20,
+    no: 19,
     category: "TKA Bilangan Bulat · Pilihan Ganda",
     soal: "Rina membeli 3 buku tulis seharga Rp7.800 per buku dan 2 pensil seharga Rp3.200 per buah. Ia membayar dengan Rp40.000. Berdasarkan taksiran yang paling tepat, pernyataan yang benar adalah ....",
     options: [
@@ -189,13 +182,13 @@ const tkaQuestionPrompts: OlympiadQuestion[] = [
     ],
   },
   {
-    no: 21,
+    no: 20,
     category: "TKA Bilangan Bulat · Pilihan Ganda",
     soal: "Sebuah baling-baling berputar 80 kali setiap 12 menit. Banyak putaran selama 1 jam adalah ....",
     options: ["A. 320 kali", "B. 360 kali", "C. 400 kali", "D. 480 kali"],
   },
   {
-    no: 22,
+    no: 21,
     category: "TKA Bilangan Bulat · Pilihan Ganda Kompleks",
     soal: "Harga beras Rp19.750 per kg. Pemilik warung membeli 12,3 kg. Estimasi yang tepat adalah ....",
     options: [
@@ -206,7 +199,7 @@ const tkaQuestionPrompts: OlympiadQuestion[] = [
     ],
   },
   {
-    no: 23,
+    no: 22,
     category: "TKA Bilangan Bulat · Pilihan Ganda Kompleks",
     soal: "Pilih semua estimasi yang benar untuk pembelian 12,3 kg beras seharga Rp19.750 per kg.",
     options: [
@@ -230,18 +223,17 @@ const tkaAnswerKeys: Record<number, Pick<OlympiadQuestion, "type" | "correctInde
   9: { type: "pg", correctIndex: 0 },
   10: { type: "mcma", correctIndices: [0, 2] },
   11: { type: "pg", correctIndex: 2 },
-  12: { type: "pg", correctIndex: 0 },
-  13: { type: "pgkbs", statementAnswers: [true, false, true] },
-  14: { type: "mcma", correctIndices: [0, 1, 2] },
-  15: { type: "pgkbs", statementAnswers: [true, false, true] },
-  16: { type: "pg", correctIndex: 0 },
-  17: { type: "pg", correctIndex: 2 },
-  18: { type: "mcma", correctIndices: [0, 1, 3] },
+  12: { type: "pgkbs", statementAnswers: [true, false, true] },
+  13: { type: "mcma", correctIndices: [0, 1, 2] },
+  14: { type: "pgkbs", statementAnswers: [true, false, true] },
+  15: { type: "pg", correctIndex: 0 },
+  16: { type: "pg", correctIndex: 2 },
+  17: { type: "mcma", correctIndices: [0, 1, 3] },
+  18: { type: "pg", correctIndex: 2 },
   19: { type: "pg", correctIndex: 2 },
   20: { type: "pg", correctIndex: 2 },
-  21: { type: "pg", correctIndex: 2 },
+  21: { type: "mcma", correctIndices: [0, 1, 2] },
   22: { type: "mcma", correctIndices: [0, 1, 2] },
-  23: { type: "mcma", correctIndices: [0, 1, 2] },
 };
 
 const editTkaQuestion = (question: OlympiadQuestion): OlympiadQuestion => ({

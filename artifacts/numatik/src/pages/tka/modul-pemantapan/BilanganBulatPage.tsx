@@ -1336,15 +1336,15 @@ const BilanganBulatPage = () => {
 
 
           {/* ══ SOAL 2 — PGS ══ */}
-          <Soal n={5} tipe="PGS">
+          <Soal n={2} tipe="PGS">
             <span className="mb-2 inline-flex rounded-full bg-cyan-500/15 px-2 py-1 text-[10px] font-bold text-cyan-300">TKA Matematika 2026</span>
             <p className={qText}>Pada beberapa jenis makanan, suhu penyimpanan yang terlalu tinggi dapat menyebabkan makanan tersebut menjadi cepat basi. Gambar di bawah ini menunjukkan berbagai suhu penyimpanan makanan di dalam lemari pendingin menurut Departemen Pertanian Amerika Serikat (FDA).</p>
             <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-fJwYwaZpNUCRgwrCm39TBx4QykJI6d.png" alt="Rekomendasi suhu menyimpan makanan" className="my-3 w-1/2 mx-auto rounded-xl" />
             <p className={qText}><strong>Catatan:</strong> daging unggas adalah daging yang berasal dari burung ternak seperti ayam, merpati dan sebagainya. Daging merah adalah daging yang berasal dari mamalia ternak seperti sapi, kambing dan sebagainya.</p>
             <p className={qText}>Pada beberapa jenis makanan, suhu penyimpanan yang terlalu tinggi dapat menyebabkan makanan cepat basi. Berdasarkan saran FDA, berapa suhu lemari pendingin yang direkomendasikan untuk menyimpan daging ayam?</p>
-            <MCQ qn={5} correct={2} cols={1} options={["A. 18 derajat di bawah 0 °C", "B. 18 derajat di atas 0 °C", "C. 19 derajat di bawah 0 °C", "D. 19 derajat di atas 0 °C"]} />
-            <PembahasanBtn n={5} />
-            {expandedPembahasan.has(5) && (
+            <MCQ qn={2} correct={2} cols={1} options={["A. 18 derajat di bawah 0 °C", "B. 18 derajat di atas 0 °C", "C. 19 derajat di bawah 0 °C", "D. 19 derajat di atas 0 °C"]} />
+            <PembahasanBtn n={2} />
+            {expandedPembahasan.has(2) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>C. 19 derajat di bawah 0 °C</PBJawaban>
                 <PBKonsep>
@@ -1359,21 +1359,21 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 6 — MCMA ══ */}
-          <Soal n={6} tipe="MCMA">
+          {/* ══ SOAL 3 — MCMA ══ */}
+          <Soal n={3} tipe="MCMA">
             <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-imTOTpjhKU7cHYTPXByjCkE3Nr6Mfx.png" alt="Aturan penskoran kompetisi matematika" className="my-3 w-full rounded-xl" />
             <p className={qText}>Perhatikan aturan penskoran dalam kompetisi matematika berikut. Total terdapat 40 soal. Pilih semua pengerjaan peserta yang benar.
               Manakah pernyataan-pernyataan berikut yang <span className={`font-bold ${isDark?"text-amber-300":"text-amber-600"}`}>BENAR</span> tentang bilangan bulat? Klik semua yang benar!
             </p>
             <p className={`${hint} ${isDark?"text-amber-300":"text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
-            <MCMA qn={6} items={[
+            <MCMA qn={3} items={[
               { text: "Rafasha menjawab 30 soal dan benar 20 soal, sehingga skornya adalah 50.", benar: false },
               { text: "Risqi menjawab 25 soal dan benar 18 soal, sehingga skornya adalah 48.", benar: true },
               { text: "Callista menjawab 28 soal dan benar 19 soal, sehingga skornya adalah 52.", benar: true },
               { text: "Nayla menjawab 20 soal dan benar 19 soal, sehingga skornya adalah 54.", benar: false },
             ]} />
-            <PembahasanBtn n={6} />
-            {expandedPembahasan.has(6) && (
+            <PembahasanBtn n={3} />
+            {expandedPembahasan.has(3) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>Pernyataan (1), (3), dan (4) benar</PBJawaban>
                 <PBKonsep>
@@ -1392,19 +1392,19 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 7 — PGS (dipindahkan dari nomor 4) ══ */}
-          <Soal n={7} tipe="PGS">
+          {/* ══ SOAL 4 — PGS ══ */}
+          <Soal n={4} tipe="PGS">
             <p className={qText}>
               Suhu di puncak gunung adalah <InlineMath math="-4°C" />. Suhu di kaki gunung <InlineMath math="23°C" /> lebih tinggi dari suhu di puncak. Suhu di kaki gunung adalah ....
             </p>
-            <MCQ qn={7} correct={2} options={[
+            <MCQ qn={4} correct={2} options={[
               <span key="a">A. <InlineMath math="-27°C" /></span>,
               <span key="b">B. <InlineMath math="-19°C" /></span>,
               <span key="c">C. <InlineMath math="19°C" /></span>,
               <span key="d">D. <InlineMath math="27°C" /></span>,
             ]} />
-            <PembahasanBtn n={7} />
-            {expandedPembahasan.has(7) && (
+            <PembahasanBtn n={4} />
+            {expandedPembahasan.has(4) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>C. 19°C</PBJawaban>
                 <PBKonsep>
@@ -1420,24 +1420,19 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 9 — MCMA ══ */}
-
-
-
-
-          {/* ══ SOAL 10 — BS ══ */}
-          <Soal n={10} tipe="BS">
+          {/* ══ SOAL 5 — BS ══ */}
+          <Soal n={5} tipe="BS">
             <p className={qText}>
               Tentukan <span className={`font-bold ${isDark?"text-green-300":"text-green-600"}`}>Benar</span> atau{" "}
               <span className={`font-bold ${isDark?"text-red-300":"text-red-600"}`}>Salah</span> setiap pernyataan berikut!
             </p>
-            <TFTable qn={10} rows={[
+            <TFTable qn={5} rows={[
               { key:"a", text: <span><InlineMath math="-15 + 7 = -8" /></span>,                correct: "Benar" },
               { key:"b", text: <span><InlineMath math="(-6) \times (-4) = -24" /></span>,      correct: "Salah" },
               { key:"c", text: <span><InlineMath math="0 \div (-5) = 0" /></span>,             correct: "Benar" },
             ]} />
-            <PembahasanBtn n={10} />
-            {expandedPembahasan.has(10) && (
+            <PembahasanBtn n={5} />
+            {expandedPembahasan.has(5) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Salah &nbsp;|&nbsp; (c) Benar</PBJawaban>
                 <PBKonsep>
@@ -1454,19 +1449,19 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 11 — PGS ══ */}
-          <Soal n={11} tipe="PGS">
+          {/* ══ SOAL 6 — PGS ══ */}
+          <Soal n={6} tipe="PGS">
             <p className={qText}>
               Kompetisi matematika memberi skor <span className={`font-bold ${isDark?"text-green-300":"text-green-600"}`}>+4</span> untuk jawaban benar,{" "}
               <span className={`font-bold ${isDark?"text-red-300":"text-red-600"}`}>−2</span> untuk jawaban salah, dan{" "}
               <span className={`font-bold ${isDark?"text-white/60":"text-gray-500"}`}>0</span> untuk tidak dijawab.
               Dari 20 soal, Dina menjawab 17 soal dengan 12 benar. Skor Dina adalah ....
             </p>
-            <MCQ qn={11} correct={1} options={[
+            <MCQ qn={6} correct={1} options={[
               "A. 34", "B. 38", "C. 42", "D. 44"
             ]} />
-            <PembahasanBtn n={11} />
-            {expandedPembahasan.has(11) && (
+            <PembahasanBtn n={6} />
+            {expandedPembahasan.has(6) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>B. 38</PBJawaban>
                 <PBKonsep>
@@ -1485,21 +1480,21 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 12 — MCMA ══ */}
-          <Soal n={12} tipe="MCMA">
+          {/* ══ SOAL 7 — MCMA ══ */}
+          <Soal n={7} tipe="MCMA">
             <p className={qText}>
               Perhatikan ekspresi: <InlineMath math="24 - 8 \times 3 + 12 \div 4" />.
               Manakah pernyataan berikut yang <span className={`font-bold ${isDark?"text-amber-300":"text-amber-600"}`}>BENAR</span>?
             </p>
             <p className={`${hint} ${isDark?"text-amber-300":"text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
-            <MCMA qn={12} items={[
+            <MCMA qn={7} items={[
               { text: <span>Langkah pertama: kerjakan <InlineMath math="8 \times 3 = 24" /></span>,     benar: true  },
               { text: <span>Nilai ekspresi tersebut adalah <InlineMath math="12" /></span>,              benar: false },
               { text: <span>Setelah kali/bagi, ekspresi menjadi <InlineMath math="24-24+3" /></span>,   benar: true  },
               { text: <span>Nilai ekspresi tersebut adalah <InlineMath math="3" /></span>,               benar: true  },
             ]} />
-            <PembahasanBtn n={12} />
-            {expandedPembahasan.has(12) && (
+            <PembahasanBtn n={7} />
+            {expandedPembahasan.has(7) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>Pernyataan (1), (3), dan (4) benar</PBJawaban>
                 <PBKonsep>
@@ -1523,19 +1518,19 @@ const BilanganBulatPage = () => {
 
 
 
-          {/* ══ SOAL 16 — BS ══ */}
-          <Soal n={16} tipe="BS">
+          {/* ══ SOAL 8 — BS ══ */}
+          <Soal n={8} tipe="BS">
             <p className={qText}>
               Tentukan <span className={`font-bold ${isDark?"text-green-300":"text-green-600"}`}>Benar</span> atau{" "}
               <span className={`font-bold ${isDark?"text-red-300":"text-red-600"}`}>Salah</span> setiap pernyataan berikut!
             </p>
-            <TFTable qn={16} rows={[
+            <TFTable qn={8} rows={[
               { key:"a", text: <span><InlineMath math="(-2)\times(-3)\times(-1) = -6" /></span>,    correct: "Benar" },
               { key:"b", text: <span><InlineMath math="(-5)^2+(-5) = 20" /></span>,                 correct: "Benar" },
               { key:"c", text: <span><InlineMath math="(-4)^3 = 64" /></span>,                      correct: "Salah" },
             ]} />
-            <PembahasanBtn n={16} />
-            {expandedPembahasan.has(16) && (
+            <PembahasanBtn n={8} />
+            {expandedPembahasan.has(8) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Benar &nbsp;|&nbsp; (c) Salah</PBJawaban>
                 <PBKonsep>
@@ -1553,8 +1548,8 @@ const BilanganBulatPage = () => {
           </Soal>
 
 
-          {/* ══ SOAL 17 — PGS ══ */}
-          <Soal n={17} tipe="PGS">
+          {/* ══ SOAL 9 — PGS ══ */}
+          <Soal n={9} tipe="PGS">
             <AnimatedNumberLine />
             <p className={qText}>Perhatikan pernyataan-pernyataan di bawah ini.</p>
             <ul className={`text-sm font-body mb-3 space-y-1 ${isDark ? "text-white/85" : "text-gray-700"}`}>
@@ -1566,11 +1561,11 @@ const BilanganBulatPage = () => {
             <p className={`font-body text-sm mb-3 ${isDark ? "text-white/80" : "text-gray-800"}`}>
               Pernyataan yang <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>BENAR</span> adalah ....
             </p>
-            <MCQ qn={17} correct={0} options={[
+            <MCQ qn={9} correct={0} options={[
               "A. (i) dan (ii)", "B. (ii) dan (iii)", "C. (ii) dan (iv)", "D. (iii) dan (iv)",
             ]} />
-            <PembahasanBtn n={17} />
-            {expandedPembahasan.has(17) && (
+            <PembahasanBtn n={9} />
+            {expandedPembahasan.has(9) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>A. (i) dan (ii)</PBJawaban>
                 <PBKonsep>
@@ -1588,22 +1583,21 @@ const BilanganBulatPage = () => {
           </Soal>
 
           {/* ══ SOAL 10 — GELAS BERSUHU ══ */}
-          <Soal n={37} tipe="MCMA">
+          <Soal n={10} tipe="MCMA">
             <AnimatedTemperatureGlasses variant={2} />
             <p className={qText}>
               Perhatikan suhu pada gelas W, X, Y, dan Z. Pilih semua pernyataan yang benar.
             </p>
             <p className={`${hint} ${isDark ? "text-amber-300" : "text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
-            <MCMA qn={37} items={[
+            <MCMA qn={10} items={[
               { text: <span>Gelas dengan suhu terendah adalah gelas X.</span>, benar: true },
               { text: <span>Selisih suhu gelas Y dan X adalah <InlineMath math="21^\circ C" />.</span>, benar: true },
               { text: <span>Urutan suhu dari terendah ke tertinggi adalah X, Y, Z, W.</span>, benar: true },
-              { text: <span>Suhu gelas W <InlineMath math="11^\circ C" /> lebih tinggi daripada suhu gelas Z.</span>, benar: true },
             ]} />
-            <PembahasanBtn n={37} />
-            {expandedPembahasan.has(37) && (
+            <PembahasanBtn n={10} />
+            {expandedPembahasan.has(10) && (
               <div className="mt-3 space-y-2">
-                <PBJawaban>Pernyataan (1), (2), (3), dan (4) benar</PBJawaban>
+                <PBJawaban>Pernyataan (1), (2), dan (3) benar</PBJawaban>
                 <PBKonsep>
                   <p>Pada garis bilangan, suhu yang lebih ke kiri bernilai lebih rendah.</p>
                   <p>Urutkan suhu dari nilai terkecil ke terbesar dan hitung selisih suhu dengan mengurangkan nilai yang lebih rendah dari yang lebih tinggi.</p>
@@ -1612,26 +1606,25 @@ const BilanganBulatPage = () => {
                   <S n={1}><p>X = −25°C adalah suhu terendah → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                   <S n={2}><p><InlineMath math="-4-(-25)=21^\circ C" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                   <S n={3}><p>Urutan suhu adalah X(−25), Y(−4), Z(7), W(18) → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={4}><p><InlineMath math="18-7=11^\circ C" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                 </PBSteps>
               </div>
             )}
           </Soal>
 
-          {/* ══ SOAL 18 — MCMA ══ */}
-          <Soal n={18} tipe="MCMA">
+          {/* ══ SOAL 11 — MCMA ══ */}
+          <Soal n={11} tipe="MCMA">
             <p className={qText}>
               Diketahui <InlineMath math="p = -6 \times 4 \div 8" /> dan <InlineMath math="q = 11 - 16 - (-8)" />. Pilihlah semua pernyataan yang <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>BENAR</span>!
             </p>
             <p className={`${hint} ${isDark ? "text-amber-300" : "text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
-            <MCMA qn={18} items={[
+            <MCMA qn={11} items={[
               { text: <span>Nilai <InlineMath math="p" /> adalah <InlineMath math="-3" /></span>, benar: true },
               { text: <span>Nilai <InlineMath math="q" /> adalah <InlineMath math="-3" /></span>, benar: false },
               { text: <span>Hasil dari <InlineMath math="p \times q - 5" /> adalah <InlineMath math="-14" /></span>, benar: true },
               { text: <span>Hasil dari <InlineMath math="p + q" /> adalah <InlineMath math="6" /></span>, benar: false },
             ]} />
-            <PembahasanBtn n={18} />
-            {expandedPembahasan.has(18) && (
+            <PembahasanBtn n={11} />
+            {expandedPembahasan.has(11) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>Pernyataan (1) dan (3) benar</PBJawaban>
                 <PBKonsep>
@@ -1652,45 +1645,16 @@ const BilanganBulatPage = () => {
 
 
 
-          {/* ══ SOAL 20 — BS ══ */}
-          <Soal n={20} tipe="BS">
-            <p className={qText}>
-              Misalkan <InlineMath math="a" />, <InlineMath math="b" />, dan <InlineMath math="c" /> adalah bilangan bulat. Tentukan{" "}
-              <span className={`font-bold ${isDark ? "text-green-300" : "text-green-600"}`}>Benar</span> atau{" "}
-              <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>Salah</span> untuk setiap pernyataan berikut!
-            </p>
-            <TFTable qn={20} rows={[
-              { key: "a", text: <span><InlineMath math="a \times b = b \times a" /> sehingga berlaku sifat komutatif pada operasi perkalian.</span>, correct: "Benar" },
-              { key: "b", text: <span><InlineMath math="a \div (b + c) = (a \div b) + (a \div c)" /> sehingga berlaku sifat distributif pembagian terhadap penjumlahan.</span>, correct: "Salah" },
-              { key: "c", text: <span><InlineMath math="a \times (b \times c) = (a \times b) \times c" /> sehingga berlaku sifat asosiatif pada operasi perkalian.</span>, correct: "Benar" },
-            ]} />
-            <PembahasanBtn n={20} />
-            {expandedPembahasan.has(20) && (
-              <div className="mt-3 space-y-2">
-                <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Salah &nbsp;|&nbsp; (c) Benar</PBJawaban>
-                <PBKonsep>
-                  <p>Sifat komutatif dan asosiatif berlaku untuk penjumlahan dan perkalian, <strong>tidak</strong> untuk pembagian atau pengurangan.</p>
-                  <p>Sifat distributif hanya berlaku untuk <em>perkalian</em> terhadap penjumlahan/pengurangan.</p>
-                </PBKonsep>
-                <PBSteps>
-                  <S n={1}><p>(a) <InlineMath math="a \times b = b \times a" /> → komutatif perkalian berlaku → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={2}><p>(b) Contoh: <InlineMath math="12\div(2+4)=2" />, <InlineMath math="(12\div2)+(12\div4)=9\neq2" /> → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
-                  <S n={3}><p>(c) <InlineMath math="a\times(b\times c)=(a\times b)\times c" /> → asosiatif perkalian berlaku → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                </PBSteps>
-              </div>
-            )}
-          </Soal>
-
-          {/* ══ SOAL 21 — PGS ══ */}
-          <Soal n={21} tipe="PGS">
+          {/* ══ SOAL 12 — PGS ══ */}
+          <Soal n={12} tipe="PGS">
             <p className={qText}>
               Pak Rudi membeli 3 kotak telur. Setiap kotak berisi 40 butir telur. Setelah berdagang, sebanyak 90 butir telur terjual dan 6 butir pecah. Banyak telur yang tersisa adalah ....
             </p>
-            <MCQ qn={21} correct={0} options={[
+            <MCQ qn={12} correct={0} options={[
               "A. 24 butir", "B. 28 butir", "C. 30 butir", "D. 36 butir",
             ]} />
-            <PembahasanBtn n={21} />
-            {expandedPembahasan.has(21) && (
+            <PembahasanBtn n={12} />
+            {expandedPembahasan.has(12) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>A. 24 butir</PBJawaban>
                 <PBKonsep>
@@ -1707,32 +1671,30 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 22 — BS ══ */}
-          <Soal n={22} tipe="BS">
+          {/* ══ SOAL 13 — BS ══ */}
+          <Soal n={13} tipe="BS">
             <p className={qText}>
               Operasi "<InlineMath math="\diamond" />" didefinisikan sebagai: "<em>kalikan bilangan pertama dengan <InlineMath math="-5" />, kemudian tambahkan dua kali bilangan kedua</em>". Tentukan{" "}
               <span className={`font-bold ${isDark ? "text-green-300" : "text-green-600"}`}>Benar</span> atau{" "}
               <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>Salah</span> untuk setiap pernyataan berikut!
             </p>
-            <TFTable qn={22} rows={[
+            <TFTable qn={13} rows={[
               { key: "a", text: <span>Hasil dari <InlineMath math="3 \diamond (-4)" /> adalah <InlineMath math="-23" />.</span>, correct: "Benar" },
-              { key: "b", text: <span><InlineMath math="2 \times 5" /> adalah <InlineMath math="10" />.</span>, correct: "Benar" },
+              { key: "b", text: <span>Hasil dari <InlineMath math="2 \diamond 5" /> adalah <InlineMath math="10" />.</span>, correct: "Salah" },
               { key: "c", text: <span>Hasil dari <InlineMath math="5 \diamond (-1)" /> adalah <InlineMath math="-27" />.</span>, correct: "Benar" },
-              { key: "d", text: <span><InlineMath math="2 \times 3^3" /> adalah <InlineMath math="54" />.</span>, correct: "Benar" },
             ]} />
-            <PembahasanBtn n={22} />
-            {expandedPembahasan.has(22) && (
+            <PembahasanBtn n={13} />
+            {expandedPembahasan.has(13) && (
               <div className="mt-3 space-y-2">
-  <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Benar &nbsp;|&nbsp; (c) Benar &nbsp;|&nbsp; (d) Benar</PBJawaban>
+                <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Salah &nbsp;|&nbsp; (c) Benar</PBJawaban>
                 <PBKonsep>
                   <p>Rumus: <InlineMath math="a \diamond b = (-5) \times a + 2 \times b" /></p>
                   <p>Substitusikan nilai yang diberikan ke rumus tersebut, perhatikan tanda.</p>
                 </PBKonsep>
                 <PBSteps>
                   <S n={1}><p>(a) <InlineMath math="3\diamond(-4)=(-5)(3)+2(-4)=-15+(-8)=-23" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-  <S n={2}><p>(b) <InlineMath math="2\times5=10" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={2}><p>(b) <InlineMath math="2\diamond5=(-5)(2)+2(5)=-10+10=0\neq10" /> → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
                   <S n={3}><p>(c) <InlineMath math="5\diamond(-1)=(-5)(5)+2(-1)=-25+(-2)=-27" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={4}><p>(d) <InlineMath math="2\times3^3=2\times27=54" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                 </PBSteps>
               </div>
             )}
@@ -1742,8 +1704,8 @@ const BilanganBulatPage = () => {
 
 
 
-          {/* ══ SOAL 26 — PGS ══ */}
-          <Soal n={26} tipe="PGS">
+          {/* ══ SOAL 14 — PGS ══ */}
+          <Soal n={14} tipe="PGS">
             <p className={qText}>
               Pak Danu mencatat keuntungan dan kerugian tokonya selama 4 hari: hari ke-1 untung{" "}
               <span className={`font-bold ${isDark ? "text-green-300" : "text-green-600"}`}>Rp85.000</span>, hari ke-2 rugi{" "}
@@ -1751,11 +1713,11 @@ const BilanganBulatPage = () => {
               <span className={`font-bold ${isDark ? "text-green-300" : "text-green-600"}`}>Rp64.000</span>, hari ke-4 rugi{" "}
               <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>Rp45.000</span>. Keuntungan bersih Pak Danu selama 4 hari adalah ....
             </p>
-            <MCQ qn={26} correct={0} options={[
+            <MCQ qn={14} correct={0} options={[
               "A. Rp72.000", "B. Rp64.000", "C. Rp56.000", "D. Rp48.000",
             ]} />
-            <PembahasanBtn n={26} />
-            {expandedPembahasan.has(26) && (
+            <PembahasanBtn n={14} />
+            {expandedPembahasan.has(14) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>A. Rp72.000</PBJawaban>
                 <PBKonsep>
@@ -1771,19 +1733,19 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 27 — PGS ══ */}
-          <Soal n={27} tipe="PGS">
+          {/* ══ SOAL 15 — PGS ══ */}
+          <Soal n={15} tipe="PGS">
             <p className={qText}>
               Suhu udara di tepi pantai adalah <InlineMath math="32°C" />, sedangkan suhu udara di puncak gunung terdekat adalah <InlineMath math="-6°C" />. Selisih suhu kedua tempat tersebut adalah ....
             </p>
-            <MCQ qn={27} correct={2} options={[
+            <MCQ qn={15} correct={2} options={[
               <span key="a">A. <InlineMath math="26°C" /></span>,
               <span key="b">B. <InlineMath math="32°C" /></span>,
               <span key="c">C. <InlineMath math="38°C" /></span>,
               <span key="d">D. <InlineMath math="44°C" /></span>,
             ]} />
-            <PembahasanBtn n={27} />
-            {expandedPembahasan.has(27) && (
+            <PembahasanBtn n={15} />
+            {expandedPembahasan.has(15) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>C. 38°C</PBJawaban>
                 <PBKonsep>
@@ -1799,19 +1761,19 @@ const BilanganBulatPage = () => {
           </Soal>
 
 
-          {/* ══ SOAL 29 — PGS ══ */}
-          <Soal n={29} tipe="PGS">
+          {/* ══ SOAL 16 — PGS ══ */}
+          <Soal n={16} tipe="PGS">
             <p className={qText}>
               Rina membeli 3 buah buku tulis seharga <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>Rp7.800 per buku</span> dan 2 buah pensil seharga <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>Rp2.700 per buah</span>. Ia membayar dengan uang <span className={`font-bold ${isDark ? "text-green-300" : "text-green-600"}`}>Rp40.000</span>. Berdasarkan taksiran (estimasi) yang paling tepat, pernyataan manakah yang benar?
             </p>
-            <MCQ qn={29} correct={2} cols={1} options={[
+            <MCQ qn={16} correct={2} cols={1} options={[
               "A. Uang Rina tidak cukup untuk membayar semua barang",
               "B. Uang Rina pas, tidak ada kembalian",
               "C. Uang Rina cukup, dengan estimasi kembalian sekitar Rp10.000",
               "D. Uang Rina cukup, dengan estimasi kembalian sekitar Rp5.000",
             ]} />
-            <PembahasanBtn n={29} />
-            {expandedPembahasan.has(29) && (
+            <PembahasanBtn n={16} />
+            {expandedPembahasan.has(16) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>C. Cukup, estimasi kembalian sekitar Rp10.000</PBJawaban>
                 <PBKonsep>
@@ -1829,16 +1791,16 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          {/* ══ SOAL 30 — PGS ══ */}
-          <Soal n={30} tipe="PGS">
+          {/* ══ SOAL 17 — PGS ══ */}
+          <Soal n={17} tipe="PGS">
             <p className={qText}>
               Sebuah baling-baling berputar <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>80 kali</span> setiap <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>12 menit</span>. Banyak putaran baling-baling tersebut selama <span className={`font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>1 jam</span> adalah ....
             </p>
-            <MCQ qn={30} correct={2} options={[
+            <MCQ qn={17} correct={2} options={[
               "A. 320 kali", "B. 360 kali", "C. 400 kali", "D. 480 kali",
             ]} />
-            <PembahasanBtn n={30} />
-            {expandedPembahasan.has(30) && (
+            <PembahasanBtn n={17} />
+            {expandedPembahasan.has(17) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>C. 400 kali</PBJawaban>
                 <PBKonsep>
@@ -1853,14 +1815,14 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
-          <Soal n={31} tipe="MCMA">
+          <Soal n={18} tipe="MCMA">
             <p className={qText}>Harga beras Rp19.750 per kg. Pemilik warung membeli <InlineMath math="12{,}3" /> kg. Estimasi yang tepat adalah ....</p>
-            <MCMA qn={31} items={[
+            <MCMA qn={18} items={[
               { text: "Total biaya kurang dari Rp260.000,00", benar: true }, { text: "Total biaya lebih dari Rp220.000,00", benar: true },
               { text: <span>Estimasi: <InlineMath math="12\times Rp20.000" /></span>, benar: true }, { text: "Nilainya mendekati Rp300.000,00", benar: false },
             ]} />
-            <PembahasanBtn n={31} />
-            {expandedPembahasan.has(31) && (
+            <PembahasanBtn n={18} />
+            {expandedPembahasan.has(18) && (
               <div id="pembahasan-31" className="mt-3 space-y-2">
                 <PBJawaban>Pernyataan (1), (2), dan (3) benar</PBJawaban>
                 <PBKonsep><p>Gunakan estimasi dengan membulatkan harga per kilogram ke Rp20.000 dan massa 12,3 kg ke sekitar 12 kg.</p></PBKonsep>
@@ -1872,14 +1834,14 @@ const BilanganBulatPage = () => {
               </div>
             )}
           </Soal>
-          <Soal n={32} tipe="MCMA">
+          <Soal n={19} tipe="MCMA">
             <p className={qText}>Diberikan tiga bilangan <InlineMath math="14^2-4^2" />, <InlineMath math="10^2+44" />, dan <InlineMath math="12\times9" />. Faktor persekutuan ketiganya adalah ....</p>
-            <MCMA qn={32} items={[
+            <MCMA qn={19} items={[
               { text: <InlineMath math="2\times3" />, benar: true }, { text: <InlineMath math="2\times5" />, benar: false },
               { text: <InlineMath math="3^2" />, benar: true }, { text: <InlineMath math="2\times3^3" />, benar: false },
             ]} />
-            <PembahasanBtn n={32} />
-            {expandedPembahasan.has(32) && (
+            <PembahasanBtn n={19} />
+            {expandedPembahasan.has(19) && (
               <div id="pembahasan-32" className="mt-3 space-y-2">
                 <PBJawaban>Pernyataan (1) dan (3) benar</PBJawaban>
                 <PBKonsep><p>Hitung ketiga bilangan terlebih dahulu, kemudian tentukan faktor persekutuan yang dimiliki semuanya.</p></PBKonsep>
@@ -1894,14 +1856,14 @@ const BilanganBulatPage = () => {
           </Soal>
 
 
-          <Soal n={35} tipe="MCMA">
+          <Soal n={20} tipe="MCMA">
             <p className={qText}>Pilih semua estimasi yang benar untuk pembelian <InlineMath math="12{,}3" /> kg beras seharga Rp19.750 per kg.</p>
-            <MCMA qn={35} items={[
+            <MCMA qn={20} items={[
               { text: "Biaya lebih dari Rp220.000,00", benar: true }, { text: "Biaya kurang dari Rp260.000,00", benar: true },
               { text: <span><InlineMath math="12\times Rp20.000" /> adalah estimasi yang masuk akal.</span>, benar: true }, { text: "Biaya mendekati Rp300.000,00", benar: false },
             ]} />
-            <PembahasanBtn n={35} />
-            {expandedPembahasan.has(35) && (
+            <PembahasanBtn n={20} />
+            {expandedPembahasan.has(20) && (
               <div id="pembahasan-35" className="mt-3 space-y-2">
                 <PBJawaban>Pernyataan (1), (2), dan (3) benar</PBJawaban>
                 <PBKonsep>
@@ -1917,17 +1879,17 @@ const BilanganBulatPage = () => {
               </div>
             )}
           </Soal>
-          <Soal n={36} tipe="MCMA">
+          <Soal n={21} tipe="MCMA">
             <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-heYkfS30KwN6x5zpdvpdO0V4eQA5LC.png" alt="Alur pelayanan pembuatan SIM baru" className="my-3 w-full rounded-xl" />
             <p className={qText}>Satuan Lalu Lintas (Satlantas) memiliki alur pelayanan pembuatan SIM sebagai berikut. Pada pukul 10.00, Revan telah menyelesaikan tahap Ujian Teori. Keivan mulai mengurus SIM dari tahap awal pada pukul 10.15. Manakah pernyataan yang benar? Pilih lebih dari satu.</p>
-            <MCMA qn={36} items={[
+            <MCMA qn={21} items={[
               { text: "Pada pukul 10.20, Keivan masih berada di Tahap 1.", benar: true },
               { text: "Pada pukul 10.25, Revan sedang melakukan Ujian Praktik.", benar: true },
               { text: "Pada pukul 10.35, Keivan sedang melakukan Ujian Teori.", benar: false },
               { text: "Pada pukul 10.40, Revan sudah selesai seluruh proses.", benar: true },
             ]} />
-            <PembahasanBtn n={36} />
-            {expandedPembahasan.has(36) && (
+            <PembahasanBtn n={21} />
+            {expandedPembahasan.has(21) && (
               <div className="mt-3 space-y-2">
                 <PBJawaban>Pernyataan (1), (2), dan (4) benar</PBJawaban>
                 <PBKonsep>
