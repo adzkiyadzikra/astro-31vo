@@ -1630,7 +1630,7 @@ const BilanganBulatPage = () => {
             </p>
             <TFTable qn={12} rows={[
               { key:"a", text: <span>Jika suhu mula-mula <InlineMath math="-5°C" /> lalu turun <InlineMath math="3°C" />, suhu akhirnya <InlineMath math="-8°C" /></span>, correct: "Benar" },
-              { key:"b", text: <span><InlineMath math="-2\diamond6=-2" /></span>, correct: "Salah" },
+              { key:"b", text: <span><InlineMath math={"-2 \\diamond 6 = -2"} /></span>, correct: "Salah" },
               { key:"c", text: <span>Suhu <InlineMath math="-3°C" /> lebih dingin dari suhu <InlineMath math="-7°C" /></span>,                                               correct: "Salah" },
             ]} />
             <PembahasanBtn n={12} />
@@ -1900,21 +1900,21 @@ const BilanganBulatPage = () => {
             </p>
             <TFTable qn={21} rows={[
               { key: "a", text: <span>Hasil dari <InlineMath math="3 \diamond (-4)" /> adalah <InlineMath math="-23" />.</span>, correct: "Benar" },
-              { key: "b", text: <span><InlineMath math="-2 \\diamond 6" /> adalah <InlineMath math="-2" />.</span>, correct: "Salah" },
+  { key: "b", text: <span><InlineMath math="2 \\times 5" /> adalah <InlineMath math="10" />.</span>, correct: "Benar" },
               { key: "c", text: <span>Hasil dari <InlineMath math="5 \\diamond (-1)" /> adalah <InlineMath math="-27" />.</span>, correct: "Benar" },
               { key: "d", text: <span><InlineMath math="2 \\times 3^3" /> adalah <InlineMath math="54" />.</span>, correct: "Benar" },
             ]} />
             <PembahasanBtn n={21} />
             {expandedPembahasan.has(21) && (
               <div className="mt-3 space-y-2">
-                <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Salah &nbsp;|&nbsp; (c) Benar &nbsp;|&nbsp; (d) Benar</PBJawaban>
+  <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Benar &nbsp;|&nbsp; (c) Benar &nbsp;|&nbsp; (d) Benar</PBJawaban>
                 <PBKonsep>
                   <p>Rumus: <InlineMath math="a \\diamond b = (-5) \\times a + 2 \\times b" /></p>
                   <p>Substitusikan nilai yang diberikan ke rumus tersebut, perhatikan tanda.</p>
                 </PBKonsep>
                 <PBSteps>
                   <S n={1}><p>(a) <InlineMath math="3\diamond(-4)=(-5)(3)+2(-4)=-15+(-8)=-23" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={2}><p>(b) <InlineMath math="(-2)\diamond6=(-5)(-2)+2(6)=10+12=22\neq-2" /> → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
+  <S n={2}><p>(b) <InlineMath math="2\times5=10" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                   <S n={3}><p>(c) <InlineMath math="5\\diamond(-1)=(-5)(5)+2(-1)=-25+(-2)=-27" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                   <S n={4}><p>(d) <InlineMath math="2\\times3^3=2\\times27=54" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                 </PBSteps>
@@ -2274,7 +2274,14 @@ const BilanganBulatPage = () => {
             ]} />
           </Soal>
 
-        </div>}{/* end soal-soal */}
+          <Soal n={41} tipe="PGS">
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-AdVmjnV1fsahe6pXJMsHwACBdWNp4m.png" alt="Rekomendasi suhu penyimpanan makanan" className="my-3 w-full rounded-xl" />
+            <p className={qText}>TKA Matematika 2026 — Berdasarkan saran FDA, berapa suhu lemari pendingin yang direkomendasikan untuk menyimpan daging ayam?</p>
+            <MCQ qn={41} correct={2} options={["A. 18 derajat di bawah 0 °C", "B. 18 derajat di atas 0 °C", "C. 19 derajat di bawah 0 °C", "D. 19 derajat di atas 0 °C"]} />
+            <PembahasanBtn n={41} />
+            {expandedPembahasan.has(41) && <div className="mt-3"><PBJawaban>C. 19 derajat di bawah 0 °C</PBJawaban><PBKonsep>Suhu daging unggas pada gambar direkomendasikan −19°C.</PBKonsep></div>}
+          </Soal>
+          </div>}{/* end soal-soal */}
 
         {/* ── Footer ── */}
         <div className={`mt-8 border rounded-xl p-4 text-center ${isDark ? "bg-blue-900/20 border-blue-500/30" : "bg-blue-50 border-blue-300"}`}>
@@ -2288,7 +2295,7 @@ const BilanganBulatPage = () => {
             onClick={() => { playPopSound(); navigate(-1); }}
             className={`text-sm hover:text-blue-400 transition-colors cursor-pointer font-body ${isDark ? "text-muted-foreground" : "text-gray-500"}`}
           >
-            ← Kembali ke Modul Pemantapan
+            �� Kembali ke Modul Pemantapan
           </button>
         </div>
 
