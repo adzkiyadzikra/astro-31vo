@@ -285,8 +285,8 @@ const latihanDasar: LatihanSoal[] = [
   {
     no: 6,
     type: "pgkbs",
-soal: "TKA Matematika 2026 — Buah merupakan salah satu sumber vitamin C. Perhatikan tabel berikut! Buah A: berat 118,4 gr, air 96,3 mL; Buah B: berat 130,7 gr, air 150 mL; Buah C: berat 130,55 gr, air 140 mL; Buah D: berat 96,255 gr, air 118,15 mL. Buah yang diteliti pertama adalah buah yang memiliki berat terbesar dan kandungan air paling banyak. Buah tersebut adalah ...",
-    options: ["Buah A", "Buah B", "Buah C", "Buah D"],
+soal: "TKA Matematika 2026 — Buah merupakan salah satu sumber vitamin C. Perhatikan tabel berikut!\n\n| Buah | Berat (gram) | Kandungan air (mL) |\n|---|---:|---:|\n| Buah A | 118,4 | 96,3 |\n| Buah B | 130,7 | 150 |\n| Buah C | 130,55 | 140 |\n| Buah D | 96,255 | 118,15 |\n\nBuah yang diteliti pertama adalah buah yang memiliki berat terbesar dan kandungan air paling banyak. Buah tersebut adalah ...",
+  options: ["A. Buah A", "B. Buah B", "C. Buah C", "D. Buah D"],
     jawaban: "B",
     pembahasan: "Buah B memiliki berat terbesar (130,7 gram) dan kandungan air paling banyak (150 mL). Jadi jawabannya B.",
   },
@@ -687,9 +687,7 @@ Berdasarkan teks tersebut, tentukan Benar atau Salah untuk setiap pernyataan ber
   {
     no: 28,
     type: "pgk",
-    soal: `Perhatikan teks berikut untuk menjawab soal nomor 28 dan 29.
-
-Persediaan Beras Bu Alya
+    soal: `Persediaan Beras Bu Alya
 Bu Alya mencatat harga pembelian 100 kg beras sebesar Rp1.200.000,00. Untuk acara syukuran, ia perlu menyediakan beras untuk 75 tamu. Setiap tamu mendapat $0{,}12$ kg beras. Beras untuk acara dibeli sebagai persediaan tambahan dengan harga per kilogram yang sama.
 
 Berdasarkan teks tersebut, pilihlah semua pernyataan yang benar.`,
