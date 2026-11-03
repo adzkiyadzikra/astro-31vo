@@ -1318,12 +1318,14 @@ const BilanganBulatPage = () => {
               Klik semua yang benar!
             </p>
             <p className={`${hint} ${isDark ? "text-amber-300" : "text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
+            <div className="w-1/2">
             <MCMA qn={2} items={[
               { text: <InlineMath math="(-3) \times (-5) = 15" />,                  benar: true  },
               { text: <InlineMath math="7 + (-7) = 14" />,                          benar: false },
               { text: <InlineMath math="(-12) \div 4 = -3" />,                      benar: true  },
               { text: <InlineMath math="(-2)^3 = -8" />,                            benar: true  },
             ]} />
+            </div>
             <PembahasanBtn n={2} />
             {expandedPembahasan.has(2) && (
               <div className="mt-3 space-y-2">
