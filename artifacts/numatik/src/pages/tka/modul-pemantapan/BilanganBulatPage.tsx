@@ -364,10 +364,14 @@ const BilanganBulatPage = () => {
   };
 
   // ── question wrapper ─────────────────────────────────────────────────
+  const displayNumberByQuestion: Record<number, number> = {
+    1: 1, 5: 2, 6: 3, 7: 4, 10: 5, 11: 6, 12: 7, 16: 8, 17: 9,
+    37: 10, 18: 11, 20: 12, 21: 13, 22: 14, 26: 15, 27: 16,
+    29: 17, 30: 18, 31: 19, 32: 20, 35: 21, 36: 22,
+  };
   const Soal = ({ n, tipe, children }: { n: number; tipe: "PGS" | "MCMA" | "BS"; children: React.ReactNode }) => {
-    const deletedNumbers = [2, 3, 4, 8, 9, 13, 14, 15, 19, 23, 24, 33, 34];
-  if (deletedNumbers.includes(n)) return null;
-  const displayNumber = n - deletedNumbers.filter((deletedNumber) => deletedNumber < n).length;
+    const displayNumber = displayNumberByQuestion[n];
+    if (displayNumber === undefined) return null;
     const tipeColor =
       tipe === "PGS"  ? (isDark ? "bg-sky-500/20 text-sky-300 border-sky-500/40"       : "bg-sky-100 text-sky-700 border-sky-300") :
       tipe === "MCMA" ? (isDark ? "bg-amber-500/20 text-amber-300 border-amber-500/40"  : "bg-amber-100 text-amber-700 border-amber-300") :
@@ -1334,7 +1338,9 @@ const BilanganBulatPage = () => {
           {/* ══ SOAL 2 — PGS ══ */}
           <Soal n={5} tipe="PGS">
             <span className="mb-2 inline-flex rounded-full bg-cyan-500/15 px-2 py-1 text-[10px] font-bold text-cyan-300">TKA Matematika 2026</span>
+            <p className={qText}>Pada beberapa jenis makanan, suhu penyimpanan yang terlalu tinggi dapat menyebabkan makanan tersebut menjadi cepat basi. Gambar di bawah ini menunjukkan berbagai suhu penyimpanan makanan di dalam lemari pendingin menurut Departemen Pertanian Amerika Serikat (FDA).</p>
             <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-fJwYwaZpNUCRgwrCm39TBx4QykJI6d.png" alt="Rekomendasi suhu menyimpan makanan" className="my-3 w-1/2 mx-auto rounded-xl" />
+            <p className={qText}><strong>Catatan:</strong> daging unggas adalah daging yang berasal dari burung ternak seperti ayam, merpati dan sebagainya. Daging merah adalah daging yang berasal dari mamalia ternak seperti sapi, kambing dan sebagainya.</p>
             <p className={qText}>Pada beberapa jenis makanan, suhu penyimpanan yang terlalu tinggi dapat menyebabkan makanan cepat basi. Berdasarkan saran FDA, berapa suhu lemari pendingin yang direkomendasikan untuk menyimpan daging ayam?</p>
             <MCQ qn={5} correct={2} cols={1} options={["A. 18 derajat di bawah 0 °C", "B. 18 derajat di atas 0 °C", "C. 19 derajat di bawah 0 °C", "D. 19 derajat di atas 0 °C"]} />
             <PembahasanBtn n={5} />
@@ -1581,6 +1587,37 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
+          {/* ══ SOAL 10 — GELAS BERSUHU ══ */}
+          <Soal n={37} tipe="MCMA">
+            <AnimatedTemperatureGlasses variant={2} />
+            <p className={qText}>
+              Perhatikan suhu pada gelas W, X, Y, dan Z. Pilih semua pernyataan yang benar.
+            </p>
+            <p className={`${hint} ${isDark ? "text-amber-300" : "text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
+            <MCMA qn={37} items={[
+              { text: <span>Gelas dengan suhu terendah adalah gelas X.</span>, benar: true },
+              { text: <span>Selisih suhu gelas Y dan X adalah <InlineMath math="21^\circ C" />.</span>, benar: true },
+              { text: <span>Urutan suhu dari terendah ke tertinggi adalah X, Y, Z, W.</span>, benar: true },
+              { text: <span>Suhu gelas W <InlineMath math="11^\circ C" /> lebih tinggi daripada suhu gelas Z.</span>, benar: true },
+            ]} />
+            <PembahasanBtn n={37} />
+            {expandedPembahasan.has(37) && (
+              <div className="mt-3 space-y-2">
+                <PBJawaban>Pernyataan (1), (2), (3), dan (4) benar</PBJawaban>
+                <PBKonsep>
+                  <p>Pada garis bilangan, suhu yang lebih ke kiri bernilai lebih rendah.</p>
+                  <p>Urutkan suhu dari nilai terkecil ke terbesar dan hitung selisih suhu dengan mengurangkan nilai yang lebih rendah dari yang lebih tinggi.</p>
+                </PBKonsep>
+                <PBSteps>
+                  <S n={1}><p>X = −25°C adalah suhu terendah → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={2}><p><InlineMath math="-4-(-25)=21^\circ C" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={3}><p>Urutan suhu adalah X(−25), Y(−4), Z(7), W(18) → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={4}><p><InlineMath math="18-7=11^\circ C" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                </PBSteps>
+              </div>
+            )}
+          </Soal>
+
           {/* ══ SOAL 18 — MCMA ══ */}
           <Soal n={18} tipe="MCMA">
             <p className={qText}>
@@ -1704,32 +1741,6 @@ const BilanganBulatPage = () => {
 
 
 
-
-          {/* ══ SOAL 25 — PGS ══ */}
-          <Soal n={25} tipe="PGS">
-            <p className={qText}>
-              Diketahui <InlineMath math="-(-3 + 7) + 10 = k" />. Nilai dari <InlineMath math="3k - 2" /> adalah ....
-            </p>
-            <MCQ qn={25} correct={0} options={[
-              "A. 16", "B. 12", "C. 10", "D. 8",
-            ]} />
-            <PembahasanBtn n={25} />
-            {expandedPembahasan.has(25) && (
-              <div className="mt-3 space-y-2">
-                <PBJawaban>A. 16</PBJawaban>
-                <PBKonsep>
-                  <p>Hitung nilai k terlebih dahulu, kemudian substitusikan ke ekspresi <InlineMath math="3k - 2" />.</p>
-                  <p className={`text-[10px] italic ${isDark ? "text-violet-300/70" : "text-violet-500"}`}>💡 Trik: kerjakan kurung terdalam dulu, lalu tangani tanda negatif di luar kurung.</p>
-                </PBKonsep>
-                <PBSteps>
-                  <S n={1}><p>Kerjakan kurung: <InlineMath math="-3 + 7 = 4" /></p></S>
-                  <S n={2}><p>Negatif di luar: <InlineMath math="-(4) = -4" /></p></S>
-                  <S n={3}><p><InlineMath math="k = -4 + 10 = 6" /></p></S>
-                  <S n={4}><div><BlockMath math="3k - 2 = 3(6) - 2 = 18 - 2 = 16" /></div></S>
-                </PBSteps>
-              </div>
-            )}
-          </Soal>
 
           {/* ══ SOAL 26 — PGS ══ */}
           <Soal n={26} tipe="PGS">
@@ -1932,38 +1943,6 @@ const BilanganBulatPage = () => {
               </div>
             )}
           </Soal>
-
-          {/* ══ SOAL GELAS BERSUHU — DIPULIHKAN ══ */}
-          <Soal n={37} tipe="MCMA">
-            <AnimatedTemperatureGlasses variant={2} />
-            <p className={qText}>
-              Perhatikan suhu pada gelas W, X, Y, dan Z. Pilih semua pernyataan yang benar.
-            </p>
-            <p className={`${hint} ${isDark ? "text-amber-300" : "text-amber-600"}`}>Jawaban benar lebih dari satu.</p>
-            <MCMA qn={37} items={[
-              { text: <span>Gelas dengan suhu terendah adalah gelas X.</span>, benar: true },
-              { text: <span>Selisih suhu gelas Y dan X adalah <InlineMath math="21^\circ C" />.</span>, benar: true },
-              { text: <span>Urutan suhu dari terendah ke tertinggi adalah X, Y, Z, W.</span>, benar: true },
-              { text: <span>Suhu gelas W <InlineMath math="11^\circ C" /> lebih tinggi daripada suhu gelas Z.</span>, benar: true },
-            ]} />
-            <PembahasanBtn n={37} />
-            {expandedPembahasan.has(37) && (
-              <div className="mt-3 space-y-2">
-                <PBJawaban>Pernyataan (1), (2), (3), dan (4) benar</PBJawaban>
-                <PBKonsep>
-                  <p>Pada garis bilangan, suhu yang lebih ke kiri bernilai lebih rendah.</p>
-                  <p>Urutkan suhu dari nilai terkecil ke terbesar dan hitung selisih suhu dengan mengurangkan nilai yang lebih rendah dari yang lebih tinggi.</p>
-                </PBKonsep>
-                <PBSteps>
-                  <S n={1}><p>X = −25°C adalah suhu terendah → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={2}><p><InlineMath math="-4-(-25)=21^\circ C" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={3}><p>Urutan suhu adalah X(−25), Y(−4), Z(7), W(18) → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={4}><p><InlineMath math="18-7=11^\circ C" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                </PBSteps>
-              </div>
-            )}
-          </Soal>
-
 
           </div>}{/* end soal-soal */}
 
