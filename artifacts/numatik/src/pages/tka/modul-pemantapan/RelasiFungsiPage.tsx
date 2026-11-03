@@ -263,14 +263,10 @@ const latihanDasar: LatihanSoal[] = [
   { no: 15, soal: "Diketahui A = {faktor dari 8} dan Q = {x | x < 7, x $\\in$ bilangan ganjil}. Banyak pemetaan dari A ke B adalah ....", options: ["A. 81", "B. 64", "C. 27", "D. 16"], jawaban: "A", pembahasan: "A = faktor dari 8 = {1, 2, 4, 8}, n(A) = 4\nB = ganjil < 7 = {1, 3, 5}, n(B) = 3\nBanyak pemetaan dari A ke B = $n(B)^{n(A)} = 3^4 = 81$ → Jawaban A" },
   { no: 16, soal: "Grafik fungsi $f(x) = 2x + 2$, dengan $x \\in R$ adalah...", options: ["A|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117343/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_16_PG_A_tojc5t.png", "B|https://res.cloudinary.com/s4ge6not/image/upload/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_16_PG_B_kudrql.png", "C|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_16_PG_C_aoj0zg.png", "D|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117342/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_16_PG_D_iwa1ee.png"], jawaban: "D", pembahasan: "f(x) = 2x + 2 adalah fungsi linear.\nGradien (kemiringan) = 2 (naik ke kanan).\nTitik potong sumbu-y: f(0) = 2(0) + 2 = 2, yaitu titik (0, 2). Titik potong sumbu-x: 0 = 2x + 2 sehingga x = -1, yaitu titik (-1, 0).\nGrafik D melalui titik (1, 4) dan (-2, -2), sesuai dengan f(x) = 2x + 2.\nJawaban D" },
   { no: 17, soal: "Jika $f(2x + 1) = 4x + 1$, maka $f(-2) = ...$", options: ["A. -6", "B. -4", "C. 3", "D. 4"], jawaban: "A", pembahasan: "f(2x + 1) = 4x + 1\nMisalkan u = 2x + 1, maka x = (u-1)/2\nf(u) = 4·(u-1)/2 + 1 = 2(u-1) + 1 = 2u - 2 + 1 = 2u - 1\nf(-2) = 2(-2) - 1 = -4 - 1 = -5\nAlternatif: 2x+1 = -2 → 2x = -3 → x = -3/2\nf(-2) = 4(-3/2) + 1 = -6 + 1 = -5\nCek pilihan: jawaban terdekat A (-6)? Atau cek ulang:\nf(u) = 2u - 1. f(-2) = -4-1 = -5. Pilihan tidak tepat, kemungkinan A = -5 (pilihan dibulatkan). Jawaban A" },
-  { no: 18, soal: "Jika $f(3x + 1) = 9x + 1$, maka $f(2) = ...$", options: ["A. -6", "B. -4", "C. 3", "D. 4"], jawaban: "D", pembahasan: "f(3x + 1) = 9x + 1\nMisalkan u = 3x + 1, maka x = (u-1)/3\nf(u) = 9·(u-1)/3 + 1 = 3(u-1) + 1 = 3u - 3 + 1 = 3u - 2\nf(2) = 3(2) - 2 = 6 - 2 = 4 → Jawaban D" },
-  { no: 19, soal: "Diketahui rumus fungsi $f(2x - 3) = 6x - 5$. Nilai $f(5) = ...$", options: ["A. 25", "B. 19", "C. -19", "D. -25"], jawaban: "B", pembahasan: "f(2x - 3) = 6x - 5\nMisalkan u = 2x - 3, maka x = (u+3)/2\nf(u) = 6·(u+3)/2 - 5 = 3(u+3) - 5 = 3u + 9 - 5 = 3u + 4\nf(5) = 3(5) + 4 = 15 + 4 = 19 → Jawaban B" },
   { no: 20, soal: "Diketahui fungsi f adalah $f(x) = ax + b$. Jika $f(4) = 5$ dan $f(-2) = -13$, maka nilai $a + b$ adalah ...", options: ["A. 10", "B. 4", "C. -4", "D. -10"], jawaban: "B", pembahasan: "f(x) = ax + b\nf(4) = 4a + b = 5 ... (1)\nf(-2) = -2a + b = -13 ... (2)\nKurangi (2) dari (1): 6a = 18 → a = 3\nSubstitusi ke (1): 4(3) + b = 5 → b = 5 - 12 = -7\na + b = 3 + (-7) = -4 → Jawaban C\nKoreksi: a+b = 3-7 = -4 → C" },
   { no: 21, soal: "Suatu fungsi dirumuskan $f(x) = 7x - 1$, jika $f(a) = 48$ dan $f(b) = -22$ maka $a + b$ adalah ...", options: ["A. -4", "B. 4", "C. 7", "D. 9"], jawaban: "B", pembahasan: "f(a) = 7a - 1 = 48 → 7a = 49 → a = 7\nf(b) = 7b - 1 = -22 → 7b = -21 → b = -3\na + b = 7 + (-3) = 4 → Jawaban B" },
   { no: 22, soal: "Sebuah perusahaan taksi memasang tarif seperti grafik berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117343/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_22_cc6y53.png]\nAriel pergi ke rumah nenek yang berjarak 25 kilometer dengan menggunakan taksi tersebut. Berapa tarif taksi yang harus dibayar Ariel?", options: ["A. Rp66.000,00", "B. Rp73.000,00", "C. Rp82.000,00", "D. Rp143.000,00"], jawaban: "C", pembahasan: "Dari grafik tarif taksi (berdasarkan pola umum soal ini):\nTarif awal (flag down) = Rp7.000\nTarif per km = Rp3.000\nUntuk jarak 25 km:\nTarif = 7.000 + 25 × 3.000 = 7.000 + 75.000 = 82.000\nAtau sesuai rumus dari grafik yang diberikan → Jawaban C" },
   { no: 23, soal: "Sebuah kota terdapat dua perusahaan taksi A dan taksi B. Perusahaan tersebut menawarkan tarif taksi seperti tabel berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117343/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_23_fiorev.png]\nPenumpang taksi dapat memilih tarif taksi yang lebih murah. Amir ingin pergi ke Bioskop yang berjarak 8 km dari rumahnya. Agar diperoleh biaya yang lebih murah, taksi manakah yang sebaiknya digunakan oleh Amir?", options: ["A. Taksi A, karena lebih murah karena lebih kecil sehingga akan terus murah.", "B. Taksi B, karena tarif taksi lebih murah.", "C. Taksi A, karena lebih murah seribu rupiah.", "D. Taksi B, karena lebih murah seribu rupiah."], jawaban: "C", pembahasan: "Pola tarif Taksi A: awal 13.000, per 2 km tambah 2.000. Tarif per km = 1.000\nPola tarif Taksi B: awal 6.000, per 2 km tambah 4.000. Tarif per km = 2.000\nRumus Taksi A: T_A = 13.000 + 1.000×d\nRumus Taksi B: T_B = 6.000 + 2.000×d\nUntuk d = 8 km:\nT_A = 13.000 + 8.000 = 21.000\nT_B = 6.000 + 16.000 = 22.000\nTaksi A lebih murah Rp1.000 → Jawaban C" },
-  { no: 24, soal: "Jika $f(x+1) = x + f(x)$ dan $f(2) = 2$, maka nilai dari $f(5)$ adalah...", options: ["A. 5", "B. 15", "C. 28", "D. 34"], jawaban: "A", pembahasan: "f(x+1) = x + f(x)\nf(2) = 2 (diketahui)\nf(3) = f(2+1) = 2 + f(2) = 2 + 2 = 4\nf(4) = f(3+1) = 3 + f(3) = 3 + 4 = 7... Hmm, tidak ada di pilihan.\nCoba ulang: f(x+1) = x + f(x)\nf(3) = 2 + f(2) = 2 + 2 = 4\nf(4) = 3 + f(3) = 3 + 4 = 7\nf(5) = 4 + f(4) = 4 + 7 = 11... masih tidak cocok.\nCek apakah f(2)=2 berarti f dimulai dari 1: f(1)=1?\nf(2)=1+f(1)=1+1=2 ✓, f(3)=2+f(2)=2+2=4, f(4)=3+4=7, f(5)=4+7=11.\nKemungkinan f(5)=11, namun pilihan adalah 5. Periksa soal asli → Jawaban A" },
-  { no: 25, soal: "Diketahui fungsi $f(5) = 16$, maka nilai $f(2)$ jika $2f(x) = f(x+1)$ adalah...", options: ["A. 1", "B. 2", "C. 5", "D. 7"], jawaban: "B", pembahasan: "2f(x) = f(x+1) artinya setiap nilai berikutnya adalah 2 kali nilai sebelumnya.\nf(5) = 16\nf(5) = 2·f(4) → f(4) = f(5)/2 = 8\nf(4) = 2·f(3) → f(3) = 8/2 = 4\nf(3) = 2·f(2) → f(2) = 4/2 = 2 → Jawaban B" },
 ];
 
 const latihanRelasiBaru: LatihanSoal[] = [
@@ -279,26 +275,119 @@ const latihanRelasiBaru: LatihanSoal[] = [
   { no: 31, type: "pg", soal: "TKA Matematika 2026 — Naura menggunakan operator seluler Nusantara Mobile. [IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-LFUVcpJI2MJGVuQ01v5d2U358Ec2cU.png] Jika x adalah paket kuota dalam GB, rumus fungsi f(x) yang menyatakan harga paket kuota adalah ...", options: ["A. f(x) = 2.000x + 4.000", "B. f(x) = 2.000x + 1.000", "C. f(x) = 1.800x + 9.000", "D. f(x) = 1.800x + 5.000"], jawaban: "C", pembahasan: "Gunakan dua pasangan berurutan pada himpunan untuk menentukan gradien dan konstanta." },
 ];
 
+const StudioMusikGraph = () => (
+  <div className="mx-auto my-3 w-full max-w-2xl overflow-hidden rounded-xl border border-cyan-400/30 bg-slate-950/90 p-2 sm:p-3">
+    <svg viewBox="0 0 560 280" role="img" aria-labelledby="studio-musik-title studio-musik-desc" className="h-auto w-full">
+      <title id="studio-musik-title">Grafik biaya sewa studio musik</title>
+      <desc id="studio-musik-desc">Biaya sewa mengikuti y sama dengan 5.000d ditambah 15.000. Batas anggaran 80.000 tercapai pada durasi 13 jam.</desc>
+      <rect width="560" height="280" rx="12" fill="#0f172a" />
+      <text x="280" y="24" textAnchor="middle" fill="#e2e8f0" fontSize="16" fontWeight="700">Grafik Biaya Sewa Studio Musik</text>
+      <text x="280" y="267" textAnchor="middle" fill="#94a3b8" fontSize="12">Durasi sewa, d (jam)</text>
+      <text x="17" y="145" textAnchor="middle" fill="#94a3b8" fontSize="12" transform="rotate(-90 17 145)">Biaya (ribu rupiah)</text>
+      <rect x="70" y="65" width="390" height="130" fill="#06b6d4" fillOpacity="0.08" />
+      {[0, 20, 40, 60, 80].map((value) => {
+        const y = 195 - value * 1.625;
+        return (
+          <g key={value}>
+            <line x1="70" y1={y} x2="490" y2={y} stroke="#334155" strokeDasharray={value ? "4 5" : undefined} />
+            <text x="58" y={y + 4} textAnchor="end" fill="#94a3b8" fontSize="10">{value}</text>
+          </g>
+        );
+      })}
+      {[0, 5, 10, 13].map((value) => {
+        const x = 70 + value * 30;
+        return (
+          <g key={value}>
+            <line x1={x} y1="65" x2={x} y2="195" stroke="#334155" strokeDasharray={value ? "4 5" : undefined} />
+            <text x={x} y="213" textAnchor="middle" fill="#94a3b8" fontSize="10">{value}</text>
+          </g>
+        );
+      })}
+      <line x1="70" y1="195" x2="490" y2="195" stroke="#cbd5e1" strokeWidth="1.5" />
+      <line x1="70" y1="65" x2="70" y2="195" stroke="#cbd5e1" strokeWidth="1.5" />
+      <line x1="70" y1="65" x2="490" y2="65" stroke="#f59e0b" strokeDasharray="8 6" strokeWidth="2" />
+      <text x="480" y="58" textAnchor="end" fill="#fbbf24" fontSize="10">Batas anggaran: Rp80.000</text>
+      <line x1="70" y1="170.625" x2="460" y2="65" stroke="#22d3ee" strokeWidth="4" strokeLinecap="round" />
+      <circle cx="70" cy="170.625" r="5" fill="#22d3ee" stroke="#ecfeff" strokeWidth="2" />
+      <circle cx="370" cy="89.375" r="5" fill="#34d399" stroke="#ecfdf5" strokeWidth="2" />
+      <circle cx="460" cy="65" r="6" fill="#a78bfa" stroke="#f5f3ff" strokeWidth="2" />
+      <text x="378" y="84" fill="#a7f3d0" fontSize="10">(10, 65)</text>
+      <text x="450" y="82" textAnchor="end" fill="#c4b5fd" fontSize="10">(13, 80)</text>
+    </svg>
+  </div>
+);
+
 const latihanPindahanPLSV: LatihanSoal[] = [
   { no: 17, type: "pg", soal: "Tentukan penyelesaian $2x+5=17$.", options: ["A. 5", "B. 6", "C. 7", "D. 8"], jawaban: "B", pembahasan: "$2x=12$, maka $x=6$." },
-  { no: 18, type: "pg", soal: "Jika $3x-4>11$, maka ...", options: ["A. $x>5$", "B. $x<5$", "C. $x>7$", "D. $x<7$"], jawaban: "A", pembahasan: "$3x>15$, sehingga $x>5$." },
-  { no: 19, type: "pg", soal: "Nilai $x$ dari $5(x-2)=20$ adalah ...", options: ["A. 2", "B. 4", "C. 6", "D. 8"], jawaban: "C", pembahasan: "$x-2=4$, jadi $x=6$." },
   { no: 20, type: "pg", soal: "Himpunan penyelesaian $x+3\\leq9$ adalah ...", options: ["A. $x\\leq6$", "B. $x\\geq6$", "C. $x<6$", "D. $x>6$"], jawaban: "A", pembahasan: "$x\\leq6$." },
+  {
+    no: 6,
+    type: "pg",
+    soal: "Sebuah usaha percetakan spanduk menentukan harga layanan berdasarkan fungsi keuntungan harian $F(x)=15x-300$ (dalam ribuan rupiah), dengan $x$ menyatakan luas spanduk yang dicetak dalam meter persegi ($m^2$). Jika pemilik percetakan menginginkan keuntungan harian berada di rentang Rp450.000,00 sampai Rp1.200.000,00, maka rentang luas spanduk ($x$) yang harus dicetak sehari adalah ...",
+    options: [
+      "A. $40 \\leq x \\leq 90$",
+      "B. $50 \\leq x \\leq 100$",
+      "C. $50 \\leq x \\leq 110$",
+      "D. $60 \\leq x \\leq 100$",
+    ],
+    jawaban: "B",
+    pembahasan: "Karena $F(x)$ dinyatakan dalam ribuan rupiah, rentang keuntungan tersebut adalah $450 \\leq F(x) \\leq 1.200$.\n$450 \\leq 15x - 300 \\leq 1.200$\n$750 \\leq 15x \\leq 1.500$\n$50 \\leq x \\leq 100$\nJadi, luas spanduk yang harus dicetak berada pada rentang $50 \\leq x \\leq 100$ $m^2$ → Jawaban B",
+  },
+  {
+    no: 7,
+    type: "pg",
+    soal: "Suatu katering makanan menghitung pendapatan bersih harian $P(n)$ (dalam ribuan rupiah) berdasarkan jumlah porsi $n$ yang terjual melalui rumus fungsi $P(n)=10n-150$. Jika pengelola menargetkan pendapatan bersih minimal Rp350.000,00 dan maksimal Rp750.000,00 per hari, tentukan daerah asal ($n$) atau rentang porsi makanan yang harus terjual!",
+    options: [
+      "A. $40 \\leq n \\leq 80$",
+      "B. $50 \\leq n \\leq 90$",
+      "C. $50 \\leq n \\leq 100$",
+      "D. $60 \\leq n \\leq 90$",
+    ],
+    jawaban: "B",
+    pembahasan: "Karena $P(n)$ dinyatakan dalam ribuan rupiah, target pendapatan menjadi:\n$350 \\leq 10n - 150 \\leq 750$\n$500 \\leq 10n \\leq 900$\n$50 \\leq n \\leq 90$\nJadi, jumlah porsi yang harus terjual adalah $50 \\leq n \\leq 90$ porsi → Jawaban B",
+  },
+  {
+    no: 8,
+    type: "pgkbs",
+    soal: "Jasa kurir Express menerapkan tarif pengiriman barang berdasarkan jarak tempuh $x$ (dalam km) dengan aturan biaya penanganan awal Rp6.000,00 dan tarif tiap kilometer Rp4.000,00. Pelanggan memiliki anggaran maksimum sebesar Rp100.000,00 untuk satu kali kirim. Tentukan kebenaran dari setiap pernyataan berikut!",
+    pernyataan: [
+      "Model matematika dari masalah tersebut adalah $4.000x+6.000 \\leq 100.000$.",
+      "Jarak maksimum pengiriman yang masih dapat dijangkau adalah 23,5 km.",
+      "Jika jarak pengiriman 20 km, maka biaya total yang harus dibayar adalah Rp86.000,00.",
+    ],
+    jawabanBS: ["B", "B", "B"],
+    pembahasan: "Biaya total terdiri dari biaya penanganan awal dan biaya berdasarkan jarak:\n$4.000x+6.000 \\leq 100.000$\n→ Pernyataan (1) BENAR.\n\n$4.000x \\leq 94.000 \\Rightarrow x \\leq 23,5$\nJarak maksimum adalah 23,5 km → Pernyataan (2) BENAR.\n\nUntuk jarak 20 km:\n$4.000(20)+6.000=80.000+6.000=86.000$\nBiaya totalnya Rp86.000,00 → Pernyataan (3) BENAR.",
+  },
+  {
+    no: 9,
+    type: "pgk",
+    soal: "Suatu jasa penyewaan studio musik menentukan biaya sewa harian berdasarkan fungsi linear $y=5.000d+15.000$, dengan $d$ adalah durasi sewa dalam jam dan $y$ total biaya dalam rupiah. Seorang pemusik memiliki anggaran maksimum sebesar Rp80.000,00 untuk menyewa studio. Manakah pernyataan berikut yang benar? Pilihan jawaban benar bisa lebih dari satu.",
+    gambar: <StudioMusikGraph />,
+    pernyataan: [
+      "Jika $d$ menyatakan durasi latihan (jam), masalah ini dapat dimodelkan dengan $5.000d+15.000 \\leq 80.000$.",
+      "Durasi latihan maksimal yang dapat dipilih pemusik adalah 13 jam.",
+      "Jika durasi sewa adalah 10 jam, biaya total yang harus dibayar tepat sama dengan Rp65.000,00.",
+      "Penambahan durasi latihan selama 2 jam akan menambah biaya sewa sebesar Rp10.000,00.",
+    ],
+    options: [
+      "A. 1 dan 2",
+      "B. 1, 2, dan 3",
+      "C. 1, 3, dan 4",
+      "D. 1, 2, 3, dan 4",
+    ],
+    jawaban: "D",
+    pembahasan: "Dengan anggaran maksimum Rp80.000, model pertidaksamaannya adalah:\n$5.000d+15.000 \\leq 80.000$\n→ Pernyataan (1) BENAR.\n\n$5.000d \\leq 65.000 \\Rightarrow d \\leq 13$\nDurasi maksimum adalah 13 jam → Pernyataan (2) BENAR.\n\nUntuk $d=10$:\n$y=5.000(10)+15.000=50.000+15.000=65.000$\n→ Pernyataan (3) BENAR.\n\nTambahan 2 jam menambah biaya sebesar $2\\times5.000=10.000$ rupiah → Pernyataan (4) BENAR.\n\nJadi, pernyataan yang benar adalah 1, 2, 3, dan 4 → Jawaban D",
+  },
 ];
 
 const latihanTambahan: LatihanSoal[] = [
-  { no: 26, type: "pgkbs", soal: "Diketahui relasi dari himpunan $K$ ke himpunan $L$ disajikan dalam diagram panah dengan $K = \\{3,4,5,6\\}$ dan $L = \\{5,6,7,8,10\\}$. Panah mengarah dari $3\\to5$, $4\\to6$, $5\\to7$, dan $6\\to8$. Tentukan Benar atau Salah untuk setiap pernyataan.", pernyataan: ["Domain relasi adalah $\\{3,4,5,6\\}$.", "Kodomain relasi adalah $\\{5,6,7,8\\}$.", "Range relasi adalah $\\{5,6,7,8\\}$."], jawabanBS: ["B", "S", "B"], pembahasan: "Domain adalah seluruh himpunan asal, sehingga domain = $\\{3,4,5,6\\}$.\nKodomain adalah seluruh himpunan tujuan $L=\\{5,6,7,8,10\\}$, sehingga pernyataan 2 salah.\nAnggota L yang tertunjuk panah adalah $\\{5,6,7,8\\}$, sehingga pernyataan 3 benar." },
   { no: 27, soal: "Suatu relasi $R:X\\to Y$ dinyatakan dalam himpunan pasangan berurutan $\\{(2,7),(4,11),(5,p),(7,q)\\}$. Jika aturan relasi dirumuskan dengan $f(x)=2x+3$, nilai $p+q$ adalah ....", options: ["A. $30$", "B. $32$", "C. $34$", "D. $36$"], jawaban: "A", pembahasan: "$p=f(5)=2(5)+3=13$.\n$q=f(7)=2(7)+3=17$.\n$p+q=13+17=30$.\nJawaban A." },
   { no: 28, type: "pgk", soal: "Di sebuah klub renang, ukuran papan renang ditentukan dengan rumus $\\text{Ukuran Papan}=\\text{Tinggi Badan}-115$. Aris 165 cm, Bella 158 cm, Candra 170 cm, dan Dina 162 cm. Pilih semua pernyataan yang benar.", pernyataan: ["Aris berpasangan dengan ukuran papan $50$ cm.", "Bella berpasangan dengan ukuran papan $43$ cm.", "Candra berpasangan dengan ukuran papan $55$ cm.", "Dina berpasangan dengan ukuran papan $47$ cm."], jawabanPGK: [0,1,2,3], pembahasan: "Aris: $165-115=50$ cm.\nBella: $158-115=43$ cm.\nCandra: $170-115=55$ cm.\nDina: $162-115=47$ cm.\nSemua pernyataan benar." },
-  { no: 29, type: "pgkbs", soal: "Diketahui $S=\\{12,13,14,15\\}$, $L=\\{1,2,3,4,5\\}$, dan $M=\\{(12,2),(13,2),(14,4),(15,5)\\}$. Tentukan Benar atau Salah.", pernyataan: ["Domain relasi $M$ adalah $\\{12,13,14,15\\}$.", "Kodomain relasi $M$ adalah $\\{1,2,3,4,5\\}$.", "Range relasi $M$ adalah $\\{2,4,5\\}$."], jawabanBS: ["B", "B", "B"], pembahasan: "Elemen pertama pasangan membentuk domain, yaitu $\\{12,13,14,15\\}$.\nKodomain adalah seluruh himpunan tujuan $L=\\{1,2,3,4,5\\}$.\nElemen kedua yang terpakai adalah $\\{2,4,5\\}$, yaitu range." },
   { no: 30, soal: "Grafik fungsi linear $f(x)$ memotong sumbu-$Y$ di titik $(0,4)$ dan sumbu-$X$ di titik $(2,0)$. Rumus fungsi $f(x)$ tersebut adalah ....", options: ["A. $f(x)=2x+4$", "B. $f(x)=-2x+4$", "C. $f(x)=-2x-4$", "D. $f(x)=2x-4$"], jawaban: "B", pembahasan: "Bentuk fungsi linear adalah $f(x)=ax+b$. Dari titik $(0,4)$, diperoleh $b=4$.\nGunakan titik $(2,0)$: $0=2a+4$, maka $a=-2$.\nJadi $f(x)=-2x+4$. Jawaban B." },
   { no: 31, soal: "Banyaknya pemetaan yang mungkin dari himpunan $P=\\{a,b,c\\}$ ke himpunan $Q=\\{1,2,3,4\\}$ adalah ....", options: ["A. $12$", "B. $64$", "C. $81$", "D. $256$"], jawaban: "B", pembahasan: "Banyak fungsi dari A ke B adalah $n(B)^{n(A)}$.\n$n(P)=3$ dan $n(Q)=4$, sehingga $4^3=64$.\nJawaban B." },
   { no: 32, soal: "Fungsi $h:A\\to B$ ditentukan oleh $h(x)=\\frac{1}{3}x+2$. Jika $A=\\{3,6,9,12\\}$ dan $B=\\{p,q,r,s\\}$, nilai $p+q+r+s$ adalah ....", options: ["A. $18$", "B. $19$", "C. $20$", "D. $22$"], jawaban: "A", pembahasan: "$p=h(3)=3$, $q=h(6)=4$, $r=h(9)=5$, dan $s=h(12)=6$.\n$p+q+r+s=3+4+5+6=18$.\nJawaban A." },
-  { no: 33, soal: "Diketahui $g(x)=5(2x-1)-4$. Jika $g(-1)=m$ dan $g(2)=n$, nilai $3m+n$ adalah ....", options: ["A. $-52$", "B. $-46$", "C. $-24$", "D. $11$"], jawaban: "B", pembahasan: "Sederhanakan: $g(x)=10x-9$.\n$m=g(-1)=-19$ dan $n=g(2)=11$.\n$3m+n=3(-19)+11=-46$.\nJawaban B." },
   { no: 34, soal: "Diketahui fungsi $f(x)=mx+n$. Jika $f(2)=1$ dan $f(-2)=-11$, nilai $n-m$ adalah ....", options: ["A. $-8$", "B. $-2$", "C. $2$", "D. $8$"], jawaban: "A", pembahasan: "Diperoleh $2m+n=1$ dan $-2m+n=-11$.\nEliminasi menghasilkan $4m=12$, sehingga $m=3$. Substitusi memberi $n=-5$.\n$n-m=-5-3=-8$. Jawaban A." },
-  { no: 35, type: "pgk", soal: "Fungsi $f(k)=k^2-4$. Jika $f(a)=21$, manakah pernyataan yang benar? (Jawaban bisa lebih dari satu.)", pernyataan: ["Nilai $a$ yang memenuhi bisa berupa $5$.", "Nilai $a$ yang memenuhi bisa berupa $-5$.", "Hasil penjumlahan semua nilai $a$ yang memenuhi adalah $0$.", "Hasil kali semua nilai $a$ yang memenuhi adalah $25."], jawabanPGK: [0,1,2], pembahasan: "$a^2-4=21\\Rightarrow a^2=25\\Rightarrow a=5$ atau $a=-5$.\nJumlah kedua nilai adalah $0$, sedangkan hasil kalinya adalah $-25$, bukan $25$.\nJadi pernyataan 1, 2, dan 3 benar." },
-  { no: 36, soal: "Suatu fungsi dirumuskan $f(x)=-2x+7$. Tentukan pasangan nilai $(x,y)$ pada pilihan berikut yang salah.", options: ["A. $x=-1\\Rightarrow y=9$", "B. $x=0\\Rightarrow y=7$", "C. $x=2\\Rightarrow y=3$", "D. $x=4\\Rightarrow y=1$"], jawaban: "D", pembahasan: "$f(-1)=9$, $f(0)=7$, dan $f(2)=3$ sehingga A, B, dan C benar.\n$f(4)=-2(4)+7=-1$, bukan 1. Jadi jawaban D." },
-  { no: 37, soal: "Bayangan dari $-3$ oleh fungsi $f:x\\mapsto10-3x$ adalah ....", options: ["A. $-1$", "B. $1$", "C. $19$", "D. $-19$"], jawaban: "C", pembahasan: "$f(-3)=10-3(-3)=10+9=19$.\nJadi bayangan dari $-3$ adalah $19$. Jawaban C." },
+      { no: 37, soal: "Bayangan dari $-3$ oleh fungsi $f:x\\mapsto10-3x$ adalah ....", options: ["A. $-1$", "B. $1$", "C. $19$", "D. $-19$"], jawaban: "C", pembahasan: "$f(-3)=10-3(-3)=10+9=19$.\nJadi bayangan dari $-3$ adalah $19$. Jawaban C." },
   { no: 38, soal: "Suatu fungsi linear memiliki himpunan pasangan berurutan $\\{(1,3),(2,5),(3,7),(4,9)\\}$. Rumus fungsi yang memenuhi adalah ....", options: ["A. $f(x)=x+2$", "B. $f(x)=2x+1$", "C. $f(x)=3x-1$", "D. $f(x)=2x-1$"], jawaban: "B", pembahasan: "Selisih nilai $y$ selalu 2, maka bentuknya $f(x)=2x+b$.\nGunakan $(1,3)$: $2+b=3$, sehingga $b=1$.\nJadi $f(x)=2x+1$. Jawaban B." },
   { no: 39, soal: "Diketahui $f(x)=4-x$ dengan domain $D=\\{x\\mid -1\\le x<3,\\ x\\in\\text{bilangan bulat}\\}$. Range fungsi tersebut adalah ....", options: ["A. $\\{1,2,3,4\\}$", "B. $\\{2,3,4,5\\}$", "C. $\\{1,2,3,5\\}$", "D. $\\{2,3,4\\}$"], jawaban: "B", pembahasan: "Domain bilangan bulatnya adalah $\\{-1,0,1,2\\}$.\nNilai fungsi berturut-turut: $5,4,3,2$.\nJadi range = $\\{2,3,4,5\\}$. Jawaban B." },
   { no: 40, soal: "Tempat penyewaan sepeda motor mengenakan tarif awal Rp10.000,00 dan tarif tambahan Rp5.000,00 untuk setiap jam. Jika total pembayaran Rp35.000,00, durasi sewa adalah ....", options: ["A. $3$ jam", "B. $4$ jam", "C. $5$ jam", "D. $6$ jam"], jawaban: "C", pembahasan: "Misalkan durasi $t$ jam. Modelnya $35.000=10.000+5.000t$.\n$25.000=5.000t$, sehingga $t=5$ jam.\nJawaban C." },
@@ -312,7 +401,7 @@ const RelasiFungsiPage = () => (
     contohSoal={contohSoal}
     showImageSourceLinks={false}
     imageScale="default"
-    latihanDasar={[...latihanDasar, ...latihanTambahan, ...latihanRelasiBaru, ...latihanPindahanPLSV].filter((soal) => !new Set([18, 19, 24, 25, 26, 29, 33, 35, 36]).has(soal.no)).map((soal) => ({ ...soal, no: soal.no === 15 ? 9 : soal.no }))}
+    latihanDasar={[...latihanDasar, ...latihanTambahan, ...latihanRelasiBaru, ...latihanPindahanPLSV].map((soal, index) => ({ ...soal, no: index + 1 }))}
   />
 );
 
