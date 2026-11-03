@@ -1906,6 +1906,57 @@ const BilanganBulatPage = () => {
             )}
           </Soal>
 
+          <Soal n={22} tipe="MCMA">
+            <p className={qText}>
+              Suhu air di gelas W, X, Y, dan Z berturut-turut adalah <InlineMath math="18^\circ C" />, <InlineMath math="-25^\circ C" />, <InlineMath math="-4^\circ C" />, dan <InlineMath math="7^\circ C" />. Operasi <InlineMath math="a \diamond b = -5a + 2b" />. Pilih semua pernyataan yang benar.
+            </p>
+            <MCMA qn={22} items={[
+              { text: "Gelas dengan suhu air terendah adalah gelas X.", benar: true },
+              { text: <span>Hasil dari <InlineMath math="2 \diamond 5" /> adalah 10.</span>, benar: false },
+              { text: "Urutan suhu dari terendah ke tertinggi adalah X, Y, Z, W.", benar: true },
+            ]} />
+            <PembahasanBtn n={22} />
+            {expandedPembahasan.has(22) && (
+              <div className="mt-3 space-y-2">
+                <PBJawaban>Pernyataan (1) dan (3) benar</PBJawaban>
+                <PBKonsep>
+                  <p>Pada garis bilangan, suhu yang lebih ke kiri bernilai lebih rendah. Untuk operasi <InlineMath math="\diamond" />, substitusikan kedua bilangan ke rumus yang diberikan.</p>
+                </PBKonsep>
+                <PBSteps>
+                  <S n={1}><p>X = −25°C adalah suhu terendah → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={2}><p><InlineMath math="2\diamond5=(-5)(2)+2(5)=0\neq10" /> → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
+                  <S n={3}><p>Urutan suhu dari terendah ke tertinggi adalah X(−25), Y(−4), Z(7), W(18) → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                </PBSteps>
+              </div>
+            )}
+          </Soal>
+
+          <Soal n={23} tipe="BS">
+            <p className={qText}>
+              Berdasarkan suhu gelas W = <InlineMath math="18^\circ C" />, X = <InlineMath math="-25^\circ C" />, Y = <InlineMath math="-4^\circ C" />, dan Z = <InlineMath math="7^\circ C" />, tentukan Benar atau Salah untuk setiap pernyataan!
+            </p>
+            <TFTable qn={23} rows={[
+              { key: "a", text: <span>Suhu air dalam gelas Y lebih rendah daripada suhu air dalam gelas Z.</span>, correct: "Benar" },
+              { key: "b", text: <span>Selisih suhu air gelas X dan gelas W adalah <InlineMath math="6^\circ C" />.</span>, correct: "Salah" },
+              { key: "c", text: <span>Suhu air gelas W lebih tinggi dari gelas Z, tetapi lebih rendah dari gelas X.</span>, correct: "Salah" },
+            ]} />
+            <PembahasanBtn n={23} />
+            {expandedPembahasan.has(23) && (
+              <div className="mt-3 space-y-2">
+                <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Salah &nbsp;|&nbsp; (c) Salah</PBJawaban>
+                <PBKonsep>
+                  <p>Urutan suhu dari terendah ke tertinggi adalah X(−25), Y(−4), Z(7), W(18).</p>
+                  <p>Selisih suhu adalah nilai mutlak dari selisih kedua suhu.</p>
+                </PBKonsep>
+                <PBSteps>
+                  <S n={1}><p>(a) −4 &lt; 7, jadi suhu Y lebih rendah daripada Z → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+                  <S n={2}><p>(b) <InlineMath math="|{-25}-18|=43^\circ C\neq6^\circ C" /> → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
+                  <S n={3}><p>(c) W = 18°C lebih tinggi daripada Z = 7°C, tetapi juga lebih tinggi daripada X = −25°C → <span className={`font-bold ${isDark ? "text-red-300" : "text-red-600"}`}>SALAH ✗</span></p></S>
+                </PBSteps>
+              </div>
+            )}
+          </Soal>
+
           </div>}{/* end soal-soal */}
 
         {/* ── Footer ── */}
