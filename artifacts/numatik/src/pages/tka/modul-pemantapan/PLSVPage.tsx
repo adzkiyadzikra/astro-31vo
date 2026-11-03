@@ -177,15 +177,11 @@ const latihanDasar: LatihanSoal[] = [
 
   // ── No. 3 — PGKBS ───────────────────────────────────────────────────────────
   {
-    no: 3, type: "pgkbs",
-    soal: "Diketahui persamaan $\\dfrac{1}{2}(x - 10) = 2x - 5$. Tentukan kebenaran setiap pernyataan berikut!",
-    pernyataan: [
-      "Mengalikan kedua ruas dengan 2 menghasilkan $x - 10 = 4x - 10$.",
-      "Penyelesaian persamaan tersebut adalah $x = 0$.",
-      "Nilai $x = 2$ juga memenuhi persamaan tersebut.",
-    ],
-    jawabanBS: ["B", "B", "S"],
-    pembahasan: "Kalikan kedua ruas dengan 2:\n$x - 10 = 4x - 10$ → Pernyataan (1) BENAR\nSederhanakan: $x - 4x = -10 + 10$ → $-3x = 0$ → $x = 0$ → Pernyataan (2) BENAR\nUji $x = 2$: $\\frac{1}{2}(2-10) = -4$; $2(2)-5 = -1$. $-4 \\neq -1$ → Pernyataan (3) SALAH",
+    no: 3, type: "pg",
+    soal: "TKA Matematika 2026 — Diketahui pertidaksamaan $3x+17\\leq7-2x$. Manakah garis bilangan yang menunjukkan himpunan penyelesaian dari pertidaksamaan tersebut?",
+    options: ["[IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-REd3lrUoBOoghHUZa7mx7r3sG60Cvb.png]", "[IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-v9ksG7Vz3P0I0bldNBS6meA3Sxx6MU.png]", "[IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-1wWLkU09NSWKe1LSyPj527qPECL286.png]", "[IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-850rs5dv9p436Ji1DNBbDXdkOtCN5B.png]"],
+    jawaban: "A",
+    pembahasan: "$3x+17\\leq7-2x \\Rightarrow 5x\\leq-10 \\Rightarrow x\\leq-2$. Jadi garis bilangan menggunakan titik penuh di $-2$ dan arsiran ke kiri: jawaban A.",
   },
 
   // ── No. 4 — PG ──────────────────────────────────────────────────────────────
@@ -289,7 +285,7 @@ const latihanDasar: LatihanSoal[] = [
   // ── No. 11 — PGK ────────────────────────────────────────────────────────────
   {
     no: 11, type: "pgk",
-    soal: "Harga sebuah buku Rp4.000,00 lebihnya dari harga bolpoin. Rina membeli dua buah buku dan sebuah bolpoin seharga Rp26.000,00. Pernyataan-pernyataan berikut berkaitan dengan situasi tersebut.",
+    soal: "Harga sebuah buku Rp4.000,00 lebihnya dari harga bolpoin. Carrisa membeli dua buah buku dan sebuah bolpoin seharga Rp26.000,00. Pernyataan-pernyataan berikut berkaitan dengan situasi tersebut.",
     pernyataan: [
       "Jika harga bolpoin $x$ rupiah, maka harga buku $(x + 4.000)$ rupiah.",
       "Model matematika yang tepat adalah $3x + 8.000 = 26.000$.",
@@ -601,7 +597,7 @@ const latihanDasar: LatihanSoal[] = [
     pembahasan: "Perkalian silang: $3x + 2 = 2(x + 4)$ → Pernyataan (1) BENAR\n$3x + 2 = 2x + 8 \\Rightarrow x = 6$ → Pernyataan (2) BENAR\n$3(6) + 2 = 20 \\neq 24$ → Pernyataan (3) SALAH",
   },
 
-  // ── No. 33 — PG ─────────────────────────────────────────────────────────────
+  // ── No. 33 — PG ────────────────────────���────────────────────────────────────
   {
     no: 33, type: "pg",
     soal: "Penyelesaian dari pertidaksamaan $\\dfrac{x + 3}{2} > \\dfrac{2x - 1}{3}$ adalah ...",
@@ -891,9 +887,9 @@ const tambahanPLSV: LatihanSoal[] = [
 ];
 
 const latihanDasarDenganTambahan: LatihanSoal[] = [
-  ...latihanDasar.slice(0, 5),
+  ...latihanDasar.filter((soal) => !new Set([3, 6, 7, 8, 9, 13, 18, 20, 21, 23, 27, 28, 29, 31, 32, 34, 35, 39, 40]).has(soal.no)).slice(0, 5),
   ...tambahanPLSV,
-  ...latihanDasar.slice(5),
+  ...latihanDasar.filter((soal) => !new Set([3, 6, 7, 8, 9, 13, 18, 20, 21, 23, 27, 28, 29, 31, 32, 34, 35, 39, 40]).has(soal.no)).slice(5),
 ].map((soal, index) => ({ ...soal, no: index + 1 }));
 
 const PLSVPage = () => (

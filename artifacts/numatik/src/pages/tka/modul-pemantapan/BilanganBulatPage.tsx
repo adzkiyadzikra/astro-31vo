@@ -1900,21 +1900,21 @@ const BilanganBulatPage = () => {
             </p>
             <TFTable qn={21} rows={[
               { key: "a", text: <span>Hasil dari <InlineMath math="3 \diamond (-4)" /> adalah <InlineMath math="-23" />.</span>, correct: "Benar" },
-              { key: "b", text: <span><InlineMath math="2 \\times 5" /> adalah <InlineMath math="10" />.</span>, correct: "Benar" },
+  { key: "b", text: <span><InlineMath math="2 \\times 5" /> adalah <InlineMath math="10" />.</span>, correct: "Benar" },
               { key: "c", text: <span>Hasil dari <InlineMath math="5 \\diamond (-1)" /> adalah <InlineMath math="-27" />.</span>, correct: "Benar" },
               { key: "d", text: <span><InlineMath math="2 \\times 3^3" /> adalah <InlineMath math="54" />.</span>, correct: "Benar" },
             ]} />
             <PembahasanBtn n={21} />
             {expandedPembahasan.has(21) && (
               <div className="mt-3 space-y-2">
-                <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Benar &nbsp;|&nbsp; (c) Benar &nbsp;|&nbsp; (d) Benar</PBJawaban>
+  <PBJawaban>(a) Benar &nbsp;|&nbsp; (b) Benar &nbsp;|&nbsp; (c) Benar &nbsp;|&nbsp; (d) Benar</PBJawaban>
                 <PBKonsep>
                   <p>Rumus: <InlineMath math="a \\diamond b = (-5) \\times a + 2 \\times b" /></p>
                   <p>Substitusikan nilai yang diberikan ke rumus tersebut, perhatikan tanda.</p>
                 </PBKonsep>
                 <PBSteps>
                   <S n={1}><p>(a) <InlineMath math="3\diamond(-4)=(-5)(3)+2(-4)=-15+(-8)=-23" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
-                  <S n={2}><p>(b) <InlineMath math="2\times5=10" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
+  <S n={2}><p>(b) <InlineMath math="2\times5=10" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                   <S n={3}><p>(c) <InlineMath math="5\\diamond(-1)=(-5)(5)+2(-1)=-25+(-2)=-27" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                   <S n={4}><p>(d) <InlineMath math="2\\times3^3=2\\times27=54" /> → <span className={`font-bold ${isDark ? "text-green-300" : "text-green-700"}`}>BENAR ✓</span></p></S>
                 </PBSteps>
