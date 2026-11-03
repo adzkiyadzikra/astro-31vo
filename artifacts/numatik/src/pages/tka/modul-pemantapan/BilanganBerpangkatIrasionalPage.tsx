@@ -40,6 +40,15 @@ const latihanDasar: LatihanSoal[] = [
     pembahasan: "Gunakan model $N(t) = 10 \\times 2^t$.\n1. Untuk setiap t minggu, jumlah orang yang terinfeksi adalah $N(t) = 10 \\times 2^t$, jadi pernyataan 1 BENAR.\n2. $N(3) = 10 \\times 2^3 = 10 \\times 8 = 80$, jadi pernyataan 2 BENAR.\n3. $N(8) = 10 \\times 2^8 = 10 \\times 256 = 2.560$, bukan 1.280, jadi pernyataan 3 SALAH.",
   },
   {
+    no: 30,
+    type: "pg",
+    sourceLabel: "TKA Matematika 2026",
+    soal: "Hasil dari operasi bilangan berpangkat berikut adalah ....\n\n$\\dfrac{7^3\\times7^{-4}}{7^2}$",
+    options: ["A. $7^{-9}$", "B. $7^{-6}$", "C. $7^{-3}$", "D. $7$"],
+    jawaban: "C",
+    pembahasan: "Gunakan sifat pangkat dengan basis sama. $7^3\\times7^{-4}=7^{3+(-4)}=7^{-1}$. Kemudian $7^{-1}\\div7^2=7^{-1-2}=7^{-3}$. Jadi jawaban C.",
+  },
+  {
     no: 4,
     soal: "Hasil dari $81^{\\frac{3}{4}}$ adalah ...",
     options: ["A. 16", "B. 8", "C. 27", "D. 81"],
@@ -76,6 +85,18 @@ const latihanDasar: LatihanSoal[] = [
     no: 7,
     type: "pgkbs",
     soal: "Sebuah kebun berbentuk persegi panjang memiliki ukuran sisi $\\sqrt{48}$ meter dan $3\\sqrt{75}$ meter. Berdasarkan konteks tersebut, tentukan BENAR atau SALAH pernyataan berikut!",
+    gambar: (
+      <svg viewBox="0 0 640 300" className="my-3 w-full rounded-xl border border-border bg-background p-3" role="img" aria-label="Diagram kebun persegi panjang dengan sisi √48 meter dan 3√75 meter">
+        <rect x="150" y="95" width="320" height="135" rx="8" fill="#dcfce7" stroke="#16a34a" strokeWidth="3" />
+        <text x="310" y="170" textAnchor="middle" fontSize="22" fontWeight="700" fill="#166534">KEBUN</text>
+        <line x1="150" y1="70" x2="470" y2="70" stroke="#166534" strokeWidth="2" />
+        <path d="M150 70l12-6v12zM470 70l-12-6v12z" fill="#166534" />
+        <line x1="495" y1="95" x2="495" y2="230" stroke="#166534" strokeWidth="2" />
+        <path d="M495 95l-6 12h12zM495 230l-6-12h12z" fill="#166534" />
+        <text x="310" y="55" textAnchor="middle" fontSize="20" fontWeight="700" fill="#166534">3√75 m</text>
+        <text x="535" y="165" textAnchor="middle" fontSize="20" fontWeight="700" fill="#166534" transform="rotate(90 535 165)">√48 m</text>
+      </svg>
+    ),
     pernyataan: [
       "Bentuk sederhana dari $\\sqrt{48}$ adalah $4\\sqrt{3}$",
       "Luas kebun tersebut adalah $60\\sqrt{3}$ m²",
@@ -188,14 +209,6 @@ const latihanDasar: LatihanSoal[] = [
     pembahasan: "Pernyataan 1: $\\frac{10}{9} \\times \\frac{\\sqrt{2}}{8} = \\frac{10\\sqrt{2}}{72} = \\frac{5\\sqrt{2}}{36}$ → BENAR\n\nPernyataan 2: $3 \\times \\frac{10}{9} = \\frac{10}{3} = 3\\frac{1}{3}$ → BENAR\n\nPernyataan 3: $\\frac{10}{9} = 1\\frac{1}{9}$ → BENAR\n\nPernyataan 4: $\\frac{1}{4\\sqrt{2}} \\times \\frac{\\sqrt{2}}{\\sqrt{2}} = \\frac{\\sqrt{2}}{4 \\times 2} = \\frac{\\sqrt{2}}{8}$ → BENAR\n\nSemua pernyataan benar.",
   },
   {
-    no: 20,
-    type: "pg",
-    soal: "Bentuk sederhana pecahan berpenyebut bentuk akar $\\frac{18}{4 + \\sqrt{7}}$ adalah ....",
-    options: ["A. $8 + 2\\sqrt{7}$", "B. $8 - 2\\sqrt{7}$", "C. $6 + 2\\sqrt{7}$", "D. $8 - \\sqrt{7}$"],
-    jawaban: "B",
-    pembahasan: "Rasionalkan penyebut dengan mengalikan sekawannya:\n$\\frac{18}{4 + \\sqrt{7}} \\times \\frac{4 - \\sqrt{7}}{4 - \\sqrt{7}} = \\frac{18(4 - \\sqrt{7})}{16 - 7} = \\frac{18(4 - \\sqrt{7})}{9}$\n$= 2(4 - \\sqrt{7}) = 8 - 2\\sqrt{7}$",
-  },
-  {
     no: 21,
     type: "pgkbs",
     soal: "Cermati data perkiraan estimasi luas wilayah dari beberapa samudra di dunia berikut:\n\nPasifik: $1{,}652 \\times 10^8$ km²\nAtlantik: $1{,}065 \\times 10^8$ km²\nHindia: $7{,}056 \\times 10^7$ km²\nArktik: $1{,}406 \\times 10^7$ km²\n\nTentukan status Benar atau Salah untuk setiap pernyataan berikut!",
@@ -208,44 +221,12 @@ const latihanDasar: LatihanSoal[] = [
     pembahasan: "Pernyataan 1: $1{,}652 \\times 10^8 = 1{,}652 \\times 100.000.000 = 165.200.000$ km² → BENAR\n\nPernyataan 2: $7{,}056 \\times 10^7 = 7{,}056 \\times 10.000.000 = 70.560.000$ km²\nPernyataan menyebutkan $705.600.000$ km², maka → SALAH\n\nPernyataan 3: $1{,}406 \\times 10^7 = 1{,}406 \\times 10.000.000 = 14.060.000$ km² → BENAR",
   },
   {
-    no: 22,
-    type: "pg",
-    soal: "Hasil dari $27^{2} \\times 9^{-3} : 3^{5}$ sama dengan hasil dari ...",
-    options: ["A. $81^{-2}$", "B. $9^{-3}$", "C. $3^{-4}$", "D. $3^{-5}$"],
-    jawaban: "D",
-    pembahasan: "$27^2 = 3^6$ dan $9^{-3}=3^{-6}$, sehingga $3^6\\times3^{-6}:3^5=3^{-5}$.",
-  },
-  {
     no: 23,
     type: "pg",
     soal: "Hasil dari $\\frac{2^5\\times5^7\\times7^3}{2^3\\times5^4\\times7}$ adalah ...",
     options: ["A. $2^8\\times5^{11}\\times7^4$", "B. $2^2\\times5^{11}\\times7^2$", "C. $2^8\\times5^3\\times7^2$", "D. $2^2\\times5^3\\times7^2$"],
     jawaban: "D",
     pembahasan: "Kurangkan pangkat pada pembilang dan penyebut: $2^{5-3}\\times5^{7-4}\\times7^{3-1}=2^2\\times5^3\\times7^2$.",
-  },
-  {
-    no: 24,
-    type: "pg",
-    soal: "Berat sebuah bakteri adalah $0{,}000000892$ gram. Bentuk notasi ilmiahnya adalah ...",
-    options: ["A. $892\\times10^{-9}$ gram", "B. $8{,}92\\times10^6$ gram", "C. $89{,}2\\times10^{-8}$ gram", "D. $8{,}92\\times10^{-7}$ gram"],
-    jawaban: "D",
-    pembahasan: "Geser koma 7 tempat ke kanan, sehingga $0{,}000000892=8{,}92\\times10^{-7}$.",
-  },
-  {
-    no: 25,
-    type: "pg",
-    soal: "Hasil dari $\\sqrt{80}-\\sqrt{45}+3\\sqrt{20}-\\sqrt{125}$ adalah ...",
-    options: ["A. $\\sqrt5$", "B. $2\\sqrt5$", "C. $3\\sqrt5$", "D. $4\\sqrt5$"],
-    jawaban: "C",
-    pembahasan: "$4\\sqrt5-3\\sqrt5+6\\sqrt5-5\\sqrt5=2\\sqrt5$.",
-  },
-  {
-    no: 26,
-    type: "pg",
-    soal: "Berat partikel C adalah $3{,}2\\times10^{-10}$ gram dan partikel D $5{,}8\\times10^{-9}$ gram. Total beratnya adalah ...",
-    options: ["A. $9{,}0\\times10^{-19}$ gram", "B. $6{,}12\\times10^{-9}$ gram", "C. $6{,}12\\times10^{-10}$ gram", "D. $9{,}0\\times10^{-10}$ gram"],
-    jawaban: "B",
-    pembahasan: "$3{,}2\\times10^{-10}+58\\times10^{-10}=61{,}2\\times10^{-10}=6{,}12\\times10^{-9}$.",
   },
   {
     no: 27,
@@ -275,15 +256,15 @@ const latihanDasar: LatihanSoal[] = [
 
 const urutanLatihanBerdasarkanSubmateri = [
   // Bilangan berpangkat bulat, negatif, dan eksponensial
-  1, 2, 8, 5, 10, 22, 23, 3,
+  1, 2, 8, 30, 5, 10, 23, 3,
   // Pangkat pecahan
   4, 9, 18,
   // Menyederhanakan dan mengoperasikan bentuk akar
-  7, 12, 13, 15, 19, 25, 29,
+  7, 11, 12, 13, 15, 19, 28, 29,
   // Merasionalkan penyebut
   6, 14, 16, 17,
   // Notasi ilmiah
-  21, 24, 26, 27,
+  21, 27,
 ] as const;
 
 const latihanDasarGrouped: LatihanSoal[] = urutanLatihanBerdasarkanSubmateri.map((nomorLama, index) => {
