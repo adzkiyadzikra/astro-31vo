@@ -35,7 +35,7 @@ const latihanDasar: LatihanSoal[] = [
     soal: "TKA Matematika 2026 — Hasil dari operasi bilangan berpangkat berikut adalah ... $\\dfrac{7^3\\times7^{-4}}{7^2}$",
     options: ["A. $7^{-9}$", "B. $7^{-6}$", "C. $7^{-3}$", "D. $7$"],
     jawaban: "C",
-    pembahasan: "Gunakan sifat pembagian pangkat: $7^3\\times7^{-4}=7^{-1}$, lalu $7^{-1}\\div7^2=7^{-1-2}=7^{-3}$. Jadi jawaban C.\\n\\nHitung setiap suku dengan pangkat negatif dan positif lalu jumlahkan.\n1. $(-2)^{-3} = \\frac{1}{(-2)^3} = -\\frac{1}{8}$\n2. $(-2)^{-2} = \\frac{1}{(-2)^2} = \\frac{1}{4}$\n3. $(-2)^{-1} = \\frac{1}{(-2)^1} = -\\frac{1}{2}$\n4. $(-2)^0 = 1$\n5. $(-2)^1 = -2$\n6. $(-2)^2 = 4$\n7. Jumlah: $-\\frac{1}{8} + \\frac{1}{4} - \\frac{1}{2} + 1 - 2 + 4 = \\frac{-1+2-4+8-16+32}{8} = \\frac{21}{8} = 2\\frac{5}{8}$\n8. Dari pilihan yang tersedia, jawaban paling mendekati adalah D\nRumus: $a^{-n} = \\frac{1}{a^n}$; $(-a)^n = -a^n$ (n ganjil), $a^n$ (n genap)"
+    pembahasan: "Gunakan sifat pangkat dengan basis sama. $7^3\\times7^{-4}=7^{3+(-4)}=7^{-1}$. Kemudian $7^{-1}\\div7^2=7^{-1-2}=7^{-3}$. Jadi jawaban C.\n\nTips: saat mengalikan pangkat dengan basis sama, jumlahkan eksponen; saat membagi, kurangkan eksponen."
   },
   {
     no: 5,
