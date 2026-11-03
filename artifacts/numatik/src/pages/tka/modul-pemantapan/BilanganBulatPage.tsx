@@ -364,7 +364,7 @@ const BilanganBulatPage = () => {
   };
 
   // ── question wrapper ─────────────────────────────────────────────────
-  const Soal = ({ n, tipe, children }: { n: number; tipe: "PGS" | "MCMA" | "BS"; children: React.ReactNode }) => {
+  const Soal = ({ n, tipe, sourceLabel, children }: { n: number; tipe: "PGS" | "MCMA" | "BS"; sourceLabel?: string; children: React.ReactNode }) => {
     const tipeColor =
       tipe === "PGS"  ? (isDark ? "bg-sky-500/20 text-sky-300 border-sky-500/40"       : "bg-sky-100 text-sky-700 border-sky-300") :
       tipe === "MCMA" ? (isDark ? "bg-amber-500/20 text-amber-300 border-amber-500/40"  : "bg-amber-100 text-amber-700 border-amber-300") :
@@ -383,6 +383,7 @@ const BilanganBulatPage = () => {
       }`}>
         <div className="flex items-center gap-2 mb-3">
           <span className="bg-amber-500/20 text-amber-400 font-display font-bold text-sm w-7 h-7 rounded-lg flex items-center justify-center shrink-0">{n}</span>
+          {sourceLabel && <span className="inline-flex rounded-full bg-cyan-500/15 px-2 py-1 text-[10px] font-bold text-cyan-300">{sourceLabel}</span>}
           <span className={`text-[10px] font-body font-bold rounded-full px-2.5 py-0.5 border ${tipeColor}`}>{tipeBadge}</span>
           <span className={`text-[9px] font-body ${isDark ? "text-white/35" : "text-gray-400"}`}>{tipeLabel}</span>
         </div>
@@ -1329,8 +1330,7 @@ const BilanganBulatPage = () => {
 
 
           {/* ══ SOAL 2 — PGS ══ */}
-          <Soal n={2} tipe="PGS">
-            <span className="mb-2 inline-flex rounded-full bg-cyan-500/15 px-2 py-1 text-[10px] font-bold text-cyan-300">TKA Matematika 2026</span>
+          <Soal n={2} tipe="PGS" sourceLabel="TKA Matematika 2026">
             <p className={qText}>Pada beberapa jenis makanan, suhu penyimpanan yang terlalu tinggi dapat menyebabkan makanan tersebut menjadi cepat basi. Gambar di bawah ini menunjukkan berbagai suhu penyimpanan makanan di dalam lemari pendingin menurut Departemen Pertanian Amerika Serikat (FDA).</p>
             <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-fJwYwaZpNUCRgwrCm39TBx4QykJI6d.png" alt="Rekomendasi suhu menyimpan makanan" className="my-3 w-1/2 mx-auto rounded-xl" />
             <p className={qText}><strong>Catatan:</strong> daging unggas adalah daging yang berasal dari burung ternak seperti ayam, merpati dan sebagainya. Daging merah adalah daging yang berasal dari mamalia ternak seperti sapi, kambing dan sebagainya.</p>

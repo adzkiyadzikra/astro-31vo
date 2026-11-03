@@ -284,11 +284,38 @@ const latihanDasar: LatihanSoal[] = [
   // ─── 6 · PGKBS ────────────────────────────────────────────────────────────
   {
     no: 6,
-    type: "pgkbs",
-soal: "TKA Matematika 2026 — Buah merupakan salah satu sumber vitamin C. Perhatikan tabel berikut!\n\n| Buah | Berat (gram) | Kandungan air (mL) |\n|---|---:|---:|\n| Buah A | 118,4 | 96,3 |\n| Buah B | 130,7 | 150 |\n| Buah C | 130,55 | 140 |\n| Buah D | 96,255 | 118,15 |\n\nBuah yang diteliti pertama adalah buah yang memiliki berat terbesar dan kandungan air paling banyak. Buah tersebut adalah ...",
-  options: ["A. Buah A", "B. Buah B", "C. Buah C", "D. Buah D"],
+    type: "pg",
+    soal: "TKA Matematika 2026 — Buah merupakan salah satu sumber vitamin C. Perhatikan tabel berikut! Buah yang memiliki berat terbesar sekaligus kandungan air paling banyak adalah ....",
+    gambar: (
+      <svg
+        viewBox="0 0 640 230"
+        className="my-3 w-full max-w-[640px]"
+        role="img"
+        aria-labelledby="fruit-table-title fruit-table-desc"
+      >
+        <title id="fruit-table-title">Tabel berat dan kandungan air empat buah</title>
+        <desc id="fruit-table-desc">Buah A: 118,4 gram dan 96,3 mililiter; Buah B: 130,7 gram dan 150 mililiter; Buah C: 130,55 gram dan 140 mililiter; Buah D: 96,255 gram dan 118,15 mililiter.</desc>
+        <rect x="1" y="1" width="638" height="228" rx="12" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+        <path d="M2 13a12 12 0 0 1 12-12h612a12 12 0 0 1 12 12v35H2z" fill="#e0f2fe" />
+        {[48, 93, 138, 183].map((y) => <line key={y} x1="2" y1={y} x2="638" y2={y} stroke="#cbd5e1" strokeWidth="1" />)}
+        {[190, 400].map((x) => <line key={x} x1={x} y1="2" x2={x} y2="228" stroke="#cbd5e1" strokeWidth="1" />)}
+        <g fill="#0f172a" fontFamily="Arial, sans-serif" fontSize="16">
+          <text x="24" y="31" fontWeight="700">Buah</text>
+          <text x="295" y="31" textAnchor="middle" fontWeight="700">Berat (gram)</text>
+          <text x="520" y="31" textAnchor="middle" fontWeight="700">Kandungan air (mL)</text>
+          <text x="24" y="77">Buah A</text><text x="295" y="77" textAnchor="middle">118,4</text><text x="520" y="77" textAnchor="middle">96,3</text>
+          <text x="24" y="122">Buah B</text><text x="295" y="122" textAnchor="middle">130,7</text><text x="520" y="122" textAnchor="middle">150</text>
+          <text x="24" y="167">Buah C</text><text x="295" y="167" textAnchor="middle">130,55</text><text x="520" y="167" textAnchor="middle">140</text>
+          <text x="24" y="212">Buah D</text><text x="295" y="212" textAnchor="middle">96,255</text><text x="520" y="212" textAnchor="middle">118,15</text>
+        </g>
+      </svg>
+    ),
+    options: ["A. Buah A", "B. Buah B", "C. Buah C", "D. Buah D"],
     jawaban: "B",
-    pembahasan: "Buah B memiliki berat terbesar (130,7 gram) dan kandungan air paling banyak (150 mL). Jadi jawabannya B.",
+    pembahasan:
+      "Bandingkan berat dengan menyamakan banyak angka di belakang koma: $118{,}4=118{,}400$, $130{,}7=130{,}700$, $130{,}55=130{,}550$, dan $96{,}255$. Berat terbesar adalah Buah B, yaitu $130{,}700$ gram.\n\n" +
+      "Untuk kandungan air, $96{,}3 < 118{,}15 < 140 < 150$, sehingga kandungan air terbanyak juga dimiliki Buah B.\n\n" +
+      "Jadi, buah dengan berat terbesar sekaligus kandungan air paling banyak adalah Buah B → B.",
   },
 
   // ─── 7 · PG ───────────────────────────────────────────────────────────────
@@ -737,7 +764,9 @@ Berdasarkan teks tersebut, pilihlah semua pernyataan yang benar.`,
 ];
 
 const nomorDihapus = new Set([13, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 29]);
-const latihanDasarTampil = latihanDasar.filter((soal) => !nomorDihapus.has(soal.no));
+const latihanDasarTampil = latihanDasar
+  .filter((soal) => !nomorDihapus.has(soal.no))
+  .map((soal, index) => ({ ...soal, displayNo: index + 1 }));
 
 const BilanganRasionalPage = () => (
   <TKAPemantapanLayout

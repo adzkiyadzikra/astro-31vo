@@ -19,6 +19,7 @@ export interface MateriSection {
 
 export interface LatihanSoal {
   no: number;
+  displayNo?: number;
   /** "pg" = pilihan ganda | "pgk" = pilih semua pernyataan benar | "pgkbs" = tentukan Benar/Salah */
   type?: "pg" | "pgk" | "pgkbs";
   soal: string;
@@ -1018,7 +1019,7 @@ const TKAPemantapanLayout = ({ title, backPath = "/tka/modul-pemantapan", materi
                           border: "1px solid rgba(167,139,250,0.3)",
                           color: "#a5b4fc",
                         }}>
-                        {soal.no}
+                        {soal.displayNo ?? soal.no}
                       </span>
                       <div className="flex-1 min-w-0">
                         {/* Type badge */}

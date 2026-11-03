@@ -471,7 +471,7 @@ const contohSoal: LS[] = [
 
 const latihanPerbandinganTampil = latihanDasar
   .filter((soal) => !new Set([12, 13]).has(soal.no))
-  .map((soal) => ({ ...soal, no: soal.no === 5 ? 20 : soal.no === 20 ? 5 : soal.no === 15 ? 19 : soal.no === 19 ? 15 : soal.no }));
+  .map((soal, index) => ({ ...soal, displayNo: index + 1 }));
 
 const PerbandinganPage = () => (
   <TKAPemantapanLayout
