@@ -394,6 +394,30 @@ const nomorAljabarDihapus = new Set([1, 2, 8, 9, 13, 15, 17, 18, 21, 24, 25, 33,
 const latihanDasarAljabar = latihanDasar
   .filter((soal) => !nomorAljabarDihapus.has(soal.no))
   .map((soal, index) => ({ ...soal, no: index + 1 }));
+const soalBentukAljabarTka: LatihanSoal = {
+  no: 3,
+  type: "pgkbs",
+  sourceLabel: "TKA Matematika 2026",
+  soal: "Diketahui bentuk aljabar berikut ini.\n\n$2ab-b^2+3a^2b+ab^2-5$\n\nTentukan Benar atau Salah pada setiap pernyataan berikut terkait bentuk aljabar tersebut!",
+  pernyataan: [
+    "Terdapat 2 variabel yaitu $a$ dan $b$.",
+    "Konstanta pada bentuk aljabar tersebut adalah $5$.",
+    "Bilangan $2$, $-1$, $3$, dan $1$ merupakan koefisien.",
+  ],
+  jawabanBS: ["B", "S", "B"],
+  pembahasan: "Variabel pada bentuk aljabar tersebut adalah $a$ dan $b$, sehingga pernyataan (1) benar. Konstanta adalah $-5$, bukan $5$, sehingga pernyataan (2) salah. Koefisien suku-suku yang memuat variabel adalah $2$, $-1$, $3$, dan $1$, sehingga pernyataan (3) benar.",
+};
+const latihanDasarAljabarAktif = latihanDasarAljabar
+  .filter((soal) => !new Set([4, 11, 20]).has(soal.no))
+  .map((soal) => ({
+    ...soal,
+    no: soal.no === 14 ? 3 : soal.no === 15 ? 4 : soal.no === 21 ? 5 : soal.no,
+  }));
+const latihanDasarAljabarDenganSoalTka = [
+  ...latihanDasarAljabarAktif.slice(0, 2),
+  soalBentukAljabarTka,
+  ...latihanDasarAljabarAktif.slice(2),
+].map((soal, index) => ({ ...soal, no: index + 1 }));
 
 const AljabarPage = () => (
   <TKAPemantapanLayout
@@ -401,7 +425,7 @@ const AljabarPage = () => (
     backPath="/tka/modul-pemantapan"
     materiSections={materiSections}
     contohSoal={contohSoal}
-    latihanDasar={latihanDasarAljabar.filter((soal) => !new Set([4, 11, 20]).has(soal.no)).map((soal) => ({ ...soal, no: soal.no === 14 ? 3 : soal.no === 15 ? 4 : soal.no === 21 ? 5 : soal.no }))}
+    latihanDasar={latihanDasarAljabarDenganSoalTka}
   />
 );
 
