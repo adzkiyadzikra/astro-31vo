@@ -95,6 +95,7 @@ const latihanDasar: LatihanSoal[] = [
   // ── No. 2 — PGK ─────────────────────────────────────────────────────────────
   {
     no: 2, type: "pgk",
+    sourceLabel: "TKA Matematika 2026",
     soal: "Sistem persamaan $2x + 3y = 19$ dan $x - y = 2$ memiliki penyelesaian $x = p$ dan $y = q$. Pernyataan-pernyataan berikut berkaitan dengan nilai $p$ dan $q$.",
     pernyataan: [
       "Nilai $p = 5$.",
@@ -115,7 +116,8 @@ const latihanDasar: LatihanSoal[] = [
   // ── No. 3 — PGKBS ───────────────────────────────────────────────────────────
   {
     no: 3, type: "pg",
-    soal: "TKA Matematika 2026 — Jajanan Tradisional. Harga 2 kotak kue putu mayang dan 3 kotak kue pancong adalah Rp58.000,00, sedangkan 3 kotak putu mayang dan 2 kotak pancong adalah Rp62.000,00. Berapa harga 3 kotak kue putu mayang dan 1 kotak kue pancong? [IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JrFeSOoLxeTb4kTxPj7jJ87QBQ88Zw.png]",
+    sourceLabel: "TKA Matematika 2026",
+    soal: "Jajanan Tradisional. Harga 2 kotak kue putu mayang dan 3 kotak kue pancong adalah Rp58.000,00, sedangkan 3 kotak putu mayang dan 2 kotak pancong adalah Rp62.000,00. Berapa harga 3 kotak kue putu mayang dan 1 kotak kue pancong?\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793749997/spldv1_mg7xrl.png]",
     options: ["A. Rp10.000,00", "B. Rp14.000,00", "C. Rp44.000,00", "D. Rp52.000,00"],
     jawaban: "D",
     pembahasan: "Misalkan putu mayang $=p$ dan pancong $=q$. Selesaikan SPLDV dari informasi pada soal, lalu substitusikan ke $3p+q$.",
@@ -124,7 +126,8 @@ const latihanDasar: LatihanSoal[] = [
   // ── No. 4 — PG ──────────────────────────────────────────────────────────────
   {
     no: 4, type: "pg",
-    soal: "TKA Matematika 2026 — Rino, Tiko, dan Bayu pergi ke toko buku. Rino membeli 4 buku tulis dan 3 pulpen. Tiko membeli dua kali lipat dari masing-masing jumlah Rino, dan Bayu membeli tiga kali lipat. Jika harga 1 buku = x dan 1 pulpen = y, bagaimana kalimat matematika total harga ketiganya? [IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MM5vDgp6wB35zmNNEjat3kgZC76ryd.png]",
+    sourceLabel: "TKA Matematika 2026",
+    soal: "Rino, Tiko, dan Bayu pergi ke toko buku. Rino membeli 4 buku tulis dan 3 pulpen. Tiko membeli dua kali lipat dari masing-masing jumlah Rino, dan Bayu membeli tiga kali lipat. Jika harga 1 buku = x dan 1 pulpen = y, bagaimana kalimat matematika total harga ketiganya?\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793749998/spldv2_svfrqd.png]",
     options: ["A. $24x+18y$", "B. $20x+15y$", "C. $12x+9y$", "D. $4x+3y$"],
     jawaban: "A",
     pembahasan: "Total buku $=(4+8+12)=24$ dan total pulpen $=(3+6+9)=18$, sehingga total harga $24x+18y$.",
@@ -398,7 +401,7 @@ const latihanDasar: LatihanSoal[] = [
   // ── No. 25 — PGKBS ──────────────────────────────────────────────────────────
   {
     no: 25, type: "pgkbs",
-    soal: "📖 Teks Informasi (untuk Soal 25 dan 26)\nIbu Anita mendistribusikan beras menggunakan truk. Beras dikemas dalam dua wadah: karung 20 kg dan karung 40 kg. Total karung yang diangkut 150 karung dengan berat keseluruhan 4.000 kg.\n\nBerdasarkan teks di atas, pilih semua pernyataan yang benar!",
+    soal: "📖 Teks Informasi (untuk Soal 16 dan 17)\nIbu Anita mendistribusikan beras menggunakan truk. Beras dikemas dalam dua wadah: karung 20 kg dan karung 40 kg. Total karung yang diangkut 150 karung dengan berat keseluruhan 4.000 kg.\n\nBerdasarkan teks di atas, pilih semua pernyataan yang benar!",
     pernyataan: [
       "Banyaknya karung beras kemasan 20 kg adalah 100 buah.",
       "Banyaknya karung beras kemasan 40 kg adalah 50 buah.",
@@ -411,7 +414,7 @@ const latihanDasar: LatihanSoal[] = [
   // ── No. 26 — PG ─────────────────────────────────────────────────────────────
   {
     no: 26, type: "pg",
-    soal: "Berdasarkan teks informasi pada Soal 25, jika ongkos angkut setiap karung kecil (20 kg) sebesar Rp6.000,00 dan karung besar (40 kg) sebesar Rp10.000,00, berapakah total biaya pengiriman seluruh beras?",
+    soal: "Berdasarkan teks informasi pada Soal 16, jika ongkos angkut setiap karung kecil (20 kg) sebesar Rp6.000,00 dan karung besar (40 kg) sebesar Rp10.000,00, berapakah total biaya pengiriman seluruh beras?",
     options: [
       "A. Rp1.000.000,00",
       "B. Rp1.100.000,00",
@@ -419,7 +422,7 @@ const latihanDasar: LatihanSoal[] = [
       "D. Rp1.300.000,00",
     ],
     jawaban: "B",
-    pembahasan: "Dari Soal 25: $k_{20}=100$ dan $k_{40}=50$.\nTotal biaya $= 100 \\times 6.000 + 50 \\times 10.000$\n$= 600.000 + 500.000 = 1.100.000$\nTotal biaya = Rp1.100.000,00 → Jawaban B",
+    pembahasan: "Dari Soal 16: $k_{20}=100$ dan $k_{40}=50$.\nTotal biaya $= 100 \\times 6.000 + 50 \\times 10.000$\n$= 600.000 + 500.000 = 1.100.000$\nTotal biaya = Rp1.100.000,00 → Jawaban B",
   },
 
   // ── No. 27 — PG ─────────────────────────────────────────────────────────────
@@ -555,6 +558,13 @@ const latihanDasarSPLDVDenganTambahan = [
   ...tambahanSPLDV,
   ...latihanDasarSPLDV.slice(9),
 ].map((soal, index) => ({ ...soal, no: index + 1 }));
+const latihanDasarSPLDVDenganTambahanDitukar = [...latihanDasarSPLDVDenganTambahan];
+[latihanDasarSPLDVDenganTambahanDitukar[19], latihanDasarSPLDVDenganTambahanDitukar[20]] = [
+  latihanDasarSPLDVDenganTambahanDitukar[20],
+  latihanDasarSPLDVDenganTambahanDitukar[19],
+];
+const latihanDasarSPLDVDenganTambahanDitukarNomor = latihanDasarSPLDVDenganTambahanDitukar
+  .map((soal, index) => ({ ...soal, no: index + 1 }));
 
 const SPLDVPage = () => (
   <TKAPemantapanLayout
@@ -562,7 +572,7 @@ const SPLDVPage = () => (
     backPath="/tka/modul-pemantapan"
     materiSections={materiSections}
     contohSoal={contohSoal}
-    latihanDasar={latihanDasarSPLDVDenganTambahan}
+    latihanDasar={latihanDasarSPLDVDenganTambahanDitukarNomor}
   />
 );
 
