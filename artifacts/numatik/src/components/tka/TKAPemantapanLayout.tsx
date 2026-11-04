@@ -35,6 +35,8 @@ export interface LatihanSoal {
   pernyataan?: string[];
   /** PGKBS: array ["B"|"S"] untuk tiap pernyataan */
   jawabanBS?: ("B" | "S")[];
+  /** Optional custom labels for the two PGKBS answer columns. */
+  jawabanBSLabels?: { benar: string; salah: string };
   pembahasan?: string;
   /** Optional diagram/image to show below the soal text */
   gambar?: React.ReactNode;
@@ -951,6 +953,9 @@ const TKAPemantapanLayout = ({ title, backPath = "/tka/modul-pemantapan", materi
                 const correctPGK = getPgkCorrectIndices(soal);
                 const isRevealed = revealedAnswers.has(soal.no);
                 const bsArr = pgkbsAnswers[soal.no] ?? Array(soal.pernyataan?.length ?? 3).fill(null);
+                const bsBenarLabel = soal.jawabanBSLabels?.benar ?? "Benar";
+                const bsSalahLabel = soal.jawabanBSLabels?.salah ?? "Salah";
+                const bsColumnWidth = soal.jawabanBSLabels ? "w-24" : "w-14";
                 const bsAllAnswered = type === "pgkbs"
                   ? bsArr.length === (soal.pernyataan?.length ?? 3) && bsArr.every(a => a !== null)
                   : false;
@@ -1258,8 +1263,8 @@ const TKAPemantapanLayout = ({ title, backPath = "/tka/modul-pemantapan", materi
                           <div className="grid grid-cols-[1fr_auto_auto] gap-0 border-b"
                             style={{ borderColor: "rgba(6,182,212,0.15)" }}>
                             <div className="px-3 py-1.5 text-[9px] font-bold font-display tracking-widest uppercase text-cyan-400/60">Pernyataan</div>
-                            <div className="w-14 text-center py-1.5 text-[9px] font-bold font-display tracking-widest uppercase text-emerald-400/60">Benar</div>
-                            <div className="w-14 text-center py-1.5 text-[9px] font-bold font-display tracking-widest uppercase text-rose-400/60">Salah</div>
+                            <div className={`${bsColumnWidth} text-center py-1.5 text-[9px] font-bold font-display tracking-widest uppercase text-emerald-400/60`}>{bsBenarLabel}</div>
+                            <div className={`${bsColumnWidth} text-center py-1.5 text-[9px] font-bold font-display tracking-widest uppercase text-rose-400/60`}>{bsSalahLabel}</div>
                           </div>
                           {/* Pernyataan rows */}
                           {soal.pernyataan.map((p, pi) => {
@@ -1304,14 +1309,14 @@ const TKAPemantapanLayout = ({ title, backPath = "/tka/modul-pemantapan", materi
                                   )}
                                 </div>
                                 {/* Benar button */}
-                                <div className="w-14 flex items-center justify-center py-2">
+                                <div className={`${bsColumnWidth} flex items-center justify-center py-2`}>
                                   <button
                                     type="button"
-                                    aria-label={`Pilih Benar untuk pernyataan ${pi + 1}`}
+                                    aria-label={`Pilih ${bsBenarLabel} untuk pernyataan ${pi + 1}`}
                                     aria-pressed={userAns === "B"}
                                     disabled={isRevealed}
                                     onClick={() => handleSelectBS(soal.no, pi, "B", soal.pernyataan!.length)}
-                                    className="w-8 h-7 rounded-lg text-[10px] font-bold font-display transition-all duration-150"
+                                    className={`${soal.jawabanBSLabels ? "min-w-20 min-h-7 h-auto px-1 py-1 text-[9px] leading-tight" : "w-8 h-7 text-[10px]"} rounded-lg font-bold font-display transition-all duration-150`}
                                     style={
                                       isRevealed
                                         ? correctAns === "B"
@@ -1323,18 +1328,18 @@ const TKAPemantapanLayout = ({ title, backPath = "/tka/modul-pemantapan", materi
                                           ? { background: "rgba(34,197,94,0.2)", border: "1px solid rgba(34,197,94,0.5)", color: "#86efac", cursor: "pointer" }
                                           : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.4)", cursor: "pointer" }
                                     }>
-                                    B
+                                    {soal.jawabanBSLabels?.benar ?? "B"}
                                   </button>
                                 </div>
                                 {/* Salah button */}
-                                <div className="w-14 flex items-center justify-center py-2">
+                                <div className={`${bsColumnWidth} flex items-center justify-center py-2`}>
                                   <button
                                     type="button"
-                                    aria-label={`Pilih Salah untuk pernyataan ${pi + 1}`}
+                                    aria-label={`Pilih ${bsSalahLabel} untuk pernyataan ${pi + 1}`}
                                     aria-pressed={userAns === "S"}
                                     disabled={isRevealed}
                                     onClick={() => handleSelectBS(soal.no, pi, "S", soal.pernyataan!.length)}
-                                    className="w-8 h-7 rounded-lg text-[10px] font-bold font-display transition-all duration-150"
+                                    className={`${soal.jawabanBSLabels ? "min-w-20 min-h-7 h-auto px-1 py-1 text-[9px] leading-tight" : "w-8 h-7 text-[10px]"} rounded-lg font-bold font-display transition-all duration-150`}
                                     style={
                                       isRevealed
                                         ? correctAns === "S"
@@ -1346,7 +1351,7 @@ const TKAPemantapanLayout = ({ title, backPath = "/tka/modul-pemantapan", materi
                                           ? { background: "rgba(239,68,68,0.2)", border: "1px solid rgba(239,68,68,0.5)", color: "#fca5a5", cursor: "pointer" }
                                           : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.4)", cursor: "pointer" }
                                     }>
-                                    S
+                                    {soal.jawabanBSLabels?.salah ?? "S"}
                                   </button>
                                 </div>
                               </div>
@@ -1364,7 +1369,7 @@ const TKAPemantapanLayout = ({ title, backPath = "/tka/modul-pemantapan", materi
                                     color: ans === "B" ? "#86efac" : "#fca5a5",
                                     border: `1px solid ${ans === "B" ? "rgba(34,197,94,0.35)" : "rgba(239,68,68,0.35)"}`,
                                   }}>
-                                  ({i + 1}) {ans}
+                                  ({i + 1}) {ans === "B" ? bsBenarLabel : bsSalahLabel}
                                 </span>
                               ))}
                             </div>

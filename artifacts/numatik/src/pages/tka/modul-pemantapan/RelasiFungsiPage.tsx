@@ -197,10 +197,115 @@ Ketiga pernyataan benar.`,
   },
 ];
 
+const diagramRelasiLatihan = ({ children }: { children: React.ReactNode }) => (
+  <svg
+    viewBox="0 0 900 250"
+    role="img"
+    aria-label="Diagram relasi antara himpunan A dan himpunan B"
+    className="mx-auto my-2 h-auto w-full max-w-3xl rounded-lg border border-border bg-background p-2 text-foreground"
+  >
+    <defs>
+      <marker id="relasi-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    {children}
+  </svg>
+);
+
+const diagramLatihanNo1 = diagramRelasiLatihan({
+  children: (
+    <>
+      {[0, 1, 2].map((diagramIndex) => {
+        const offset = diagramIndex * 300;
+        const rightLabels = [["s", "q", "r", "s"], ["s", "q", "r", "p"], ["p", "q", "r", "s"]][diagramIndex];
+        const arrows = [
+          [[0, 2], [1, 0], [2, 1], [3, 3]],
+          [[0, 2], [1, 3], [2, 1], [3, 0]],
+          [[0, 0], [1, 2], [2, 3], [3, 1]],
+        ][diagramIndex];
+
+        return (
+          <g key={diagramIndex} transform={`translate(${offset}, 0)`}>
+            <text x="105" y="26" textAnchor="middle" fontSize="16" fontWeight="bold">A</text>
+            <text x="225" y="26" textAnchor="middle" fontSize="16" fontWeight="bold">B</text>
+            <ellipse cx="105" cy="126" rx="39" ry="92" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <ellipse cx="225" cy="126" rx="39" ry="92" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            {arrows.map(([from, to], index) => {
+              const fromY = 76 + from * 33;
+              const toY = 76 + to * 33;
+              return (
+                <path
+                  key={index}
+                  d={`M 119 ${fromY} Q 165 ${(fromY + toY) / 2} 207 ${toY}`}
+                  fill="none"
+                  stroke="#f59e0b"
+                  strokeWidth="1.7"
+                  markerEnd="url(#relasi-arrow)"
+                />
+              );
+            })}
+            {[5, 9, 13, 17].map((value, index) => (
+              <g key={value}>
+                <circle cx="92" cy={76 + index * 33} r="3" fill="currentColor" />
+                <text x="82" y={81 + index * 33} textAnchor="end" fontSize="13">{value}</text>
+              </g>
+            ))}
+            {rightLabels.map((label, index) => (
+              <g key={`${label}-${index}`}>
+                <circle cx="212" cy={76 + index * 33} r="3" fill="currentColor" />
+                <text x="222" y={81 + index * 33} fontSize="13">{label}</text>
+              </g>
+            ))}
+            <text x="165" y="242" textAnchor="middle" fontSize="12" fontWeight="bold">DIAGRAM {diagramIndex + 1}</text>
+          </g>
+        );
+      })}
+    </>
+  ),
+});
+
+const diagramLatihanNo3 = (
+  <svg
+    viewBox="0 0 520 230"
+    role="img"
+    aria-label="Diagram panah: domain A berisi 1, 4, 9, 10 dan kodomain B berisi 1, 2, 3, 4, 5"
+    className="mx-auto my-2 h-auto w-full max-w-lg rounded-lg border border-border bg-background p-3 text-foreground"
+  >
+    <defs>
+      <marker id="relasi-no3-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <text x="155" y="26" textAnchor="middle" fontSize="16" fontWeight="bold">A</text>
+    <text x="365" y="26" textAnchor="middle" fontSize="16" fontWeight="bold">B</text>
+    <ellipse cx="155" cy="125" rx="55" ry="91" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <ellipse cx="365" cy="125" rx="55" ry="105" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    {[
+      { from: "1", to: "1", fromY: 72, toY: 55 },
+      { from: "4", to: "2", fromY: 108, toY: 91 },
+      { from: "9", to: "3", fromY: 144, toY: 127 },
+      { from: "10", to: "4", fromY: 180, toY: 163 },
+    ].map(({ from, to, fromY, toY }) => (
+      <g key={from}>
+        <path d={`M 177 ${fromY} Q 260 ${(fromY + toY) / 2} 338 ${toY}`} fill="none" stroke="#f59e0b" strokeWidth="1.8" markerEnd="url(#relasi-no3-arrow)" />
+        <circle cx="140" cy={fromY} r="3" fill="currentColor" />
+        <text x="130" y={fromY + 5} textAnchor="end" fontSize="14">{from}</text>
+        <circle cx="350" cy={toY} r="3" fill="currentColor" />
+        <text x="360" y={toY + 5} fontSize="14">{to}</text>
+      </g>
+    ))}
+    <circle cx="350" cy="199" r="3" fill="currentColor" />
+    <text x="360" y="204" fontSize="14">5</text>
+    <text x="155" y="224" textAnchor="middle" fontSize="12">Domain</text>
+    <text x="365" y="224" textAnchor="middle" fontSize="12">Kodomain</text>
+  </svg>
+);
+
 const latihanDasar: LatihanSoal[] = [
-  { no: 1, soal: "Perhatikan gambar diagram panah berikut!\n[IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-S2PF3XPW4Tlf64K8MXASGvWJnIYBzG.png]\nRelasi dari A ke B adalah ....", options: ["A. akar dari", "B. faktor dari", "C. kuadrat dari", "D. kelipatan dari"], jawaban: "A", pembahasan: "Dari diagram panah, setiap anggota A dipasangkan dengan akar kuadratnya di B: $4\\to2$, $9\\to3$, $16\\to4$, dan $25\\to5$.\nJadi, relasi dari A ke B adalah 'akar dari'.\nJawaban A" },
+  { no: 1, soal: "Perhatikan gambar diagram panah berikut!\n[IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-S2PF3XPW4Tlf64K8MXASGvWJnIYBzG.png]\n[DIAGRAM]\nRelasi dari A ke B adalah ....", options: ["A. akar dari", "B. faktor dari", "C. kuadrat dari", "D. kelipatan dari"], jawaban: "A", pembahasan: "Dari diagram panah, setiap anggota A dipasangkan dengan akar kuadratnya di B: $4\\to2$, $9\\to3$, $16\\to4$, dan $25\\to5$.\nJadi, relasi dari A ke B adalah 'akar dari'.\nJawaban A" },
   { no: 2, soal: "Himpunan pasangan berurut berikut: (2, 4), (2, 10), (2, 12), (3, 12), (5, 10), merupakan relasi dari A = {1, 2, 3, 5} ke B = {4, 7, 10, 12}. Relasi yang menghasilkan himpunan pasangan berurut itu adalah ...", options: ["A. Faktor dari", "B. Kelipatan dari", "C. Kurang dari", "D. Hasil kali dari"], jawaban: "A", pembahasan: "Cek pasangan berurutan:\n(2, 4): 2 adalah faktor dari 4 ✓\n(2, 10): 2 adalah faktor dari 10 ✓\n(2, 12): 2 adalah faktor dari 12 ✓\n(3, 12): 3 adalah faktor dari 12 ✓\n(5, 10): 5 adalah faktor dari 10 ✓\nRelasi: 'faktor dari' → Jawaban A" },
-  { no: 3, soal: "Perhatikan gambar diagram panah berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_3_pttc7t.png]\nHimpunan daerah kawan (kodomain) dari diagram panah di atas adalah ...", options: ["A. {1, 2, 3, 4, 5}", "B. {1, 2, 3, 4}", "C. {1, 4, 9, 10}", "D. {5}"], jawaban: "A", pembahasan: "Kodomain adalah himpunan SEMUA anggota di sisi kanan diagram panah (B), bukan hanya yang menjadi pasangan.\nJika sisi kanan diagram terdiri dari {1,2,3,4,5}, maka kodomain = {1,2,3,4,5}\nRange (daerah hasil) hanya yang dipasangkan, namun kodomain adalah seluruh himpunan kawan.\nJawaban A" },
+  { no: 3, soal: "Perhatikan gambar diagram panah berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_3_pttc7t.png]\n[DIAGRAM]\nHimpunan daerah kawan (kodomain) dari diagram panah di atas adalah ...", options: ["A. {1, 2, 3, 4, 5}", "B. {1, 2, 3, 4}", "C. {1, 4, 9, 10}", "D. {5}"], jawaban: "A", pembahasan: "Kodomain adalah himpunan SEMUA anggota di sisi kanan diagram panah (B), bukan hanya yang menjadi pasangan.\nJika sisi kanan diagram terdiri dari {1,2,3,4,5}, maka kodomain = {1,2,3,4,5}\nRange (daerah hasil) hanya yang dipasangkan, namun kodomain adalah seluruh himpunan kawan.\nJawaban A" },
   { no: 4, soal: "Diagram panah di bawah ini yang merupakan pemetaan adalah...", options: ["A|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_4_PG_A_thckey.png", "B|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117345/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_4_PG_B_qqfu2l.png", "C|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_4_PG_C_ws13ue.png", "D|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_4_PG_D_orckfe.png"], jawaban: "D", pembahasan: "Syarat pemetaan (fungsi):\n1. Setiap anggota domain memiliki tepat SATU pasangan\n2. Tidak boleh ada anggota domain yang tidak memiliki pasangan\n3. Boleh ada anggota kodomain yang tidak memiliki pasangan\nPada diagram D, setiap anggota domain memiliki tepat satu panah. Diagram lain memiliki anggota domain yang tidak berpasangan atau memiliki lebih dari satu pasangan.\nJawaban D" },
   {
     no: 5,
@@ -269,10 +374,44 @@ const latihanDasar: LatihanSoal[] = [
   { no: 23, soal: "Sebuah kota terdapat dua perusahaan taksi A dan taksi B. Perusahaan tersebut menawarkan tarif taksi seperti tabel berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117343/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_23_fiorev.png]\nPenumpang taksi dapat memilih tarif taksi yang lebih murah. Amir ingin pergi ke Bioskop yang berjarak 8 km dari rumahnya. Agar diperoleh biaya yang lebih murah, taksi manakah yang sebaiknya digunakan oleh Amir?", options: ["A. Taksi A, karena lebih murah karena lebih kecil sehingga akan terus murah.", "B. Taksi B, karena tarif taksi lebih murah.", "C. Taksi A, karena lebih murah seribu rupiah.", "D. Taksi B, karena lebih murah seribu rupiah."], jawaban: "C", pembahasan: "Pola tarif Taksi A: awal 13.000, per 2 km tambah 2.000. Tarif per km = 1.000\nPola tarif Taksi B: awal 6.000, per 2 km tambah 4.000. Tarif per km = 2.000\nRumus Taksi A: T_A = 13.000 + 1.000×d\nRumus Taksi B: T_B = 6.000 + 2.000×d\nUntuk d = 8 km:\nT_A = 13.000 + 8.000 = 21.000\nT_B = 6.000 + 16.000 = 22.000\nTaksi A lebih murah Rp1.000 → Jawaban C" },
 ];
 
-const latihanRelasiBaru: LatihanSoal[] = [
-  { no: 4, type: "pgkbs", soal: "TKA Matematika 2026 — Perhatikan diagram panah berikut ini. [IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-S2PF3XPW4Tlf64K8MXASGvWJnIYBzG.png] Apakah diagram 1, diagram 2, dan diagram 3 merupakan fungsi? Tentukan Fungsi atau Bukan Fungsi pada setiap diagram berikut!", pernyataan: ["Diagram 1", "Diagram 2", "Diagram 3"], jawabanBS: ["B", "S", "B"], pembahasan: "Diagram 1 dan 3 merupakan fungsi; Diagram 2 bukan fungsi karena ada anggota domain yang memiliki lebih dari satu pasangan." },
-  { no: 30, type: "pgkbs", soal: "TKA Matematika 2026 — Pembayaran air PDAM setiap rumah berbeda-beda. Biaya pemasangan awal Rp800.000,00. Tarif pemakaian air dapat dilihat pada grafik berikut. [IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-I3UpIZAzw8YCphADlXgd9QGAs9n41v.png] Seseorang menghabiskan biaya Rp920.000,00 dalam 1 bulan.", pernyataan: ["Jumlah pemakaian air mencapai 60 m³.", "Orang tersebut akan menghabiskan biaya Rp120.000,00 jika tanpa pemasangan baru.", "Tarif dapat mencapai 1 juta jika pemakaian air kurang dari 90 m³ dengan pemasangan baru."], jawabanBS: ["S", "B", "S"], pembahasan: "Biaya pemakaian adalah Rp120.000,00, sehingga grafik menunjukkan pemakaian 60 m³." },
-  { no: 31, type: "pg", soal: "TKA Matematika 2026 — Naura menggunakan operator seluler Nusantara Mobile. [IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-LFUVcpJI2MJGVuQ01v5d2U358Ec2cU.png] Jika x adalah paket kuota dalam GB, rumus fungsi f(x) yang menyatakan harga paket kuota adalah ...", options: ["A. f(x) = 2.000x + 4.000", "B. f(x) = 2.000x + 1.000", "C. f(x) = 1.800x + 9.000", "D. f(x) = 1.800x + 5.000"], jawaban: "C", pembahasan: "Gunakan dua pasangan berurutan pada himpunan untuk menentukan gradien dan konstanta." },
+const soalTkaRelasiFungsi: LatihanSoal[] = [
+  {
+    no: 4,
+    type: "pgkbs",
+    sourceLabel: "TKA Matematika 2026",
+    soal: "Perhatikan diagram panah berikut ini.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793778725/fungsi_1_nwcxzs.png]\nApakah diagram 1, diagram 2, dan diagram 3 merupakan fungsi? Tentukan Fungsi atau Bukan Fungsi pada setiap diagram berikut!",
+    pernyataan: ["Diagram 1", "Diagram 2", "Diagram 3"],
+    jawabanBS: ["S", "S", "B"],
+    jawabanBSLabels: { benar: "Fungsi", salah: "Bukan Fungsi" },
+    pembahasan: "Diagram 1 bukan fungsi karena anggota domain 9 tidak memiliki pasangan. Diagram 2 bukan fungsi karena anggota domain 13 memiliki dua pasangan. Diagram 3 merupakan fungsi karena setiap anggota domain memiliki tepat satu pasangan.",
+  },
+  {
+    no: 5,
+    type: "pgkbs",
+    sourceLabel: "TKA Matematika 2026",
+    soal: "Pembayaran air PDAM setiap rumah berbeda-beda tergantung banyaknya pemakaian air. Biaya pemasangan awal adalah Rp800.000,00. Tarif pemakaian air berdasarkan banyak air yang digunakan dengan pemasangan awal dapat dilihat pada grafik berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793778724/fungsi_2_u2jofe.png]\n\nSeseorang menghabiskan biaya Rp920.000,00 dalam 1 bulan pemakaian dengan pemasangan baru. Tentukan Benar atau Salah pada setiap pernyataan berikut!",
+    pernyataan: [
+      "Jumlah pemakaian air mencapai 60 m³.",
+      "Orang tersebut akan menghabiskan biaya sebesar Rp120.000,00 jika tanpa pemasangan baru.",
+      "Tarif dapat mencapai 1 juta jika pemakaian air kurang dari 90 m³ dengan pemasangan baru.",
+    ],
+    jawabanBS: ["B", "B", "S"],
+    pembahasan: "Biaya pemakaian air tanpa pemasangan baru adalah Rp920.000,00 − Rp800.000,00 = Rp120.000,00. Berdasarkan grafik, biaya pemakaian Rp120.000,00 bersesuaian dengan 60 m³, sehingga pernyataan (1) dan (2) benar. Tarif pada pemakaian di bawah 90 m³ belum mencapai Rp1.000.000,00 dengan biaya pemasangan awal, sehingga pernyataan (3) salah.",
+  },
+  {
+    no: 6,
+    type: "pg",
+    sourceLabel: "TKA Matematika 2026",
+    soal: "Naura menggunakan operator seluler \"Nusantara Mobile\". Naura menuliskan pilihan paket kuota dan harganya dalam bentuk himpunan pasangan berurutan berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793778725/fungsi_3_kpvuu5.png]\nJika $x$ adalah paket kuota dalam GB, rumus fungsi $f(x)$ yang menyatakan harga paket kuota adalah …",
+    options: [
+      "A. $f(x)=2.000x+4.000$",
+      "B. $f(x)=2.000x+1.000$",
+      "C. $f(x)=1.800x+9.000$",
+      "D. $f(x)=1.800x+5.000$",
+    ],
+    jawaban: "D",
+    pembahasan: "Dari pasangan $(5,14.000)$ dan $(10,23.000)$, gradiennya adalah $\\frac{23.000-14.000}{10-5}=1.800$. Substitusi pasangan $(5,14.000)$ ke $f(x)=1.800x+b$ menghasilkan $b=5.000$. Jadi, $f(x)=1.800x+5.000$, yaitu pilihan D.",
+  },
 ];
 
 const StudioMusikGraph = () => (
@@ -401,7 +540,14 @@ const RelasiFungsiPage = () => (
     contohSoal={contohSoal}
     showImageSourceLinks={false}
     imageScale="default"
-    latihanDasar={[...latihanDasar, ...latihanTambahan, ...latihanRelasiBaru, ...latihanPindahanPLSV].map((soal, index) => ({ ...soal, no: index + 1 }))}
+    soalSvgMap={{ "1": diagramLatihanNo1, "3": diagramLatihanNo3 }}
+    latihanDasar={[
+      ...latihanDasar.slice(0, 3),
+      ...soalTkaRelasiFungsi,
+      ...latihanDasar.slice(3),
+      ...latihanTambahan,
+      ...latihanPindahanPLSV,
+    ].map((soal, index) => ({ ...soal, no: index + 1 }))}
   />
 );
 
