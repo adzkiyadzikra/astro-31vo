@@ -219,6 +219,7 @@ const SmaSudutAntaraDuaVektorPage = lazy(() => import("./pages/ruang-untuk-guru/
 const SmaProyeksiVektorPage = lazy(() => import("./pages/ruang-untuk-guru/SmaProyeksiVektorPage"));
 const NumatikGamePage = lazy(() => import("./pages/ruang-untuk-guru/NumatikGamePage"));
 const NumatikStrikeGamePage = lazy(() => import("./pages/math-game-arena/umum/GamePage"));
+const NumatikWorldPage = lazy(() => import("./pages/math-game-arena/umum/NumatikWorldPage"));
 const KeyakinanKelasPage = lazy(() => import("./pages/ruang-untuk-guru/KeyakinanKelasPage"));
 const PenilaianPembelajaranPage = lazy(() => import("./pages/ruang-untuk-guru/PenilaianPembelajaranPage"));
 const CapaianPembelajaranPage = lazy(() => import("./pages/ruang-untuk-guru/CapaianPembelajaranPage"));
@@ -1382,6 +1383,7 @@ const AppInner = () => {
             <Route path="/ruang-untuk-guru/exam-browser" element={<ExamBrowserComingSoonPage />} />
             <Route path="/ruang-untuk-guru/numatik-game" element={<NumatikGamePage />} />
             <Route path="/math-game-arena/umum/numatik-strike" element={<NumatikStrikeGamePage />} />
+            <Route path="/math-game-arena/umum/numatik-world" element={<NumatikWorldPage />} />
             <Route path="/ruang-untuk-guru/keyakinan-kelas" element={<KeyakinanKelasPage />} />
             <Route path="/ruang-untuk-guru/penilaian-pembelajaran" element={<PenilaianPembelajaranPage />} />
             <Route path="/ruang-untuk-guru/capaian-pembelajaran" element={<CapaianPembelajaranPage />} />

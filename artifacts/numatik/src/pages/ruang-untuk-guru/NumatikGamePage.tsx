@@ -13,6 +13,7 @@ import {
   Target,
   Disc,
   GraduationCap,
+  Sparkles,
 } from "lucide-react";
 import Starfield from "@/components/Starfield";
 import PageNavigation from "@/components/PageNavigation";
@@ -79,6 +80,13 @@ const games = [
         <Crosshair className="absolute left-1/2 top-1/2 w-3.5 h-3.5 -translate-x-1/2 -translate-y-1/2 text-white" />
       </span>
     ),
+  },
+  {
+    label: "NUMATIK WORLD",
+    emoji: "🌈",
+    path: "/math-game-arena/umum/numatik-world",
+    desc: "Jelajahi pulau 3D, lompat, kumpulkan kristal, dan jawab soal matematika!",
+    icon: <Sparkles className="w-7 h-7 text-amber-300 shrink-0 group-hover:scale-110 transition-transform" />,
   },
   {
     label: "Galaksi Tempur",

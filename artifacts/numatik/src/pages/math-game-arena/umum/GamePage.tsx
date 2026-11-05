@@ -140,7 +140,7 @@ const ENEMY_SCREAM_VARIANTS: EnemyScreamVariant[] = [
   { pitch: 226, duration: 0.47, formants: [650, 1080, 2380] },
   { pitch: 202, duration: 0.39, formants: [720, 1370, 2820] },
 ];
-const SKY_HORIZON_COLOR = "#e9f3f7";
+const SKY_HORIZON_COLOR = "#66594d";
 const QUALITY_FOG: Record<QualitySetting, { near: number; far: number }> = {
   low: { near: 30, far: 124 },
   medium: { near: 36, far: 145 },
@@ -454,14 +454,14 @@ const GamePage = () => {
     player.add(camera);
 
     const hemisphereLight = new THREE.HemisphereLight(
-      0xc4e5ff,
-      0x8a704f,
+      0x84909a,
+      0x40372c,
       BRIGHTNESS_PRESETS[brightnessRef.current].hemisphereIntensity,
     );
     hemisphereLightRef.current = hemisphereLight;
     scene.add(hemisphereLight);
-    scene.add(new THREE.AmbientLight(0xffe8ca, 0.42));
-    const keyLight = new THREE.DirectionalLight(0xffe5b5, 3);
+    scene.add(new THREE.AmbientLight(0x777b79, 0.2));
+    const keyLight = new THREE.DirectionalLight(0xffbd78, 2.9);
     keyLight.position.set(-32, 42, -24);
     keyLight.castShadow = false;
     keyLight.shadow.camera.left = -70;
@@ -474,7 +474,7 @@ const GamePage = () => {
     keyLight.shadow.normalBias = 0.025;
     sunlightRef.current = keyLight;
     scene.add(keyLight);
-    const fillLight = new THREE.DirectionalLight(0xb8d6f4, 0.65);
+    const fillLight = new THREE.DirectionalLight(0x71899a, 0.7);
     fillLight.position.set(28, 18, 34);
     scene.add(fillLight);
 
@@ -504,7 +504,7 @@ const GamePage = () => {
     materials.push(contactShadowMaterial);
     const contactShadowGeometry = new THREE.PlaneGeometry(1, 1);
     const material = (color: string, roughness = 0.72, metalness = 0.15) => {
-      const mat = new THREE.MeshStandardMaterial({ color, roughness, metalness, flatShading: true });
+      const mat = new THREE.MeshStandardMaterial({ color, roughness, metalness });
       materials.push(mat);
       return mat;
     };
@@ -587,7 +587,7 @@ const GamePage = () => {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(2, 2);
+      texture.repeat.set(kind === "earth" ? 2 : 1, kind === "earth" ? 2 : 1);
       textures.push(texture);
       return texture;
     };
@@ -643,6 +643,9 @@ const GamePage = () => {
     vehicleMat.map = createSurfaceTexture("#909384", "metal");
     puddleMat.map = createSurfaceTexture("#758285", "earth");
     groundDetailMat.map = floorMat.map;
+    floorMat.map.repeat.set(12, 12);
+    roadMat.map.repeat.set(12, 12);
+    openZoneMat.map.repeat.set(8, 8);
     [
       floorMat, roadMat, openZoneMat, perimeterMat, bunkerMat, bunkerRoofMat,
       lowWallMat, crateMat, crateMetalMat, towerMat, steelDetailMat, sandbagMat, vehicleMat,
@@ -689,7 +692,6 @@ const GamePage = () => {
         map: texture,
         roughness: 0.91,
         metalness: 0.02,
-        flatShading: true,
       });
       materials.push(mat);
       return mat;
@@ -750,9 +752,17 @@ const GamePage = () => {
     };
     const rifleView = new THREE.Group();
     camera.add(rifleView);
+    const sightLensMat = material("#56645f", 0.24, 0.48);
     addViewPart(rifleView, new THREE.BoxGeometry(0.18, 0.15, 0.37), playerGunMat, 0, 0, 0.16);
     addViewPart(rifleView, new THREE.BoxGeometry(0.17, 0.15, 0.43), playerGunMetalMat, 0, 0.01, -0.24);
     addViewPart(rifleView, new THREE.BoxGeometry(0.15, 0.13, 0.36), playerGunMat, 0, 0.015, -0.59);
+    addViewPart(rifleView, new THREE.BoxGeometry(0.12, 0.035, 0.47), playerGunMat, 0, 0.095, -0.38);
+    const rifleOptic = addViewPart(rifleView, new THREE.CylinderGeometry(0.052, 0.052, 0.2, 14), playerGunMat, 0, 0.19, -0.4);
+    rifleOptic.rotation.x = -Math.PI / 2;
+    addViewPart(rifleView, new THREE.TorusGeometry(0.052, 0.012, 6, 16), playerGunMetalMat, 0, 0.19, -0.505);
+    addViewPart(rifleView, new THREE.CircleGeometry(0.041, 16), sightLensMat, 0, 0.19, -0.514);
+    addViewPart(rifleView, new THREE.BoxGeometry(0.075, 0.2, 0.08), playerGunMat, 0, -0.08, -0.5);
+    addViewPart(rifleView, new THREE.BoxGeometry(0.13, 0.15, 0.12), playerGunMat, 0.16, -0.01, -0.59);
     const rifleBarrel = addViewPart(rifleView, new THREE.CylinderGeometry(0.023, 0.03, 0.42, 8), playerGunMetalMat, 0, 0.02, -0.87);
     rifleBarrel.rotation.x = -Math.PI / 2;
     addViewPart(rifleView, new THREE.BoxGeometry(0.12, 0.25, 0.13), playerGunMat, 0.035, -0.17, -0.13);
@@ -802,8 +812,8 @@ const GamePage = () => {
     const skyPositions = skyGeometry.getAttribute("position");
     const skyColors = new Float32Array(skyPositions.count * 3);
     const horizonColor = new THREE.Color(SKY_HORIZON_COLOR);
-    const middayColor = new THREE.Color("#a8d9f3");
-    const zenithColor = new THREE.Color("#4f91cb");
+    const middayColor = new THREE.Color("#ad8060");
+    const zenithColor = new THREE.Color("#394955");
     const skyColor = new THREE.Color();
     for (let i = 0; i < skyPositions.count; i += 1) {
       const height = THREE.MathUtils.clamp(skyPositions.getY(i) / 145, 0, 1);
@@ -822,10 +832,36 @@ const GamePage = () => {
     const sky = new THREE.Mesh(skyGeometry, skyMaterial);
     sky.renderOrder = -1;
     scene.add(sky);
-    const sunMaterial = new THREE.MeshBasicMaterial({ color: "#fff0b8", fog: false, toneMapped: false });
+    const sunGlowCanvas = document.createElement("canvas");
+    sunGlowCanvas.width = 128;
+    sunGlowCanvas.height = 128;
+    const sunGlowContext = sunGlowCanvas.getContext("2d");
+    if (!sunGlowContext) throw new Error("Canvas 2D tidak tersedia untuk cahaya matahari.");
+    const sunGlow = sunGlowContext.createRadialGradient(64, 64, 5, 64, 64, 64);
+    sunGlow.addColorStop(0, "rgba(255,198,128,0.82)");
+    sunGlow.addColorStop(0.18, "rgba(239,145,79,0.43)");
+    sunGlow.addColorStop(1, "rgba(224,169,112,0)");
+    sunGlowContext.fillStyle = sunGlow;
+    sunGlowContext.fillRect(0, 0, 128, 128);
+    const sunGlowTexture = new THREE.CanvasTexture(sunGlowCanvas);
+    sunGlowTexture.colorSpace = THREE.SRGBColorSpace;
+    textures.push(sunGlowTexture);
+    const sunGlowMaterial = new THREE.SpriteMaterial({
+      map: sunGlowTexture,
+      transparent: true,
+      depthWrite: false,
+      fog: false,
+      toneMapped: false,
+    });
+    materials.push(sunGlowMaterial);
+    const sunGlowSprite = new THREE.Sprite(sunGlowMaterial);
+    sunGlowSprite.position.set(-25, 18, -58);
+    sunGlowSprite.scale.set(34, 34, 1);
+    scene.add(sunGlowSprite);
+    const sunMaterial = new THREE.MeshBasicMaterial({ color: "#f5c27e", fog: false, toneMapped: false });
     materials.push(sunMaterial);
-    const sun = new THREE.Mesh(new THREE.SphereGeometry(5.8, 20, 12), sunMaterial);
-    sun.position.set(-16, 35, -52);
+    const sun = new THREE.Mesh(new THREE.SphereGeometry(5.2, 28, 18), sunMaterial);
+    sun.position.set(-25, 18, -58);
     scene.add(sun);
     const cloudCanvas = document.createElement("canvas");
     cloudCanvas.width = 256;
@@ -833,9 +869,9 @@ const GamePage = () => {
     const cloudContext = cloudCanvas.getContext("2d");
     if (!cloudContext) throw new Error("Canvas 2D tidak tersedia untuk awan arena.");
     const cloudGradient = cloudContext.createRadialGradient(128, 70, 8, 128, 70, 112);
-    cloudGradient.addColorStop(0, "rgba(255,255,255,0.7)");
-    cloudGradient.addColorStop(0.48, "rgba(255,255,255,0.38)");
-    cloudGradient.addColorStop(1, "rgba(255,255,255,0)");
+    cloudGradient.addColorStop(0, "rgba(103,108,105,0.72)");
+    cloudGradient.addColorStop(0.48, "rgba(112,114,106,0.42)");
+    cloudGradient.addColorStop(1, "rgba(90,94,91,0)");
     cloudContext.fillStyle = cloudGradient;
     cloudContext.beginPath();
     cloudContext.ellipse(128, 70, 112, 42, 0, 0, Math.PI * 2);
@@ -848,7 +884,7 @@ const GamePage = () => {
     const cloudMaterial = new THREE.SpriteMaterial({
       map: cloudTexture,
       transparent: true,
-      opacity: 0.52,
+      opacity: 0.46,
       depthWrite: false,
       fog: false,
       toneMapped: false,
@@ -863,6 +899,55 @@ const GamePage = () => {
       cloud.position.set(x, y, z);
       cloud.scale.set(width, height, 1);
       scene.add(cloud);
+    });
+    const smokeCanvas = document.createElement("canvas");
+    smokeCanvas.width = 128;
+    smokeCanvas.height = 256;
+    const smokeContext = smokeCanvas.getContext("2d");
+    if (!smokeContext) throw new Error("Canvas 2D tidak tersedia untuk asap arena.");
+    const smokeGradient = smokeContext.createLinearGradient(64, 0, 64, 256);
+    smokeGradient.addColorStop(0, "rgba(91,94,89,0)");
+    smokeGradient.addColorStop(0.28, "rgba(91,94,89,0.2)");
+    smokeGradient.addColorStop(0.72, "rgba(91,94,89,0.34)");
+    smokeGradient.addColorStop(1, "rgba(91,94,89,0)");
+    smokeContext.fillStyle = smokeGradient;
+    [
+      [55, 55, 48, 48],
+      [73, 92, 48, 56],
+      [47, 133, 39, 48],
+      [78, 177, 42, 59],
+      [57, 214, 34, 37],
+    ].forEach(([x, y, width, height]) => {
+      smokeContext.beginPath();
+      smokeContext.ellipse(x!, y!, width!, height!, 0, 0, Math.PI * 2);
+      smokeContext.fill();
+    });
+    const smokeTexture = new THREE.CanvasTexture(smokeCanvas);
+    smokeTexture.colorSpace = THREE.SRGBColorSpace;
+    textures.push(smokeTexture);
+    const smokeMaterial = new THREE.SpriteMaterial({
+      map: smokeTexture,
+      color: "#777a74",
+      transparent: true,
+      opacity: 0.52,
+      depthWrite: false,
+      fog: true,
+      toneMapped: false,
+    });
+    materials.push(smokeMaterial);
+    [
+      { x: -47, z: -50, y: 9, width: 24, height: 20 },
+      { x: 8, z: -57, y: 11, width: 27, height: 24 },
+      { x: 53, z: -35, y: 10, width: 23, height: 22 },
+      { x: 48, z: 47, y: 8, width: 21, height: 19 },
+    ].forEach(({ x, z, y, width, height }, index) => {
+      const smokeMapMaterial = smokeMaterial.clone();
+      smokeMapMaterial.rotation = index % 2 ? 0.08 : -0.06;
+      materials.push(smokeMapMaterial);
+      const smoke = new THREE.Sprite(smokeMapMaterial);
+      smoke.position.set(x, y, z);
+      smoke.scale.set(width, height, 1);
+      scene.add(smoke);
     });
 
     type CollisionBox = { x: number; z: number; width: number; depth: number };
@@ -1161,6 +1246,30 @@ const GamePage = () => {
       scenerySeed = (scenerySeed * 1103515245 + 12345) >>> 0;
       return scenerySeed / 4294967296;
     };
+    const dustCount = 120;
+    const dustPositions = new Float32Array(dustCount * 3);
+    const dustDrift = new Float32Array(dustCount);
+    for (let index = 0; index < dustCount; index += 1) {
+      dustPositions[index * 3] = ((index * 37.31) % 110) - 55;
+      dustPositions[index * 3 + 1] = 1.4 + ((index * 13.77) % 10);
+      dustPositions[index * 3 + 2] = ((index * 51.19) % 110) - 55;
+      dustDrift[index] = 0.12 + (index % 7) * 0.035;
+    }
+    const dustGeometry = new THREE.BufferGeometry();
+    dustGeometry.setAttribute("position", new THREE.BufferAttribute(dustPositions, 3));
+    const dustMaterial = new THREE.PointsMaterial({
+      color: "#d8bd8b",
+      size: 0.14,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.38,
+      depthWrite: false,
+      fog: true,
+    });
+    materials.push(dustMaterial);
+    const dustField = new THREE.Points(dustGeometry, dustMaterial);
+    dustField.frustumCulled = false;
+    scene.add(dustField);
     const reservedDecorations: Array<{ x: number; z: number; width: number; depth: number }> = [];
     const towerRampClearanceHalfWidth = towerStairWidth / 2 + 3;
     const distanceToTowerRamp = (x: number, z: number) => {
@@ -1585,15 +1694,15 @@ const GamePage = () => {
       rotation: [number, number, number];
     };
     const soldierBoxGeometry = soldierGeometry(new THREE.BoxGeometry(1, 1, 1));
-    const soldierSphereGeometry = soldierGeometry(new THREE.SphereGeometry(0.5, 10, 8));
+    const soldierSphereGeometry = soldierGeometry(new THREE.SphereGeometry(0.5, 18, 12));
     const soldierMaskGeometry = soldierGeometry(
-      new THREE.SphereGeometry(0.5, 10, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
+      new THREE.SphereGeometry(0.5, 18, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
     );
     const soldierHelmetShellGeometry = soldierGeometry(
-      new THREE.SphereGeometry(0.5, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+      new THREE.SphereGeometry(0.5, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2),
     );
-    const soldierCylinderGeometry = soldierGeometry(new THREE.CylinderGeometry(0.5, 0.5, 1, 8));
-    const soldierTorusGeometry = soldierGeometry(new THREE.TorusGeometry(0.5, 0.08, 4, 14));
+    const soldierCylinderGeometry = soldierGeometry(new THREE.CylinderGeometry(0.5, 0.5, 1, 14));
+    const soldierTorusGeometry = soldierGeometry(new THREE.TorusGeometry(0.5, 0.08, 6, 20));
     const soldierMagazineCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0, -0.08, 0),
       new THREE.Vector3(0, -0.18, 0.02),
@@ -1601,7 +1710,7 @@ const GamePage = () => {
       new THREE.Vector3(0.065, -0.36, 0.14),
     ]);
     const soldierMagazineGeometry = soldierGeometry(new THREE.TubeGeometry(soldierMagazineCurve, 9, 0.055, 6, false));
-    const muzzleFlashGeometry = soldierGeometry(new THREE.SphereGeometry(0.5, 8, 6));
+    const muzzleFlashGeometry = soldierGeometry(new THREE.SphereGeometry(0.5, 12, 8));
     const soldierPart = (
       geometry: THREE.BufferGeometry,
       materialIndex: number,
@@ -1645,8 +1754,8 @@ const GamePage = () => {
       return soldierGeometry(merged);
     };
     const bodyGeometry = mergeSoldierParts([
-      soldierPart(soldierBoxGeometry, 0, [0, 1.29, 0], [0.58, 0.76, 0.36]),
-      soldierPart(soldierBoxGeometry, 1, [0, 1.31, 0.04], [0.66, 0.52, 0.42]),
+      soldierPart(soldierSphereGeometry, 0, [0, 1.29, 0], [0.58, 0.76, 0.36]),
+      soldierPart(soldierSphereGeometry, 1, [0, 1.31, 0.04], [0.66, 0.52, 0.42]),
       soldierPart(soldierSphereGeometry, 0, [-0.31, 1.54, 0], [0.26, 0.2, 0.3]),
       soldierPart(soldierSphereGeometry, 0, [0.31, 1.54, 0], [0.26, 0.2, 0.3]),
       soldierPart(soldierBoxGeometry, 2, [0, 1.01, 0.02], [0.64, 0.12, 0.42]),
@@ -1661,6 +1770,10 @@ const GamePage = () => {
       soldierPart(soldierBoxGeometry, 2, [-0.2, 1.5, -0.12], [0.075, 0.45, 0.045], [0, 0, -0.2]),
       soldierPart(soldierBoxGeometry, 2, [0.2, 1.5, -0.12], [0.075, 0.45, 0.045], [0, 0, 0.2]),
       soldierPart(soldierBoxGeometry, 2, [-0.25, 1.49, 0.218], [0.13, 0.1, 0.025]),
+      soldierPart(soldierBoxGeometry, 1, [-0.24, 1.35, 0.27], [0.13, 0.18, 0.11]),
+      soldierPart(soldierBoxGeometry, 1, [0.24, 1.35, 0.27], [0.13, 0.18, 0.11]),
+      soldierPart(soldierBoxGeometry, 2, [0.28, 1.43, -0.34], [0.16, 0.3, 0.12]),
+      soldierPart(soldierCylinderGeometry, 1, [0.28, 1.43, -0.42], [0.09, 0.28, 0.09], [0, 0, Math.PI / 2]),
     ]);
     const headGeometry = mergeSoldierParts([
       soldierPart(soldierCylinderGeometry, 0, [0, 1.72, 0], [0.14, 0.2, 0.14]),
@@ -1676,6 +1789,9 @@ const GamePage = () => {
       soldierPart(soldierBoxGeometry, 2, [0.225, 1.98, 0.16], [0.11, 0.055, 0.04]),
       soldierPart(soldierBoxGeometry, 2, [-0.13, 1.82, 0.13], [0.07, 0.17, 0.035], [0, 0, -0.25]),
       soldierPart(soldierBoxGeometry, 2, [0.13, 1.82, 0.13], [0.07, 0.17, 0.035], [0, 0, 0.25]),
+      soldierPart(soldierSphereGeometry, 2, [-0.105, 1.99, 0.245], [0.09, 0.055, 0.035]),
+      soldierPart(soldierSphereGeometry, 2, [0.105, 1.99, 0.245], [0.09, 0.055, 0.035]),
+      soldierPart(soldierBoxGeometry, 1, [0, 2.31, -0.02], [0.12, 0.12, 0.12]),
     ]);
     const makeArmGeometry = (side: -1 | 1) => {
       const inward = side < 0 ? 1 : -1;
@@ -1693,6 +1809,7 @@ const GamePage = () => {
       soldierPart(soldierBoxGeometry, 0, [0, -0.2, 0], [0.24, 0.43, 0.26]),
       soldierPart(soldierBoxGeometry, 0, [0, -0.56, 0.015], [0.21, 0.36, 0.23]),
       soldierPart(soldierBoxGeometry, 1, [0, -0.44, 0.14], [0.23, 0.16, 0.08]),
+      soldierPart(soldierSphereGeometry, 1, [0, -0.43, 0.19], [0.16, 0.12, 0.07]),
       soldierPart(soldierBoxGeometry, 1, [0, -0.75, 0.015], [0.24, 0.13, 0.26]),
       soldierPart(soldierBoxGeometry, 1, [0, -0.85, 0.1], [0.29, 0.15, 0.42]),
     ]);
@@ -1711,6 +1828,9 @@ const GamePage = () => {
       soldierPart(soldierBoxGeometry, 1, [0, 0.09, -0.23], [0.045, 0.1, 0.07]),
       soldierPart(soldierTorusGeometry, 0, [0.08, -0.12, -0.07], [0.18, 0.16, 0.18]),
       soldierPart(soldierBoxGeometry, 1, [0.13, 0.015, -0.08], [0.05, 0.07, 0.08]),
+      soldierPart(soldierCylinderGeometry, 1, [0, 0.19, -0.04], [0.06, 0.2, 0.06]),
+      soldierPart(soldierTorusGeometry, 1, [0, 0.19, -0.04], [0.075, 0.075, 0.075], [Math.PI / 2, 0, 0]),
+      soldierPart(soldierBoxGeometry, 0, [-0.11, -0.13, 0.32], [0.08, 0.16, 0.18]),
     ]);
 
     const spawnsAreValid = soldierSpawns.length === STARTING_ENEMIES
@@ -3509,6 +3629,18 @@ const GamePage = () => {
       const dt = Math.min((now - previousTime) / 1000, 0.05);
       previousTime = now;
       lastRenderAt = now;
+      const dustAttribute = dustGeometry.getAttribute("position") as THREE.BufferAttribute;
+      for (let index = 0; index < dustCount; index += 1) {
+        const x = dustAttribute.getX(index) + dustDrift[index]! * dt;
+        const y = dustAttribute.getY(index) + dustDrift[index]! * 0.22 * dt;
+        dustAttribute.setXYZ(
+          index,
+          x > 55 ? -55 : x,
+          y > 11.5 ? 1.4 : y,
+          dustAttribute.getZ(index),
+        );
+      }
+      dustAttribute.needsUpdate = true;
       if (activeDecorationQuality !== qualityRef.current) {
         activeDecorationQuality = qualityRef.current;
         tieredInstanceMeshes.forEach(({ mesh, counts }) => {
@@ -4192,13 +4324,13 @@ const GamePage = () => {
         .strike-top{position:absolute;left:clamp(16px,4vw,48px);right:clamp(16px,4vw,48px);top:clamp(16px,3vh,30px);display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
         .strike-brand{display:flex;align-items:center;gap:12px}
         .strike-logo{display:block;flex:0 0 auto;width:76px;height:22px;overflow:hidden;opacity:.84;filter:drop-shadow(0 0 5px rgba(67,220,232,.12))}
-        .strike-title{font:700 13px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.16em;color:#e9fbff}
-        .strike-subtitle{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#76a1b2;margin-top:4px}
+        .strike-title{font:700 13px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.16em;color:#f1eee1}
+        .strike-subtitle{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#b1aa91;margin-top:4px}
          .strike-header-actions{display:flex;align-items:center;gap:7px}
-         .strike-status{font:500 10px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.1em;color:#8ab6c3;border:1px solid rgba(144,203,218,.2);background:rgba(5,16,28,.55);padding:9px 12px;white-space:nowrap}
+         .strike-status{font:500 10px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.1em;color:#c0c3a9;border:1px solid rgba(192,195,169,.25);background:rgba(12,16,15,.72);padding:9px 12px;white-space:nowrap}
          .strike-status span{color:rgba(144,203,218,.4);padding:0 4px}
-        .strike-status i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#45dfb1;margin-right:8px;box-shadow:0 0 8px #45dfb1}
-         .strike-header-button{pointer-events:auto;min-height:36px;padding:7px 10px;border:1px solid rgba(105,210,220,.45);background:rgba(5,20,31,.82);color:#dffbff;font:600 8px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.08em;cursor:pointer}
+        .strike-status i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#b4ca77;margin-right:8px;box-shadow:0 0 6px rgba(180,202,119,.7)}
+         .strike-header-button{pointer-events:auto;min-height:36px;padding:7px 10px;border:1px solid rgba(178,171,139,.42);background:rgba(12,16,15,.9);color:#e5e0cc;font:600 8px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.08em;cursor:pointer}
          .strike-header-button:disabled{opacity:.46;cursor:not-allowed}
         .strike-quality-control{position:absolute;z-index:4;right:clamp(16px,4vw,48px);top:68px;pointer-events:auto}
         .strike-settings-toggle,.strike-settings-panel select{border:1px solid rgba(202,211,211,.32);background:rgba(19,31,38,.88);color:#eef7f7;font:600 8px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.08em;cursor:pointer}
@@ -4226,9 +4358,9 @@ const GamePage = () => {
         .strike-brightness-options button{min-height:34px;padding:5px 4px;border:1px solid rgba(202,211,211,.24);background:rgba(9,18,23,.74);color:#c7d6d8;font:500 8px var(--font-body,'Exo 2'),sans-serif;cursor:pointer}
         .strike-brightness-options button[aria-pressed="true"]{border-color:#f3d391;background:rgba(120,99,57,.35);color:#fff1c9}
         .strike-settings-toggle:focus-visible,.strike-settings-panel select:focus-visible,.strike-brightness-options button:focus-visible{outline:2px solid #8fe3ec;outline-offset:2px}
-        .strike-atmosphere-vignette{position:absolute;z-index:0;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 50%,rgba(42,46,48,.16) 100%)}
+        .strike-atmosphere-vignette{position:absolute;z-index:0;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(23,25,25,.16),rgba(67,49,32,.08) 56%,rgba(22,20,17,.24)),radial-gradient(ellipse at 50% 44%,transparent 34%,rgba(24,25,22,.2) 72%,rgba(17,18,16,.58) 100%);mix-blend-mode:multiply}
          .strike-reticle{position:absolute;left:50%;top:50%;width:36px;height:36px;transform:translate(-50%,-50%);opacity:.78;transition:opacity .15s,filter .15s}
-         .strike-reticle span{position:absolute;display:block;background:#d6fbff;border-radius:2px;box-shadow:0 0 4px rgba(95,230,238,.35)}
+         .strike-reticle span{position:absolute;display:block;background:#e8e0c3;border-radius:1px;box-shadow:0 0 3px rgba(18,20,15,.8)}
          .strike-reticle .reticle-top,.strike-reticle .reticle-bottom{left:17px;width:2px;height:7px}
          .strike-reticle .reticle-top{top:0;transform:translateY(calc(-1 * var(--crosshair-gap)))}
          .strike-reticle .reticle-bottom{bottom:0;transform:translateY(var(--crosshair-gap))}
@@ -4236,25 +4368,25 @@ const GamePage = () => {
          .strike-reticle .reticle-left{left:0;transform:translateX(calc(-1 * var(--crosshair-gap)))}
          .strike-reticle .reticle-right{right:0;transform:translateX(var(--crosshair-gap))}
          .strike-reticle .reticle-center{left:16px;top:16px;width:4px;height:4px;border-radius:50%}
-         .strike-reticle.is-aiming{opacity:1;filter:drop-shadow(0 0 5px #43dce8)}
+         .strike-reticle.is-aiming{opacity:1;filter:drop-shadow(0 0 4px rgba(232,224,195,.72))}
          .strike-damage-vignette{position:absolute;z-index:1;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(174,24,35,.5) 100%);animation:strike-damage-flash .58s ease-out both}
          @keyframes strike-damage-flash{0%{opacity:.9}100%{opacity:0}}
          .strike-direction{position:absolute;left:50%;top:50%;width:34px;height:38px;display:grid;place-items:center;color:#ff655d;filter:drop-shadow(0 0 8px rgba(255,72,64,.8));pointer-events:none;animation:strike-direction-pulse 1.05s ease-out both}
          .strike-direction svg{width:28px;height:32px;fill:rgba(255,74,69,.55);stroke:#ffd1ca;stroke-width:1.4}
          @keyframes strike-direction-pulse{0%{opacity:0;scale:.8}16%{opacity:1;scale:1.1}70%{opacity:.9;scale:1}100%{opacity:0;scale:.88}}
-         .strike-radar{position:absolute;right:clamp(16px,4vw,48px);top:112px;width:112px;height:112px;border:1px solid rgba(79,224,224,.36);border-radius:50%;background:rgba(4,18,27,.7);box-shadow:inset 0 0 18px rgba(44,202,210,.08),0 8px 24px rgba(0,0,0,.18);overflow:hidden}
+         .strike-radar{position:absolute;right:clamp(16px,4vw,48px);top:112px;width:112px;height:112px;border:1px solid rgba(173,180,146,.42);border-radius:50%;background:rgba(13,17,14,.82);box-shadow:inset 0 0 18px rgba(173,180,146,.08),0 8px 24px rgba(0,0,0,.3);overflow:hidden}
          .strike-radar svg{width:100%;height:100%}
-         .strike-radar-ring{fill:none;stroke:rgba(99,211,216,.2);stroke-width:.7}
-         .strike-radar-line{stroke:rgba(99,211,216,.16);stroke-width:.7}
-         .strike-radar-sweep{fill:none;stroke:rgba(73,230,208,.16);stroke-width:14;stroke-dasharray:22 100;transform-origin:50px 50px;animation:str-radar-sweep 5s linear infinite}
+         .strike-radar-ring{fill:none;stroke:rgba(173,180,146,.22);stroke-width:.7}
+         .strike-radar-line{stroke:rgba(173,180,146,.16);stroke-width:.7}
+         .strike-radar-sweep{fill:none;stroke:rgba(173,190,115,.17);stroke-width:14;stroke-dasharray:22 100;transform-origin:50px 50px;animation:str-radar-sweep 5s linear infinite}
          @keyframes str-radar-sweep{to{transform:rotate(360deg)}}
-         .strike-radar-player{fill:#66f5e6;stroke:#d3fffa;stroke-width:1}
+         .strike-radar-player{fill:#d7dfab;stroke:#f3f5dd;stroke-width:1}
          .strike-radar-enemy{fill:#ff514c;stroke:#ffc3a5;stroke-width:.8;filter:drop-shadow(0 0 2px #ff4d48)}
-         .strike-radar-label{position:absolute;left:50%;top:-1px;transform:translateX(-50%);font:600 7px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.08em;color:#7dbbc0;text-shadow:0 1px 4px #06131a}
-          .strike-health-panel,.strike-ammo-panel{position:absolute;bottom:82px;min-height:60px;padding:9px 11px;border:1px solid rgba(144,203,218,.22);background:rgba(5,16,28,.76);box-shadow:0 8px 24px rgba(0,0,0,.16);pointer-events:none}
+         .strike-radar-label{position:absolute;left:50%;top:-1px;transform:translateX(-50%);font:600 7px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.08em;color:#c4c6a9;text-shadow:0 1px 4px #06131a}
+          .strike-health-panel,.strike-ammo-panel{position:absolute;bottom:82px;min-height:60px;padding:9px 11px;border:1px solid rgba(180,176,145,.28);background:rgba(12,16,15,.82);box-shadow:0 8px 24px rgba(0,0,0,.3);pointer-events:none}
          .strike-health-panel{left:clamp(16px,4vw,48px);width:210px}
          .strike-ammo-panel{right:clamp(16px,4vw,48px);width:220px;text-align:right}
-         .strike-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font:600 8px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.12em;color:#8eb4c0}
+         .strike-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font:600 8px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.12em;color:#c0b997}
          .strike-health-value{font:700 14px var(--font-display,'Orbitron'),sans-serif;color:#dffbf4}
          .strike-health-track,.strike-reload-track{height:5px;margin-top:7px;background:rgba(210,235,236,.13);overflow:hidden}
          .strike-health-fill{height:100%;background:linear-gradient(90deg,#28b997,#8df1bd);transition:width .18s}
@@ -4265,7 +4397,7 @@ const GamePage = () => {
          .strike-ammo-count{margin-top:4px;font:700 18px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.05em;color:#eefbfc}
          .strike-ammo-count small{font-size:11px;color:#7294a0}
          .strike-reload-track{height:2px;margin-top:5px}
-         .strike-reload-fill{width:0;height:100%;background:#52e4d3}
+         .strike-reload-fill{width:0;height:100%;background:#c2b774}
          .strike-reload-track.is-reloading .strike-reload-fill{animation:str-reload-progress 1.45s linear both}
          @keyframes str-reload-progress{from{width:0}to{width:100%}}
          .strike-feed{position:absolute;left:clamp(16px,4vw,48px);top:82px;width:min(250px,42vw);display:grid;gap:5px;pointer-events:none}
