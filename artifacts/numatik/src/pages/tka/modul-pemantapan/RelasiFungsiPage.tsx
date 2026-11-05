@@ -197,74 +197,6 @@ Ketiga pernyataan benar.`,
   },
 ];
 
-const diagramRelasiLatihan = ({ children }: { children: React.ReactNode }) => (
-  <svg
-    viewBox="0 0 900 250"
-    role="img"
-    aria-label="Diagram relasi antara himpunan A dan himpunan B"
-    className="mx-auto my-2 h-auto w-full max-w-3xl rounded-lg border border-border bg-background p-2 text-foreground"
-  >
-    <defs>
-      <marker id="relasi-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
-      </marker>
-    </defs>
-    {children}
-  </svg>
-);
-
-const diagramLatihanNo1 = diagramRelasiLatihan({
-  children: (
-    <>
-      {[0, 1, 2].map((diagramIndex) => {
-        const offset = diagramIndex * 300;
-        const rightLabels = [["s", "q", "r", "s"], ["s", "q", "r", "p"], ["p", "q", "r", "s"]][diagramIndex];
-        const arrows = [
-          [[0, 2], [1, 0], [2, 1], [3, 3]],
-          [[0, 2], [1, 3], [2, 1], [3, 0]],
-          [[0, 0], [1, 2], [2, 3], [3, 1]],
-        ][diagramIndex];
-
-        return (
-          <g key={diagramIndex} transform={`translate(${offset}, 0)`}>
-            <text x="105" y="26" textAnchor="middle" fontSize="16" fontWeight="bold">A</text>
-            <text x="225" y="26" textAnchor="middle" fontSize="16" fontWeight="bold">B</text>
-            <ellipse cx="105" cy="126" rx="39" ry="92" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            <ellipse cx="225" cy="126" rx="39" ry="92" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            {arrows.map(([from, to], index) => {
-              const fromY = 76 + from * 33;
-              const toY = 76 + to * 33;
-              return (
-                <path
-                  key={index}
-                  d={`M 119 ${fromY} Q 165 ${(fromY + toY) / 2} 207 ${toY}`}
-                  fill="none"
-                  stroke="#f59e0b"
-                  strokeWidth="1.7"
-                  markerEnd="url(#relasi-arrow)"
-                />
-              );
-            })}
-            {[5, 9, 13, 17].map((value, index) => (
-              <g key={value}>
-                <circle cx="92" cy={76 + index * 33} r="3" fill="currentColor" />
-                <text x="82" y={81 + index * 33} textAnchor="end" fontSize="13">{value}</text>
-              </g>
-            ))}
-            {rightLabels.map((label, index) => (
-              <g key={`${label}-${index}`}>
-                <circle cx="212" cy={76 + index * 33} r="3" fill="currentColor" />
-                <text x="222" y={81 + index * 33} fontSize="13">{label}</text>
-              </g>
-            ))}
-            <text x="165" y="242" textAnchor="middle" fontSize="12" fontWeight="bold">DIAGRAM {diagramIndex + 1}</text>
-          </g>
-        );
-      })}
-    </>
-  ),
-});
-
 const diagramLatihanNo3 = (
   <svg
     viewBox="0 0 520 230"
@@ -303,9 +235,8 @@ const diagramLatihanNo3 = (
 );
 
 const latihanDasar: LatihanSoal[] = [
-  { no: 1, soal: "Perhatikan gambar diagram panah berikut!\n[IMAGE:https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-S2PF3XPW4Tlf64K8MXASGvWJnIYBzG.png]\n[DIAGRAM]\nRelasi dari A ke B adalah ....", options: ["A. akar dari", "B. faktor dari", "C. kuadrat dari", "D. kelipatan dari"], jawaban: "A", pembahasan: "Dari diagram panah, setiap anggota A dipasangkan dengan akar kuadratnya di B: $4\\to2$, $9\\to3$, $16\\to4$, dan $25\\to5$.\nJadi, relasi dari A ke B adalah 'akar dari'.\nJawaban A" },
   { no: 2, soal: "Himpunan pasangan berurut berikut: (2, 4), (2, 10), (2, 12), (3, 12), (5, 10), merupakan relasi dari A = {1, 2, 3, 5} ke B = {4, 7, 10, 12}. Relasi yang menghasilkan himpunan pasangan berurut itu adalah ...", options: ["A. Faktor dari", "B. Kelipatan dari", "C. Kurang dari", "D. Hasil kali dari"], jawaban: "A", pembahasan: "Cek pasangan berurutan:\n(2, 4): 2 adalah faktor dari 4 ✓\n(2, 10): 2 adalah faktor dari 10 ✓\n(2, 12): 2 adalah faktor dari 12 ✓\n(3, 12): 3 adalah faktor dari 12 ✓\n(5, 10): 5 adalah faktor dari 10 ✓\nRelasi: 'faktor dari' → Jawaban A" },
-  { no: 3, soal: "Perhatikan gambar diagram panah berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_3_pttc7t.png]\n[DIAGRAM]\nHimpunan daerah kawan (kodomain) dari diagram panah di atas adalah ...", options: ["A. {1, 2, 3, 4, 5}", "B. {1, 2, 3, 4}", "C. {1, 4, 9, 10}", "D. {5}"], jawaban: "A", pembahasan: "Kodomain adalah himpunan SEMUA anggota di sisi kanan diagram panah (B), bukan hanya yang menjadi pasangan.\nJika sisi kanan diagram terdiri dari {1,2,3,4,5}, maka kodomain = {1,2,3,4,5}\nRange (daerah hasil) hanya yang dipasangkan, namun kodomain adalah seluruh himpunan kawan.\nJawaban A" },
+  { no: 3, soal: "Perhatikan gambar diagram panah berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793867379/Gemini_Generated_Image_rfo6dqrfo6dqrfo6_pqq5a6.jpg]\n[DIAGRAM]\nHimpunan daerah kawan (kodomain) dari diagram panah di atas adalah ...", options: ["A. {1, 2, 3, 4, 5}", "B. {1, 2, 3, 4}", "C. {1, 4, 9, 10}", "D. {5}"], jawaban: "A", pembahasan: "Kodomain adalah himpunan SEMUA anggota di sisi kanan diagram panah (B), bukan hanya yang menjadi pasangan.\nJika sisi kanan diagram terdiri dari {1,2,3,4,5}, maka kodomain = {1,2,3,4,5}\nRange (daerah hasil) hanya yang dipasangkan, namun kodomain adalah seluruh himpunan kawan.\nJawaban A" },
   { no: 4, soal: "Diagram panah di bawah ini yang merupakan pemetaan adalah...", options: ["A|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_4_PG_A_thckey.png", "B|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117345/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_4_PG_B_qqfu2l.png", "C|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_4_PG_C_ws13ue.png", "D|https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_800,dpr_auto/v1783117344/RELASI_DAN_FUNGSI_LATIHAN_DASAR_NO_4_PG_D_orckfe.png"], jawaban: "D", pembahasan: "Syarat pemetaan (fungsi):\n1. Setiap anggota domain memiliki tepat SATU pasangan\n2. Tidak boleh ada anggota domain yang tidak memiliki pasangan\n3. Boleh ada anggota kodomain yang tidak memiliki pasangan\nPada diagram D, setiap anggota domain memiliki tepat satu panah. Diagram lain memiliki anggota domain yang tidak berpasangan atau memiliki lebih dari satu pasangan.\nJawaban D" },
   {
     no: 5,
@@ -379,7 +310,7 @@ const soalTkaRelasiFungsi: LatihanSoal[] = [
     no: 4,
     type: "pgkbs",
     sourceLabel: "TKA Matematika 2026",
-    soal: "Perhatikan diagram panah berikut ini.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793778725/fungsi_1_nwcxzs.png]\nApakah diagram 1, diagram 2, dan diagram 3 merupakan fungsi? Tentukan Fungsi atau Bukan Fungsi pada setiap diagram berikut!",
+    soal: "Perhatikan diagram panah berikut ini.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793855054/Gemini_Generated_Image_289yd1289yd1289y_1_vxd5n0.jpg]\nApakah diagram 1, diagram 2, dan diagram 3 merupakan fungsi? Tentukan Fungsi atau Bukan Fungsi pada setiap diagram berikut!",
     pernyataan: ["Diagram 1", "Diagram 2", "Diagram 3"],
     jawabanBS: ["S", "S", "B"],
     jawabanBSLabels: { benar: "Fungsi", salah: "Bukan Fungsi" },
@@ -540,14 +471,14 @@ const RelasiFungsiPage = () => (
     contohSoal={contohSoal}
     showImageSourceLinks={false}
     imageScale="default"
-    soalSvgMap={{ "1": diagramLatihanNo1, "3": diagramLatihanNo3 }}
+    soalSvgMap={{ "3": diagramLatihanNo3 }}
     latihanDasar={[
-      ...latihanDasar.slice(0, 3),
+      ...latihanDasar.slice(0, 2),
       ...soalTkaRelasiFungsi,
-      ...latihanDasar.slice(3),
+      ...latihanDasar.slice(2),
       ...latihanTambahan,
       ...latihanPindahanPLSV,
-    ].map((soal, index) => ({ ...soal, no: index + 1 }))}
+    ].map((soal, index) => ({ ...soal, no: index + 2 }))}
   />
 );
 

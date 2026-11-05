@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Preview Numatik",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"--filter",
+				"@workspace/numatik",
+				"run",
+				"dev",
+				"--",
+				"--port",
+				"5173"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
