@@ -310,7 +310,7 @@ const soalTkaRelasiFungsi: LatihanSoal[] = [
     no: 4,
     type: "pgkbs",
     sourceLabel: "TKA Matematika 2026",
-    soal: "Perhatikan diagram panah berikut ini.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793855054/Gemini_Generated_Image_289yd1289yd1289y_1_vxd5n0.jpg]\nApakah diagram 1, diagram 2, dan diagram 3 merupakan fungsi? Tentukan Fungsi atau Bukan Fungsi pada setiap diagram berikut!",
+    soal: "Perhatikan diagram panah berikut ini.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793912713/fungsi_1_tx4ka5.png]\nApakah diagram 1, diagram 2, dan diagram 3 merupakan fungsi? Tentukan Fungsi atau Bukan Fungsi pada setiap diagram berikut!",
     pernyataan: ["Diagram 1", "Diagram 2", "Diagram 3"],
     jawabanBS: ["S", "S", "B"],
     jawabanBSLabels: { benar: "Fungsi", salah: "Bukan Fungsi" },
@@ -320,7 +320,7 @@ const soalTkaRelasiFungsi: LatihanSoal[] = [
     no: 5,
     type: "pgkbs",
     sourceLabel: "TKA Matematika 2026",
-    soal: "Pembayaran air PDAM setiap rumah berbeda-beda tergantung banyaknya pemakaian air. Biaya pemasangan awal adalah Rp800.000,00. Tarif pemakaian air berdasarkan banyak air yang digunakan dengan pemasangan awal dapat dilihat pada grafik berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793778724/fungsi_2_u2jofe.png]\n\nSeseorang menghabiskan biaya Rp920.000,00 dalam 1 bulan pemakaian dengan pemasangan baru. Tentukan Benar atau Salah pada setiap pernyataan berikut!",
+    soal: "Pembayaran air PDAM setiap rumah berbeda-beda tergantung banyaknya pemakaian air. Biaya pemasangan awal adalah Rp800.000,00. Tarif pemakaian air berdasarkan banyak air yang digunakan dengan pemasangan awal dapat dilihat pada grafik berikut.\n[IMAGE:https://res.cloudinary.com/s4ge6not/image/upload/f_auto,q_auto,w_auto,dpr_auto,c_limit/v1793855054/Gemini_Generated_Image_289yd1289yd1289y_1_vxd5n0.jpg]\n\nSeseorang menghabiskan biaya Rp920.000,00 dalam 1 bulan pemakaian dengan pemasangan baru. Tentukan Benar atau Salah pada setiap pernyataan berikut!",
     pernyataan: [
       "Jumlah pemakaian air mencapai 60 m³.",
       "Orang tersebut akan menghabiskan biaya sebesar Rp120.000,00 jika tanpa pemasangan baru.",
@@ -478,7 +478,7 @@ const RelasiFungsiPage = () => (
       ...latihanDasar.slice(2),
       ...latihanTambahan,
       ...latihanPindahanPLSV,
-    ].map((soal, index) => ({ ...soal, no: index + 2 }))}
+    ].map((soal, index) => ({ ...soal, no: index + 1 }))}
   />
 );
 
