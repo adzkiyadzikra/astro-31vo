@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
-import Starfield from "@/components/Starfield";
+import Starfihapus eld from "@/components/Starfield";
 import PageNavigation from "@/components/PageNavigation";
 import { playPopSound } from "@/hooks/useAudio";
 import { InlineMath } from "react-katex";
+import { PengertianPLSVCards } from "./PengertianPLSVPage";
 import "katex/dist/katex.min.css";
 
 /* ── Reusable atoms ───────────────────────────────────── */
@@ -29,10 +30,9 @@ const SoalSatu = () => {
   const rows = [
     { l: "a", terbuka: <span>□ + 5 = 13</span> },
     { l: "b", terbuka: <span>▽ ÷ 6 = 4</span> },
-    { l: "c", terbuka: <span><M math="m + m = 3m" /></span> },
-    { l: "d", terbuka: <span><M math="y" /> {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q1.rowDSuffix')}</span> },
-    { l: "e", terbuka: <span><M math="(-x)^3 = -27" /></span> },
-    { l: "f", terbuka: <span><M math="p \times p < 15" /></span> },
+    { l: "c", terbuka: <span><M math="y" /> {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q1.rowDSuffix')}</span> },
+    { l: "d", terbuka: <span><M math="(-x)^3 = -27" /></span> },
+    { l: "e", terbuka: <span><M math="p \times p < 15" /></span> },
   ];
 
   return (
@@ -81,12 +81,8 @@ const SoalDua = () => {
     { l: "a", text: <span><M math="n" /> {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemA')}</span> },
     { l: "b", text: <span>{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemB')}</span> },
     { l: "c", text: <span>{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemC')}</span> },
-    { l: "d", text: <span>{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemDPre')}<M math="x" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemDMid')}<M math="7x" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemDEnd')}</span> },
-    { l: "e", text: <span>{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemEPre')}<M math="s" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemEMid')}<M math="s^2" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemEEnd')}</span> },
-    { l: "f", text: <span><M math="6 \times 7 = 45" /></span> },
-    { l: "g", text: <span><M math="p" /> {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemG')}</span> },
-    { l: "h", text: <span>{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemHPre')}<M math="y = -3" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemHMid')}<M math="(-y)^2 = -9" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemHEnd')}</span> },
-    { l: "i", text: <span>{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemIPre')}<M math="(-4)^n = 16" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemIMid')}<M math="n" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemISuffix')}</span> },
+    { l: "d", text: <span><M math="6 \times 7 = 45" /></span> },
+    { l: "e", text: <span><M math="p" /> {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q2.itemG')}</span> },
   ];
   return (
     <div className="space-y-3">
@@ -121,7 +117,6 @@ const SoalTiga = () => {
     { l: "c", text: <span><M math="z" /> {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q3.itemCSuffix')}</span> },
     { l: "d", text: <span><M math="p" /> {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q3.itemDSuffix')}</span> },
     { l: "e", text: <span><M math="q \times 5 = 40" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q3.itemEMid')}<M math="q" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q3.itemESuffix')}</span> },
-    { l: "f", text: <span><M math="n" /> {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q3.itemFSuffix')}</span> },
   ];
   return (
     <div className="space-y-3">
@@ -132,58 +127,6 @@ const SoalTiga = () => {
         {items.map(({ l, text }) => (
           <div key={l} className="flex items-start gap-2.5 bg-yellow-500/5 border border-yellow-500/10 rounded-lg px-3 py-2.5">
             <SubLabel letter={l} color="bg-yellow-500/20 text-yellow-300 border border-yellow-400/30" />
-            <p className="font-body text-sm text-white/80 leading-relaxed pt-0.5">{text}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-/* ── Soal 4 ── Penyelesaian dari {3, 4, 9, 15, 20} ───── */
-const SoalEmpat = () => {
-  const { t } = useTranslation();
-  const items = [
-    { l: "a", text: <span><M math="(x + 3)" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q4.itemASuffix')}</span> },
-    { l: "b", text: <span><M math="(y - 1)" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q4.itemBSuffix')}</span> },
-    { l: "c", text: <span><M math="\dfrac{z}{3}" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q4.itemCSuffix')}</span> },
-    { l: "d", text: <span><M math="2 \times n" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q4.itemDSuffix')}</span> },
-  ];
-  return (
-    <div className="space-y-3">
-      <p className="font-body text-sm text-white/90 leading-relaxed">
-        {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q4.instrPre')}<span className="text-lime-300 font-bold font-body">3, 4, 9, 15, 20</span>{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q4.instrSuffix')}
-      </p>
-      <div className="space-y-2 pl-1">
-        {items.map(({ l, text }) => (
-          <div key={l} className="flex items-start gap-2.5 bg-lime-500/5 border border-lime-500/10 rounded-lg px-3 py-2.5">
-            <SubLabel letter={l} color="bg-lime-500/20 text-lime-300 border border-lime-400/30" />
-            <p className="font-body text-sm text-white/80 leading-relaxed pt-0.5">{text}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-/* ── Soal 5 ── Penyelesaian dari {1, 2, …, 12} ────────── */
-const SoalLima = () => {
-  const { t } = useTranslation();
-  const items = [
-    { l: "a", text: <span><M math="4 \times x < 25" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q5.itemAMid')}<M math="x" />{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q5.itemASuffix')}</span> },
-    { l: "b", text: <span><M math="(y \times y) < 50" />.</span> },
-    { l: "c", text: <span><M math="5 \times m = 3m + 10" />.</span> },
-    { l: "d", text: <span><M math="3 \times n = n + 16" />.</span> },
-  ];
-  return (
-    <div className="space-y-3">
-      <p className="font-body text-sm text-white/90 leading-relaxed">
-        {t('practice.plsvPtlsv.kalimatTerbukaTertutup.q5.instrPre')}<span className="text-green-300 font-bold font-body">1, 2, 3, …, 12</span>{t('practice.plsvPtlsv.kalimatTerbukaTertutup.q5.instrSuffix')}
-      </p>
-      <div className="space-y-2 pl-1">
-        {items.map(({ l, text }) => (
-          <div key={l} className="flex items-start gap-2.5 bg-green-500/5 border border-green-500/10 rounded-lg px-3 py-2.5">
-            <SubLabel letter={l} color="bg-green-500/20 text-green-300 border border-green-400/30" />
             <p className="font-body text-sm text-white/80 leading-relaxed pt-0.5">{text}</p>
           </div>
         ))}
@@ -220,20 +163,6 @@ const KalimatTerbukaTertutupPage = () => {
       bar: "from-yellow-400 to-lime-500", numBg: "bg-yellow-500/30 text-yellow-200",
       custom: <SoalTiga />,
     },
-    {
-      num: 4, tag: t('practice.plsvPtlsv.kalimatTerbukaTertutup.tags.q4'),
-      tagColor: "bg-lime-500/20 text-lime-300 border-lime-400/40",
-      gradient: "from-lime-900/40 to-green-900/25", border: "border-lime-500/25",
-      bar: "from-lime-400 to-green-500", numBg: "bg-lime-500/30 text-lime-200",
-      custom: <SoalEmpat />,
-    },
-    {
-      num: 5, tag: t('practice.plsvPtlsv.kalimatTerbukaTertutup.tags.q5'),
-      tagColor: "bg-green-500/20 text-green-300 border-green-400/40",
-      gradient: "from-green-900/40 to-teal-900/25", border: "border-green-500/25",
-      bar: "from-green-400 to-teal-500", numBg: "bg-green-500/30 text-green-200",
-      custom: <SoalLima />,
-    },
   ];
 
   return (
@@ -254,7 +183,6 @@ const KalimatTerbukaTertutupPage = () => {
           >
             {t('practice.plsvPtlsv.kalimatTerbukaTertutup.title')}
           </h1>
-          <p className="text-white/40 text-xs text-center font-body mt-1">{t('practice.plsvPtlsv.kalimatTerbukaTertutup.subtitle')}</p>
           <p className="text-white/40 text-xs text-center font-body mt-1">Kelas 7 · PLSV & PtLSV · {t('practice.breadcrumb')}</p>
           <div className="flex items-center gap-2 mt-3">
             <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/50 font-body">
@@ -290,6 +218,16 @@ const KalimatTerbukaTertutupPage = () => {
             </div>
           ))}
         </div>
+
+        <section className="mt-10">
+          <h2 className="font-display text-lg md:text-xl font-bold text-white text-center mb-2">
+            {t('practice.plsvPtlsv.pengertianPLSV.title1')} {t('practice.plsvPtlsv.pengertianPLSV.title2')}
+          </h2>
+          <p className="text-white/40 text-xs text-center font-body mb-5">
+            {t('practice.plsvPtlsv.pengertianPLSV.badge')}
+          </p>
+          <PengertianPLSVCards numberOffset={cards.length} />
+        </section>
 
         {/* ── Back button ── */}
         <div className="mt-10 text-center">

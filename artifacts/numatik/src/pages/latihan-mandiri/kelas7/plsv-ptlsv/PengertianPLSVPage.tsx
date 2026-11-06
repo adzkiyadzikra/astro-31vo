@@ -67,7 +67,6 @@ const SoalDua = () => {
     { l: "c", expr: "5(y - 3) = 5y - 15" },
     { l: "d", expr: "\\dfrac{3x}{9} - \\dfrac{x}{3} = 0" },
     { l: "e", expr: "4(a + 1) = 18 - a" },
-    { l: "f", expr: "n(n + 2) = 15 + n" },
   ];
   return (
     <div className="space-y-3">
@@ -93,51 +92,8 @@ const SoalDua = () => {
   );
 };
 
-/* ── Soal 3 ── Ekuivalen atau Tidak? ──────────────────── */
-const SoalTiga = () => {
+export const PengertianPLSVCards = ({ numberOffset = 0 }: { numberOffset?: number }) => {
   const { t } = useTranslation();
-  const items = [
-    { l: "a", left: "n + 7 = 12",            right: "n = 12 - 7" },
-    { l: "b", left: "m - 4 = 6",             right: "3m - 4 = 9" },
-    { l: "c", left: "x - 8 = 3",             right: "15 + x = 26" },
-    { l: "d", left: "y \\times 5 = 30",      right: "6y \\div 2 = 25" },
-    { l: "e", left: "3p - 5 = 7",            right: "3p - 5 + 2 = 9" },
-    { l: "f", left: "\\dfrac{2q}{3} = 8",   right: "\\dfrac{2q}{3} \\times 2 = 16" },
-  ];
-  return (
-    <div className="space-y-3">
-      <p className="font-body text-sm text-white/90 leading-relaxed">
-        <Trans
-          i18nKey="practice.plsvPtlsv.pengertianPLSV.q3.instruction"
-          components={{
-            a: <span className="text-green-300 font-semibold" />,
-            b: <span className="text-rose-300 font-semibold" />,
-          }}
-        />
-      </p>
-      <div className="space-y-2.5 pl-1">
-        {items.map(({ l, left, right }) => (
-          <div key={l} className="flex items-center gap-2.5 bg-green-500/5 border border-green-500/10 rounded-lg px-3 py-2.5">
-            <SubLabel letter={l} color="bg-green-500/20 text-green-300 border border-green-400/30" />
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 flex-1">
-              <M math={left} />
-              <span className="text-white/40 text-xs font-body">{t('practice.plsvPtlsv.pengertianPLSV.q3.connector')}</span>
-              <M math={right} />
-            </div>
-            <span className="ml-auto text-white/20 text-[11px] font-body shrink-0">= …</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-/* ── Page ─────────────────────────────────────────────── */
-const PengertianPLSVPage = () => {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-
-  /* ── Card config (inside component so t() is available) ── */
   const cards = [
     {
       num: 1, tag: t('practice.plsvPtlsv.pengertianPLSV.tags.q1'),
@@ -153,14 +109,41 @@ const PengertianPLSVPage = () => {
       bar: "from-yellow-400 to-lime-500", numBg: "bg-yellow-500/30 text-yellow-200",
       custom: <SoalDua />,
     },
-    {
-      num: 3, tag: t('practice.plsvPtlsv.pengertianPLSV.tags.q3'),
-      tagColor: "bg-green-500/20 text-green-300 border-green-400/40",
-      gradient: "from-green-900/40 to-teal-900/25", border: "border-green-500/25",
-      bar: "from-green-400 to-teal-500", numBg: "bg-green-500/30 text-green-200",
-      custom: <SoalTiga />,
-    },
   ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      {cards.map((c, i) => (
+        <div
+          key={c.num}
+          className="relative rounded-2xl overflow-hidden animate-slide-up"
+          style={{ animationDelay: `${i * 0.05}s` }}
+        >
+          <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient} backdrop-blur`} />
+          <div className={`absolute inset-0 border ${c.border} rounded-2xl`} />
+          <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${c.bar} rounded-l-2xl`} />
+
+          <div className="relative px-5 py-4 pl-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold font-body shrink-0 ${c.numBg}`}>
+                {c.num + numberOffset}
+              </span>
+              <Tag label={c.tag} color={c.tagColor} />
+            </div>
+            <div className="pl-1">
+              {c.custom}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* ── Page ─────────────────────────────────────────────── */
+const PengertianPLSVPage = () => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="relative min-h-screen flex flex-col items-center gradient-space overflow-hidden plsv-ptlsv-practice-route">
@@ -196,31 +179,7 @@ const PengertianPLSVPage = () => {
         </div>
 
         {/* ── Cards ── */}
-        <div className="flex flex-col gap-4">
-          {cards.map((c, i) => (
-            <div
-              key={c.num}
-              className="relative rounded-2xl overflow-hidden animate-slide-up"
-              style={{ animationDelay: `${i * 0.05}s` }}
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient} backdrop-blur`} />
-              <div className={`absolute inset-0 border ${c.border} rounded-2xl`} />
-              <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${c.bar} rounded-l-2xl`} />
-
-              <div className="relative px-5 py-4 pl-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold font-body shrink-0 ${c.numBg}`}>
-                    {c.num}
-                  </span>
-                  <Tag label={c.tag} color={c.tagColor} />
-                </div>
-                <div className="pl-1">
-                  {c.custom}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <PengertianPLSVCards />
 
         {/* ── Back button ── */}
         <div className="mt-10 text-center">

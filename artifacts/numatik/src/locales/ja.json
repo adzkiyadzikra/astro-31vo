@@ -1272,9 +1272,9 @@
     },
     "plsvPtlsv": {
       "kalimatTerbukaTertutup": {
-        "title": "開いた文と閉じた文",
+        "title": "開文・閉文（命題）と一元一次方程式の定義",
         "subtitle": "（命題）",
-        "badge": "記述問題 5問",
+        "badge": "記述問題 8問",
         "tags": {
           "q1": "文の表",
           "q2": "文の分類",
