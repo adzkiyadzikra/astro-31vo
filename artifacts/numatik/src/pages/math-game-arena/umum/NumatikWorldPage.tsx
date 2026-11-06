@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { ArrowLeft, Gem, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { useNavigate } from "react-router-dom";
@@ -66,12 +66,14 @@ type WorldQuestion = {
   options: number[];
 };
 
-type Crystal = {
+type Treasure = {
   group: THREE.Group;
   home: THREE.Vector3;
   phase: number;
   collected: boolean;
 };
+
+const TREASURE_COUNT = 5;
 
 // Skala tunggal untuk mengatur ukuran figur tanpa menggeser telapak dari pangkal rig.
 const AVATAR_SCALE = 1;
@@ -128,11 +130,14 @@ const NumatikWorldPage = () => {
   const navigate = useNavigate();
   const hostRef = useRef<HTMLDivElement>(null);
   const keysRef = useRef(new Set<string>());
-  const pendingCrystalRef = useRef<Crystal | null>(null);
+  const pendingTreasureRef = useRef<Treasure | null>(null);
+  const gameCompleteRef = useRef(false);
   const jumpRequestedRef = useRef(false);
   const [selectedIsland, setSelectedIsland] = useState<IslandId>("rainbow");
   const [gameStarted, setGameStarted] = useState(false);
   const [score, setScore] = useState(0);
+  const [treasuresFound, setTreasuresFound] = useState(0);
+  const [gameComplete, setGameComplete] = useState(false);
   const [question, setQuestion] = useState<WorldQuestion | null>(null);
   const [answerFeedback, setAnswerFeedback] = useState<string | null>(null);
   const [mobile, setMobile] = useState(false);
@@ -191,9 +196,8 @@ const NumatikWorldPage = () => {
       glove: makeMaterial("#242629", 0.6),
       pendant: makeMaterial("#d8b15e", 0.6),
       eye: makeMaterial("#293e61"),
-      crystal: makeMaterial("#74eff1", 0.2),
-      crystalPink: makeMaterial("#ff92c4", 0.2),
-      crystalGold: makeMaterial("#ffe36b", 0.2),
+      pink: makeMaterial("#ff92c4", 0.2),
+      chestWood: makeMaterial("#9f5834"),
       trunk: makeMaterial("#a86f4d"),
       leaf: makeMaterial(island.palette.leaf),
       leafLight: makeMaterial(island.palette.leafLight),
@@ -326,7 +330,7 @@ const NumatikWorldPage = () => {
         lollipop.position.set(side * 32, 1.68, -37 + index * 13);
         scene.add(lollipop);
         addBox(lollipop, mats.wood, [0, 6, 0], [0.7, 12, 0.7]);
-        addMesh(new THREE.SphereGeometry(4.5, 20, 16), index ? mats.blue : mats.crystalPink, lollipop, [0, 13, 0]);
+        addMesh(new THREE.SphereGeometry(4.5, 20, 16), index ? mats.blue : mats.pink, lollipop, [0, 13, 0]);
         addMesh(new THREE.TorusGeometry(2.8, 0.35, 8, 32), mats.white, lollipop, [0, 13, 3.4]);
       });
     } else if (island.id === "cloud") {
@@ -595,20 +599,19 @@ const NumatikWorldPage = () => {
     });
     let dustCursor = 0;
 
-    const crystalMats = [mats.crystal, mats.crystalPink, mats.crystalGold];
-    const crystalPositions: Array<[number, number]> = [
-      [-18, 28], [20, 30], [-34, 3], [36, -7], [-19, -31], [17, -48], [2, 45], [45, 8],
+    const treasurePositions: Array<[number, number]> = [
+      [2, 45], [-18, 28], [20, 30], [-34, 3], [36, -7],
     ];
-    const crystals: Crystal[] = crystalPositions.map(([x, z], index) => {
+    const treasures: Treasure[] = treasurePositions.map(([x, z], index) => {
       const group = new THREE.Group();
-      group.position.set(x, 2.3, z);
+      group.position.set(x, 0.08, z);
       scene.add(group);
-      const crystalGeometry = new THREE.IcosahedronGeometry(0.68, 0);
-      const crystal = addMesh(crystalGeometry, crystalMats[index % crystalMats.length]!, group, [0, 0, 0]);
-      crystal.rotation.y = Math.PI / 4;
-      const halo = addMesh(new THREE.TorusGeometry(0.95, 0.055, 8, 24), mats.yellow, group, [0, 0, 0]);
+      addBox(group, mats.chestWood, [0, 0.38, 0], [1.1, 0.55, 0.76]);
+      addBox(group, mats.chestWood, [0, 0.7, 0], [1.16, 0.18, 0.82]);
+      addBox(group, mats.yellow, [0, 0.39, 0.39], [1.12, 0.1, 0.06]);
+      addBox(group, mats.yellow, [0, 0.7, 0.42], [0.2, 0.24, 0.08]);
+      const halo = addMesh(new THREE.TorusGeometry(0.95, 0.055, 8, 24), mats.yellow, group, [0, 0.08, 0]);
       halo.rotation.x = Math.PI / 2;
-      addMesh(new THREE.SphereGeometry(0.12, 10, 8), mats.white, group, [0, 0.82, 0]);
       return { group, home: group.position.clone(), phase: index * 0.8, collected: false };
     });
 
@@ -713,7 +716,7 @@ const NumatikWorldPage = () => {
       const wasGrounded = grounded;
       let movementSpeed = 0;
 
-      if (!pendingCrystalRef.current) {
+      if (!pendingTreasureRef.current && !gameCompleteRef.current) {
         const direction = new THREE.Vector3(
           Math.sin(cameraYaw) * forward + Math.cos(cameraYaw) * sideways,
           0,
@@ -745,20 +748,20 @@ const NumatikWorldPage = () => {
           playerPosition.z *= maxIslandRadius / distanceFromCenter;
         }
         avatar.position.copy(playerPosition);
-        const nearbyCrystal = crystals.find((crystal) => (
-          !crystal.collected && crystal.group.position.distanceTo(playerPosition) < 2.15
+        const nearbyTreasure = treasures.find((treasure) => (
+          !treasure.collected && treasure.group.position.distanceTo(playerPosition) < 2.15
         ));
-        if (nearbyCrystal) {
-          nearbyCrystal.collected = true;
-          nearbyCrystal.group.visible = false;
-          pendingCrystalRef.current = nearbyCrystal;
+        if (nearbyTreasure) {
+          nearbyTreasure.collected = true;
+          nearbyTreasure.group.visible = false;
+          pendingTreasureRef.current = nearbyTreasure;
           setQuestion(makeQuestion());
           setAnswerFeedback(null);
         }
       }
 
       if (!wasGrounded && grounded) animationState.landingBend = 1;
-      const isRunning = movementSpeed > 0 && grounded && !pendingCrystalRef.current;
+      const isRunning = movementSpeed > 0 && grounded && !pendingTreasureRef.current;
       const runIntensity = movementSpeed >= 10 ? 1 : movementSpeed > 0 ? 0.86 : 0;
       const phaseBeforeStep = animationState.phase;
       if (isRunning) {
@@ -867,10 +870,10 @@ const NumatikWorldPage = () => {
         particle.mesh.scale.setScalar(particle.baseScale * (1 - progress));
       });
 
-      crystals.forEach((crystal) => {
-        if (crystal.collected) return;
-        crystal.group.rotation.y = now * 0.0007 + crystal.phase;
-        crystal.group.position.y = crystal.home.y + Math.sin(now * 0.002 + crystal.phase) * 0.22;
+      treasures.forEach((treasure) => {
+        if (treasure.collected) return;
+        treasure.group.rotation.y = Math.sin(now * 0.0004 + treasure.phase) * 0.12;
+        treasure.group.position.y = treasure.home.y + Math.sin(now * 0.002 + treasure.phase) * 0.08;
       });
       cameraTarget.set(playerPosition.x, playerPosition.y + 1.1, playerPosition.z);
       const cameraDistance = 5.2;
@@ -909,27 +912,35 @@ const NumatikWorldPage = () => {
   }, [gameStarted, selectedIsland]);
 
   const answerQuestion = (answer: number) => {
-    if (!question || !pendingCrystalRef.current) return;
+    if (!question || !pendingTreasureRef.current) return;
     if (answer !== question.answer) {
       setAnswerFeedback("Belum tepat. Coba hitung sekali lagi!");
       return;
     }
-    const crystal = pendingCrystalRef.current;
-    const angle = Math.random() * Math.PI * 2;
-    const radius = 16 + Math.random() * 38;
-    crystal.home.set(Math.cos(angle) * radius, 2.3, Math.sin(angle) * radius);
-    crystal.group.position.copy(crystal.home);
-    crystal.group.visible = true;
-    crystal.collected = false;
-    pendingCrystalRef.current = null;
+    pendingTreasureRef.current = null;
+    const nextTreasuresFound = treasuresFound + 1;
+    setTreasuresFound(nextTreasuresFound);
     setScore((value) => value + 10);
+    if (nextTreasuresFound >= TREASURE_COUNT) {
+      gameCompleteRef.current = true;
+      setGameComplete(true);
+    }
     setQuestion(null);
     setAnswerFeedback(null);
   };
 
   useEffect(() => {
-    if (!question) pendingCrystalRef.current = null;
+    if (!question) pendingTreasureRef.current = null;
   }, [question]);
+
+  const restartAdventure = () => {
+    gameCompleteRef.current = false;
+    setGameComplete(false);
+    setTreasuresFound(0);
+    setScore(0);
+    setQuestion(null);
+    setGameStarted(false);
+  };
 
   const holdKey = (key: string) => (event: ReactPointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -1022,7 +1033,7 @@ const NumatikWorldPage = () => {
               <header className="world-start-heading">
                 <div className="world-start-mark"><Sparkles size={28} /></div>
                 <h1 className="world-start-title" id="world-start-title">NUMATIK WORLD</h1>
-                <p className="world-start-subtitle">Pilih pulau, jelajahi dunia, kumpulkan kristal! ✨</p>
+                <p className="world-start-subtitle">Pilih pulau, jelajahi dunia, dan cari {TREASURE_COUNT} harta karun! ✨</p>
               </header>
               <div className="world-lobby">
                 <section className="world-lobby-panel" aria-labelledby="world-rules-title">
@@ -1031,8 +1042,8 @@ const NumatikWorldPage = () => {
                   <div className="world-rules">
                     <div className="world-rule"><span className="world-rule-icon">🕹️</span><span><strong>Jelajahi pulau</strong><br />WASD / tombol arah untuk bergerak, seret layar untuk melihat.</span></div>
                     <div className="world-rule"><span className="world-rule-icon">🦘</span><span><strong>Melompat</strong><br />Tekan SPACE atau tombol LOMPAT.</span></div>
-                    <div className="world-rule"><span className="world-rule-icon">💎</span><span><strong>Ambil kristal</strong><br />Dekati kristal untuk membuka soal matematika.</span></div>
-                    <div className="world-rule"><span className="world-rule-icon">⭐</span><span><strong>Kumpulkan poin</strong><br />Jawaban benar mendapat 10 poin dan kristal baru!</span></div>
+                    <div className="world-rule"><span className="world-rule-icon">🧰</span><span><strong>Temukan harta karun</strong><br />Dekati peti harta untuk membuka soal matematika.</span></div>
+                    <div className="world-rule"><span className="world-rule-icon">⭐</span><span><strong>Kumpulkan harta</strong><br />Jawab soal dengan benar untuk mendapatkan harta. Ada {TREASURE_COUNT} harta karun!</span></div>
                   </div>
                 </section>
                 <section className="world-lobby-panel" aria-labelledby="world-island-title">
@@ -1073,10 +1084,10 @@ const NumatikWorldPage = () => {
                 <div className="world-brand-mark"><Sparkles size={21} /></div>
                 <div>
                   <div className="world-title">NUMATIK WORLD</div>
-                  <div className="world-subtitle">{ISLANDS.find(({ id }) => id === selectedIsland)?.emoji} {ISLANDS.find(({ id }) => id === selectedIsland)?.name} · jelajahi dan kumpulkan kristal!</div>
+                  <div className="world-subtitle">{ISLANDS.find(({ id }) => id === selectedIsland)?.emoji} {ISLANDS.find(({ id }) => id === selectedIsland)?.name} · cari {TREASURE_COUNT} harta karun!</div>
                 </div>
               </div>
-              <div className="world-score" aria-live="polite"><Gem size={17} /> {score} POIN</div>
+              <div className="world-score" aria-live="polite">🧰 HARTA {treasuresFound}/{TREASURE_COUNT} · {score} POIN</div>
             </header>
             <div className="world-bottom">
               Jelajahi pulau &nbsp; <kbd>W A S D</kbd> bergerak &nbsp; <kbd>SPACE</kbd> lompat &nbsp; seret layar untuk melihat
@@ -1094,12 +1105,22 @@ const NumatikWorldPage = () => {
             )}
           </div>
         )}
+        {gameComplete && (
+          <div className="world-question-layer">
+            <section className="world-question-card" role="dialog" aria-modal="true" aria-labelledby="world-complete-title">
+              <div className="world-question-kicker">🎉 PETUALANGAN SELESAI</div>
+              <h2 className="world-question-title" id="world-complete-title">Semua harta ditemukan!</h2>
+              <p className="world-lobby-intro">Kamu berhasil mengumpulkan {TREASURE_COUNT} harta karun dan mendapat {score} poin.</p>
+              <button className="world-start-button" type="button" onClick={restartAdventure}>MAIN LAGI</button>
+            </section>
+          </div>
+        )}
       </div>
       {question && (
         <div className="world-question-layer">
           <section className="world-question-card" role="dialog" aria-modal="true" aria-labelledby="world-question-title">
-            <div className="world-question-kicker"><Gem size={15} /> KRISTAL MATEMATIKA</div>
-            <h2 className="world-question-title" id="world-question-title">Jawab untuk kumpulkan!</h2>
+            <div className="world-question-kicker">🧰 HARTA KARUN</div>
+            <h2 className="world-question-title" id="world-question-title">Jawab untuk mendapatkan harta!</h2>
             <div className="world-question-prompt">{question.prompt}</div>
             <div className="world-answer-grid">
               {question.options.map((option) => (
