@@ -73,6 +73,41 @@ type Crystal = {
   collected: boolean;
 };
 
+// Skala tunggal untuk mengatur ukuran figur tanpa menggeser telapak dari pangkal rig.
+const AVATAR_SCALE = 1;
+
+const RUN_CONFIG = {
+  cycleLength: 4.2,
+  maxCyclesPerSecond: 2.6,
+  legSwing: 0.8,
+  elbowBend: 1.57,
+  bodyLean: 0.24,
+  footLift: 0.34,
+  bodyBounce: 0.06,
+  blendSeconds: 0.2,
+  torsoTwist: 0.08,
+  maxDeltaTime: 0.04,
+} as const;
+
+type AvatarHairStyle = "swept" | "short" | "long";
+
+type AvatarColors = {
+  skin: string;
+  hair: string;
+  hoodie: string;
+  vest: string;
+  pants: string;
+  shoes: string;
+};
+
+type DustParticle = {
+  mesh: THREE.Mesh;
+  velocity: THREE.Vector3;
+  age: number;
+  lifetime: number;
+  baseScale: number;
+};
+
 const makeQuestion = (): WorldQuestion => {
   const first = 3 + Math.floor(Math.random() * 18);
   const second = 2 + Math.floor(Math.random() * 12);
@@ -132,7 +167,7 @@ const NumatikWorldPage = () => {
 
     const resources = new Set<THREE.BufferGeometry | THREE.Material>();
     const makeMaterial = (color: THREE.ColorRepresentation, roughness = 0.8) => {
-      const value = new THREE.MeshStandardMaterial({ color, roughness });
+      const value = new THREE.MeshStandardMaterial({ color, roughness, metalness: 0 });
       resources.add(value);
       return value;
     };
@@ -146,11 +181,15 @@ const NumatikWorldPage = () => {
       blue: makeMaterial(island.palette.blue),
       yellow: makeMaterial("#ffd858"),
       white: makeMaterial("#fff6dc"),
-      skin: makeMaterial("#f0b887"),
-      hair: makeMaterial("#563b32"),
-      shirt: makeMaterial("#27b99e"),
-      pants: makeMaterial("#4778d5"),
-      shoes: makeMaterial("#f8f2dc"),
+      skin: makeMaterial("#f2c9a5", 0.6),
+      hair: makeMaterial("#7a4a32", 0.6),
+      hoodie: makeMaterial("#e8c98a", 0.6),
+      vest: makeMaterial("#3b3f44", 0.6),
+      pants: makeMaterial("#292c30", 0.6),
+      shoes: makeMaterial("#c98b4e", 0.6),
+      shoeSole: makeMaterial("#292722", 0.65),
+      glove: makeMaterial("#242629", 0.6),
+      pendant: makeMaterial("#d8b15e", 0.6),
       eye: makeMaterial("#293e61"),
       crystal: makeMaterial("#74eff1", 0.2),
       crystalPink: makeMaterial("#ff92c4", 0.2),
@@ -159,6 +198,36 @@ const NumatikWorldPage = () => {
       leaf: makeMaterial(island.palette.leaf),
       leafLight: makeMaterial(island.palette.leafLight),
     };
+    const hairStyleGroups = new Map<AvatarHairStyle, THREE.Group>();
+    const avatarConfig: {
+      colors: AvatarColors;
+      hairstyle: AvatarHairStyle;
+      applyColors: (colors?: Partial<AvatarColors>, hairstyle?: AvatarHairStyle) => void;
+    } = {
+      colors: {
+        skin: "#f2c9a5",
+        hair: "#7a4a32",
+        hoodie: "#e8c98a",
+        vest: "#3b3f44",
+        pants: "#292c30",
+        shoes: "#c98b4e",
+      },
+      hairstyle: "swept",
+      applyColors: (colors = {}, hairstyle) => {
+        Object.assign(avatarConfig.colors, colors);
+        mats.skin.color.set(avatarConfig.colors.skin);
+        mats.hair.color.set(avatarConfig.colors.hair);
+        mats.hoodie.color.set(avatarConfig.colors.hoodie);
+        mats.vest.color.set(avatarConfig.colors.vest);
+        mats.pants.color.set(avatarConfig.colors.pants);
+        mats.shoes.color.set(avatarConfig.colors.shoes);
+        if (hairstyle) avatarConfig.hairstyle = hairstyle;
+        hairStyleGroups.forEach((group, style) => {
+          group.visible = style === avatarConfig.hairstyle;
+        });
+      },
+    };
+    avatarConfig.applyColors();
     const addMesh = <T extends THREE.BufferGeometry>(
       geometry: T,
       mat: THREE.Material,
@@ -277,39 +346,254 @@ const NumatikWorldPage = () => {
 
     const avatar = new THREE.Group();
     scene.add(avatar);
-    const torso = new THREE.Group();
-    torso.position.y = 1.9;
-    avatar.add(torso);
-    addMesh(new RoundedBoxGeometry(1.25, 1.3, 0.72, 4, 0.2), mats.shirt, torso, [0, 0, 0]);
-    addMesh(new RoundedBoxGeometry(0.42, 0.23, 0.055, 3, 0.025), mats.yellow, torso, [0, 0.45, 0.38]);
-    const head = new THREE.Group();
-    head.position.y = 1.02;
-    torso.add(head);
-    addMesh(new RoundedBoxGeometry(0.9, 0.86, 0.82, 5, 0.24), mats.skin, head, [0, 0, 0]);
-    addMesh(new THREE.SphereGeometry(0.5, 16, 12), mats.hair, head, [0, 0.31, -0.02], [1, 0.55, 1]);
-    addMesh(new THREE.SphereGeometry(0.22, 12, 10), mats.hair, head, [-0.38, 0.17, 0.16], [0.7, 1.2, 1]);
-    [-0.2, 0.2].forEach((x) => {
-      addMesh(new THREE.SphereGeometry(0.09, 12, 10), mats.white, head, [x, 0.07, 0.397], [0.82, 1.15, 0.48]);
-      addMesh(new THREE.SphereGeometry(0.052, 10, 8), mats.eye, head, [x, 0.065, 0.435], [0.85, 1.08, 0.48]);
-    });
-    const smile = addMesh(new THREE.TorusGeometry(0.12, 0.018, 6, 16, Math.PI), mats.roof, head, [0.12, -0.18, 0.4]);
-    smile.rotation.z = Math.PI;
+    const avatarRig = new THREE.Group();
+    // Pangkal rig berada di telapak sehingga perubahan skala tidak mengubah titik tanah.
+    avatarRig.scale.setScalar(AVATAR_SCALE);
+    avatar.add(avatarRig);
+    const textures = new Set<THREE.Texture>();
+    const makeRoundedGeometry = (width: number, height: number, depth: number, radius: number) => (
+      new RoundedBoxGeometry(width, height, depth, 5, radius)
+    );
+    const torsoGeometry = makeRoundedGeometry(0.76, 0.68, 0.54, 0.16);
+    const hoodieGeometry = makeRoundedGeometry(0.8, 0.72, 0.58, 0.17);
+    const vestGeometry = makeRoundedGeometry(0.52, 0.6, 0.08, 0.025);
+    const vestBackGeometry = makeRoundedGeometry(0.5, 0.58, 0.07, 0.02);
+    const sleeveGeometry = makeRoundedGeometry(0.3, 0.34, 0.32, 0.075);
+    const forearmSleeveGeometry = makeRoundedGeometry(0.29, 0.35, 0.31, 0.075);
+    const armGeometry = makeRoundedGeometry(0.27, 0.33, 0.29, 0.075);
+    const forearmGeometry = makeRoundedGeometry(0.26, 0.34, 0.28, 0.07);
+    const cuffGeometry = makeRoundedGeometry(0.28, 0.11, 0.3, 0.035);
+    const handGeometry = makeRoundedGeometry(0.27, 0.24, 0.3, 0.08);
+    const gloveGeometry = makeRoundedGeometry(0.29, 0.17, 0.32, 0.055);
+    const legGeometry = makeRoundedGeometry(0.35, 0.48, 0.38, 0.09);
+    const kneePadGeometry = makeRoundedGeometry(0.27, 0.19, 0.08, 0.02);
+    const bootGeometry = makeRoundedGeometry(0.42, 0.34, 0.58, 0.11);
+    const soleGeometry = makeRoundedGeometry(0.44, 0.09, 0.6, 0.027);
+    const neckGeometry = makeRoundedGeometry(0.24, 0.18, 0.25, 0.055);
+    const headGeometry = makeRoundedGeometry(0.58, 0.56, 0.52, 0.15);
+    const earGeometry = makeRoundedGeometry(0.1, 0.18, 0.12, 0.03);
+    const hairCapGeometry = makeRoundedGeometry(0.62, 0.2, 0.56, 0.06);
+    const hairFringeGeometry = makeRoundedGeometry(0.43, 0.16, 0.18, 0.055);
+    const hairLockGeometry = makeRoundedGeometry(0.15, 0.24, 0.17, 0.05);
+    const hairSpikeGeometry = makeRoundedGeometry(0.14, 0.22, 0.14, 0.045);
+    const hoodGeometry = makeRoundedGeometry(0.48, 0.38, 0.18, 0.05);
+    const pocketGeometry = makeRoundedGeometry(0.36, 0.17, 0.045, 0.015);
+    const pendantGeometry = makeRoundedGeometry(0.09, 0.12, 0.045, 0.015);
+    const faceGeometry = new THREE.PlaneGeometry(0.28, 0.2);
+    [
+      torsoGeometry,
+      hoodieGeometry,
+      vestGeometry,
+      vestBackGeometry,
+      sleeveGeometry,
+      forearmSleeveGeometry,
+      armGeometry,
+      forearmGeometry,
+      cuffGeometry,
+      handGeometry,
+      gloveGeometry,
+      legGeometry,
+      kneePadGeometry,
+      bootGeometry,
+      soleGeometry,
+      neckGeometry,
+      headGeometry,
+      earGeometry,
+      hairCapGeometry,
+      hairFringeGeometry,
+      hairLockGeometry,
+      hairSpikeGeometry,
+      hoodGeometry,
+      pocketGeometry,
+      pendantGeometry,
+      faceGeometry,
+    ].forEach((geometry) => resources.add(geometry));
 
-    const makeLimb = (x: number, y: number, mat: THREE.Material, isArm: boolean) => {
-      const pivot = new THREE.Group();
-      pivot.position.set(x, y, 0);
-      avatar.add(pivot);
-      const width = isArm ? 0.38 : 0.43;
-      addMesh(new RoundedBoxGeometry(width, 0.9, 0.48, 4, isArm ? 0.18 : 0.2), mat, pivot, [0, -0.43, 0]);
-      if (!isArm) {
-        addMesh(new RoundedBoxGeometry(0.54, 0.2, 0.72, 4, 0.09), mats.shoes, pivot, [0, -0.89, 0.1]);
+    const faceCanvas = document.createElement("canvas");
+    faceCanvas.width = 128;
+    faceCanvas.height = 128;
+    const faceContext = faceCanvas.getContext("2d");
+    if (!faceContext) throw new Error("Canvas 2D tidak tersedia untuk membuat wajah avatar.");
+    faceContext.fillStyle = "#161616";
+    faceContext.beginPath();
+    faceContext.arc(43, 54, 4, 0, Math.PI * 2);
+    faceContext.arc(85, 54, 4, 0, Math.PI * 2);
+    faceContext.fill();
+    faceContext.strokeStyle = "#161616";
+    faceContext.lineWidth = 2.5;
+    faceContext.lineCap = "round";
+    faceContext.beginPath();
+    faceContext.moveTo(57, 82);
+    faceContext.quadraticCurveTo(64, 88, 71, 82);
+    faceContext.stroke();
+    const faceTexture = new THREE.CanvasTexture(faceCanvas);
+    faceTexture.colorSpace = THREE.SRGBColorSpace;
+    textures.add(faceTexture);
+    const faceMaterial = new THREE.MeshStandardMaterial({
+      map: faceTexture,
+      transparent: true,
+      roughness: 0.6,
+      metalness: 0,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    resources.add(faceMaterial);
+
+    const bodyRig = new THREE.Group();
+    bodyRig.position.y = 1;
+    avatarRig.add(bodyRig);
+    addMesh(torsoGeometry, mats.skin, bodyRig, [0, 0, 0]);
+    addMesh(hoodieGeometry, mats.hoodie, bodyRig, [0, 0, 0]);
+    addMesh(vestGeometry, mats.vest, bodyRig, [0, -0.015, 0.31]);
+    addMesh(vestBackGeometry, mats.vest, bodyRig, [0, 0, -0.3]);
+    addMesh(pocketGeometry, mats.hoodie, bodyRig, [0, -0.19, 0.355]);
+    const hoodPivot = new THREE.Group();
+    hoodPivot.position.set(0, 0.43, -0.3);
+    bodyRig.add(hoodPivot);
+    addMesh(hoodGeometry, mats.hoodie, hoodPivot, [0, 0, 0]);
+    addMesh(neckGeometry, mats.skin, bodyRig, [0, 0.47, 0]);
+    const necklace = addMesh(cuffGeometry, mats.pendant, bodyRig, [0, 0.29, 0.06], [0.72, 0.14, 0.72]);
+    necklace.rotation.x = -0.16;
+    const pendantPivot = new THREE.Group();
+    pendantPivot.position.set(0, 0.17, 0.16);
+    bodyRig.add(pendantPivot);
+    addMesh(pendantGeometry, mats.pendant, pendantPivot, [0, 0, 0]);
+
+    const hairMotion = new THREE.Group();
+    const head = new THREE.Group();
+    head.position.set(0, 0.72, 0);
+    bodyRig.add(head);
+    addMesh(headGeometry, mats.skin, head, [0, 0, 0]);
+    addMesh(faceGeometry, faceMaterial, head, [0, 0, 0.264]);
+    [-1, 1].forEach((side) => {
+      addMesh(earGeometry, mats.skin, head, [side * 0.32, 0, 0]);
+    });
+
+    const makeHairStyle = (style: AvatarHairStyle) => {
+      const group = new THREE.Group();
+      group.visible = style === avatarConfig.hairstyle;
+      hairMotion.add(group);
+      addMesh(hairCapGeometry, mats.hair, group, [0, 0.22, -0.015]);
+      if (style === "swept") {
+        const fringe = addMesh(hairFringeGeometry, mats.hair, group, [0.035, 0.205, 0.205]);
+        fringe.rotation.z = -0.16;
+        [-1, 1].forEach((side) => {
+          const lock = addMesh(hairLockGeometry, mats.hair, group, [side * 0.23, -0.015, 0.17]);
+          lock.rotation.z = side * -0.12;
+        });
+        [
+          [-0.22, 0.29, -0.08, -0.35],
+          [-0.08, 0.32, -0.02, -0.12],
+          [0.08, 0.31, -0.02, 0.18],
+          [0.22, 0.27, -0.08, 0.38],
+        ].forEach(([x, y, z, angle]) => {
+          const spike = addMesh(hairSpikeGeometry, mats.hair, group, [x!, y!, z!]);
+          spike.rotation.z = angle!;
+        });
+      } else if (style === "short") {
+        [-1, 1].forEach((side) => {
+          addMesh(hairLockGeometry, mats.hair, group, [side * 0.23, -0.015, 0.17]);
+        });
+        [-0.16, 0, 0.16].forEach((x, index) => {
+          const spike = addMesh(hairSpikeGeometry, mats.hair, group, [x, 0.3, -0.04]);
+          spike.rotation.z = (index - 1) * 0.2;
+        });
+      } else {
+        const fringe = addMesh(hairFringeGeometry, mats.hair, group, [-0.025, 0.2, 0.205]);
+        fringe.rotation.z = 0.14;
+        [-1, 1].forEach((side) => {
+          const lock = addMesh(hairLockGeometry, mats.hair, group, [side * 0.24, -0.12, -0.02]);
+          lock.scale.y = 2;
+        });
+        [-0.12, 0.08].forEach((x) => {
+          const spike = addMesh(hairSpikeGeometry, mats.hair, group, [x, 0.3, -0.03]);
+          spike.rotation.z = x * -1.5;
+        });
       }
-      return pivot;
+      hairStyleGroups.set(style, group);
     };
-    const leftArm = makeLimb(-0.88, 2.35, mats.shirt, true);
-    const rightArm = makeLimb(0.88, 2.35, mats.shirt, true);
-    const leftLeg = makeLimb(-0.34, 1.25, mats.pants, false);
-    const rightLeg = makeLimb(0.34, 1.25, mats.pants, false);
+    (["swept", "short", "long"] as const).forEach(makeHairStyle);
+    head.add(hairMotion);
+    avatarConfig.applyColors();
+
+    type LimbRig = { pivot: THREE.Group; elbow: THREE.Group; hand: THREE.Group };
+    const makeArm = (side: number): LimbRig => {
+      const shoulder = new THREE.Group();
+      shoulder.position.set(side * 0.47, 0.28, 0);
+      bodyRig.add(shoulder);
+      addMesh(armGeometry, mats.skin, shoulder, [0, -0.16, 0]);
+      addMesh(sleeveGeometry, mats.hoodie, shoulder, [0, -0.08, 0], [1.06, 1, 1.06]);
+      const elbow = new THREE.Group();
+      elbow.position.y = -0.25;
+      shoulder.add(elbow);
+      addMesh(forearmGeometry, mats.skin, elbow, [0, -0.15, 0]);
+      addMesh(forearmSleeveGeometry, mats.hoodie, elbow, [0, -0.14, 0], [1.04, 1, 1.04]);
+      addMesh(cuffGeometry, mats.hoodie, elbow, [0, -0.2, 0]);
+      const hand = new THREE.Group();
+      hand.position.y = -0.22;
+      elbow.add(hand);
+      addMesh(handGeometry, mats.skin, hand, [0, -0.045, 0]);
+      addMesh(gloveGeometry, mats.glove, hand, [0, -0.13, 0.015]);
+      addMesh(cuffGeometry, mats.glove, hand, [0, 0.055, 0]);
+      return { pivot: shoulder, elbow, hand };
+    };
+    const makeLeg = (side: number): { pivot: THREE.Group; baseY: number } => {
+      const hip = new THREE.Group();
+      hip.position.set(side * 0.2, 0.64, 0);
+      avatarRig.add(hip);
+      addMesh(legGeometry, mats.pants, hip, [0, -0.22, 0]);
+      addMesh(kneePadGeometry, mats.glove, hip, [0, -0.28, 0.2]);
+      const boot = new THREE.Group();
+      boot.position.set(0, -0.445, 0.08);
+      hip.add(boot);
+      addMesh(bootGeometry, mats.shoes, boot, [0, 0.02, 0.03]);
+      addMesh(soleGeometry, mats.shoeSole, boot, [0, -0.15, 0.02]);
+      return { pivot: hip, baseY: hip.position.y };
+    };
+    const leftArm = makeArm(-1);
+    const rightArm = makeArm(1);
+    const leftLeg = makeLeg(-1);
+    const rightLeg = makeLeg(1);
+    const animationState = {
+      phase: 0,
+      runBlend: 0,
+      runIntensity: 0,
+      armSwing: 0,
+      armLift: 0,
+      elbowBend: 0,
+      breath: 0,
+      torsoLean: 0,
+      torsoTwist: 0,
+      bodyBounce: 0,
+      leftFootLift: 0,
+      rightFootLift: 0,
+      leftLegSwing: 0,
+      rightLegSwing: 0,
+      hoodSway: 0,
+      hairSway: 0,
+      pendantSway: 0,
+      landingBend: 0,
+    };
+
+    // Pool debu berukuran tetap; mesh dan material dipakai ulang setiap langkah.
+    const dustGeometry = new THREE.SphereGeometry(0.045, 8, 6);
+    const dustMaterial = new THREE.MeshStandardMaterial({
+      color: "#d8c6a5",
+      roughness: 1,
+      metalness: 0,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+    });
+    resources.add(dustGeometry);
+    resources.add(dustMaterial);
+    const dustParticles: DustParticle[] = Array.from({ length: 16 }, () => {
+      const mesh = new THREE.Mesh(dustGeometry, dustMaterial);
+      mesh.visible = false;
+      scene.add(mesh);
+      return { mesh, velocity: new THREE.Vector3(), age: 0, lifetime: 0.32, baseScale: 0.55 };
+    });
+    let dustCursor = 0;
 
     const crystalMats = [mats.crystal, mats.crystalPink, mats.crystalGold];
     const crystalPositions: Array<[number, number]> = [
@@ -329,6 +613,30 @@ const NumatikWorldPage = () => {
     });
 
     const playerPosition = new THREE.Vector3(0, 1.68, 43);
+    const emitDust = (side: number, count: number) => {
+      const facingX = Math.sin(avatar.rotation.y);
+      const facingZ = Math.cos(avatar.rotation.y);
+      for (let index = 0; index < count; index += 1) {
+        const particle = dustParticles[dustCursor]!;
+        dustCursor = (dustCursor + 1) % dustParticles.length;
+        const lateral = side * 0.2 + (index - (count - 1) / 2) * 0.07;
+        particle.mesh.position.set(
+          playerPosition.x - facingX * 0.2 + Math.cos(avatar.rotation.y) * lateral,
+          playerPosition.y + 0.035,
+          playerPosition.z - facingZ * 0.2 - Math.sin(avatar.rotation.y) * lateral,
+        );
+        particle.velocity.set(
+          -facingX * (0.25 + index * 0.04) + Math.cos(avatar.rotation.y) * side * 0.18,
+          0.35 + index * 0.04,
+          -facingZ * (0.25 + index * 0.04) - Math.sin(avatar.rotation.y) * side * 0.18,
+        );
+        particle.age = 0;
+        particle.lifetime = 0.28 + index * 0.025;
+        particle.baseScale = 0.55 + index * 0.08;
+        particle.mesh.scale.setScalar(particle.baseScale);
+        particle.mesh.visible = true;
+      }
+    };
     const velocity = new THREE.Vector3();
     const cameraTarget = new THREE.Vector3();
     const cameraPosition = new THREE.Vector3();
@@ -396,12 +704,14 @@ const NumatikWorldPage = () => {
 
     const animate = (now: number) => {
       frameId = window.requestAnimationFrame(animate);
-      const dt = Math.min((now - lastFrameTime) / 1000, 0.04);
+      const dt = Math.min((now - lastFrameTime) / 1000, RUN_CONFIG.maxDeltaTime);
       lastFrameTime = now;
       const input = keysRef.current;
       const forward = Number(input.has("w") || input.has("arrowup")) - Number(input.has("s") || input.has("arrowdown"));
       const sideways = Number(input.has("d") || input.has("arrowright")) - Number(input.has("a") || input.has("arrowleft"));
       const moving = forward !== 0 || sideways !== 0;
+      const wasGrounded = grounded;
+      let movementSpeed = 0;
 
       if (!pendingCrystalRef.current) {
         const direction = new THREE.Vector3(
@@ -412,6 +722,7 @@ const NumatikWorldPage = () => {
         if (moving) {
           direction.normalize();
           const speed = input.has("shift") ? 10 : 6.2;
+          movementSpeed = speed;
           playerPosition.x += direction.x * speed * dt;
           playerPosition.z += direction.z * speed * dt;
           avatar.rotation.y = Math.atan2(direction.x, direction.z);
@@ -434,14 +745,6 @@ const NumatikWorldPage = () => {
           playerPosition.z *= maxIslandRadius / distanceFromCenter;
         }
         avatar.position.copy(playerPosition);
-        const gait = now * 0.012;
-        const stride = moving && grounded ? Math.sin(gait) * 0.55 : 0;
-        leftLeg.rotation.x = stride;
-        rightLeg.rotation.x = -stride;
-        leftArm.rotation.x = -stride * 0.8;
-        rightArm.rotation.x = stride * 0.8;
-        torso.position.y = 1.9 + (moving && grounded ? Math.abs(Math.sin(gait)) * 0.045 : 0);
-
         const nearbyCrystal = crystals.find((crystal) => (
           !crystal.collected && crystal.group.position.distanceTo(playerPosition) < 2.15
         ));
@@ -454,16 +757,126 @@ const NumatikWorldPage = () => {
         }
       }
 
+      if (!wasGrounded && grounded) animationState.landingBend = 1;
+      const isRunning = movementSpeed > 0 && grounded && !pendingCrystalRef.current;
+      const runIntensity = movementSpeed >= 10 ? 1 : movementSpeed > 0 ? 0.86 : 0;
+      const phaseBeforeStep = animationState.phase;
+      if (isRunning) {
+        const cyclesPerSecond = Math.min(
+          movementSpeed / RUN_CONFIG.cycleLength,
+          RUN_CONFIG.maxCyclesPerSecond,
+        );
+        animationState.phase += cyclesPerSecond * Math.PI * 2 * dt;
+        if (phaseBeforeStep < Math.PI && animationState.phase >= Math.PI) {
+          emitDust(-1, runIntensity > 0.9 ? 2 : 1);
+        }
+        if (animationState.phase >= Math.PI * 2) {
+          animationState.phase %= Math.PI * 2;
+          emitDust(1, runIntensity > 0.9 ? 2 : 1);
+        }
+      }
+
+      const runTarget = isRunning ? 1 : 0;
+      const blendAlpha = 1 - Math.exp(-dt / (RUN_CONFIG.blendSeconds / 3));
+      const damping = 1 - Math.exp(-10 * dt);
+      animationState.runBlend = THREE.MathUtils.lerp(animationState.runBlend, runTarget, blendAlpha);
+      animationState.runIntensity = THREE.MathUtils.lerp(animationState.runIntensity, runIntensity, blendAlpha);
+      const strideWave = Math.sin(animationState.phase);
+      const leftSwing = Math.max(0, strideWave);
+      const rightSwing = Math.max(0, -strideWave);
+      animationState.armSwing = THREE.MathUtils.lerp(
+        animationState.armSwing,
+        -strideWave * RUN_CONFIG.legSwing * runIntensity,
+        damping,
+      );
+      animationState.elbowBend = THREE.MathUtils.lerp(
+        animationState.elbowBend,
+        isRunning ? RUN_CONFIG.elbowBend : 0,
+        damping,
+      );
+      animationState.landingBend *= Math.exp(-dt / 0.12);
+      if (animationState.landingBend < 0.005) animationState.landingBend = 0;
+
+      const runWeight = animationState.runIntensity * animationState.runBlend;
+      const bounceTarget = isRunning
+        ? Math.max(0, Math.sin(animationState.phase * 2)) * RUN_CONFIG.bodyBounce * runWeight
+        : 0;
+      const breathTarget = isRunning ? 0 : Math.sin(now * 0.0018) * 0.018;
+      const leanTarget = isRunning
+        ? RUN_CONFIG.bodyLean * runIntensity * animationState.runBlend
+        : 0;
+      const twistTarget = isRunning
+        ? -Math.sin(animationState.phase) * RUN_CONFIG.torsoTwist * animationState.runBlend
+        : 0;
+      animationState.bodyBounce = THREE.MathUtils.lerp(animationState.bodyBounce, bounceTarget, damping);
+      animationState.breath = THREE.MathUtils.lerp(animationState.breath, breathTarget, damping);
+      animationState.torsoLean = THREE.MathUtils.lerp(animationState.torsoLean, leanTarget, damping);
+      animationState.torsoTwist = THREE.MathUtils.lerp(animationState.torsoTwist, twistTarget, damping);
+      animationState.hoodSway = THREE.MathUtils.lerp(
+        animationState.hoodSway,
+        isRunning ? Math.sin(animationState.phase - 0.35) * 0.09 * runIntensity : 0,
+        1 - Math.exp(-7 * dt),
+      );
+      animationState.hairSway = THREE.MathUtils.lerp(
+        animationState.hairSway,
+        isRunning ? Math.sin(animationState.phase - 0.5) * 0.055 * runIntensity : 0,
+        1 - Math.exp(-8 * dt),
+      );
+      animationState.pendantSway = THREE.MathUtils.lerp(
+        animationState.pendantSway,
+        isRunning ? Math.sin(animationState.phase - 0.45) * 0.12 * runWeight : 0,
+        1 - Math.exp(-9 * dt),
+      );
+
+      animationState.leftFootLift = leftSwing * RUN_CONFIG.footLift * runWeight;
+      animationState.rightFootLift = rightSwing * RUN_CONFIG.footLift * runWeight;
+      animationState.leftLegSwing = leftSwing * RUN_CONFIG.legSwing * runWeight;
+      animationState.rightLegSwing = -rightSwing * RUN_CONFIG.legSwing * runWeight;
+      leftLeg.pivot.position.y = leftLeg.baseY + Math.max(0, animationState.leftFootLift);
+      rightLeg.pivot.position.y = rightLeg.baseY + Math.max(0, animationState.rightFootLift);
+      leftLeg.pivot.rotation.x = animationState.leftLegSwing;
+      rightLeg.pivot.rotation.x = animationState.rightLegSwing;
+      leftArm.pivot.rotation.x = animationState.armSwing * animationState.runBlend;
+      rightArm.pivot.rotation.x = -animationState.armSwing * animationState.runBlend;
+      const jumpLift = grounded ? 0 : 2.2;
+      animationState.armLift = THREE.MathUtils.lerp(animationState.armLift, jumpLift, 1 - Math.exp(-12 * dt));
+      leftArm.pivot.rotation.z = animationState.armLift;
+      rightArm.pivot.rotation.z = -leftArm.pivot.rotation.z;
+      leftArm.elbow.rotation.x = -animationState.elbowBend * animationState.runBlend;
+      rightArm.elbow.rotation.x = -animationState.elbowBend * animationState.runBlend;
+      bodyRig.position.y = 1 + Math.max(0, animationState.bodyBounce) + animationState.breath;
+      bodyRig.rotation.x = animationState.torsoLean;
+      bodyRig.rotation.y = animationState.torsoTwist;
+      bodyRig.scale.y = 1 - animationState.landingBend * 0.06;
+      head.rotation.x = -animationState.torsoLean;
+      head.rotation.y = -animationState.torsoTwist;
+      hoodPivot.rotation.x = animationState.hoodSway;
+      hairMotion.rotation.x = animationState.hairSway;
+      pendantPivot.rotation.x = animationState.pendantSway;
+
+      dustParticles.forEach((particle) => {
+        if (!particle.mesh.visible) return;
+        particle.age += dt;
+        if (particle.age >= particle.lifetime) {
+          particle.mesh.visible = false;
+          return;
+        }
+        particle.velocity.y -= 0.8 * dt;
+        particle.mesh.position.addScaledVector(particle.velocity, dt);
+        const progress = particle.age / particle.lifetime;
+        particle.mesh.scale.setScalar(particle.baseScale * (1 - progress));
+      });
+
       crystals.forEach((crystal) => {
         if (crystal.collected) return;
         crystal.group.rotation.y = now * 0.0007 + crystal.phase;
         crystal.group.position.y = crystal.home.y + Math.sin(now * 0.002 + crystal.phase) * 0.22;
       });
-      cameraTarget.set(playerPosition.x, playerPosition.y + 1.45, playerPosition.z);
-      const cameraDistance = 8.5;
+      cameraTarget.set(playerPosition.x, playerPosition.y + 1.1, playerPosition.z);
+      const cameraDistance = 5.2;
       cameraPosition.set(
         playerPosition.x + Math.sin(cameraYaw) * Math.cos(cameraPitch) * cameraDistance,
-        playerPosition.y + 2.1 + Math.sin(cameraPitch) * cameraDistance,
+        playerPosition.y + 1.6 + Math.sin(cameraPitch) * cameraDistance,
         playerPosition.z + Math.cos(cameraYaw) * Math.cos(cameraPitch) * cameraDistance,
       );
       camera.position.lerp(cameraPosition, 1 - Math.exp(-7 * dt));
@@ -488,6 +901,7 @@ const NumatikWorldPage = () => {
         if (object instanceof THREE.Mesh && !resources.has(object.geometry)) object.geometry.dispose();
       });
       resources.forEach((resource) => resource.dispose());
+      textures.forEach((texture) => texture.dispose());
       renderer.dispose();
       renderer.domElement.remove();
       keysRef.current.clear();
