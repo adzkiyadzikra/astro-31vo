@@ -4316,7 +4316,7 @@ const GamePage = () => {
   return (
     <main className="strike-page">
       <style>{`
-        .strike-page{position:relative;width:100%;height:100dvh;min-height:460px;overflow:hidden;background:#07101d;color:#e9f6ff;font-family:var(--font-body,'Exo 2'),sans-serif;isolation:isolate}
+        .strike-page{position:relative;width:100%;height:100dvh;min-height:100dvh;overflow:hidden;background:#07101d;color:#e9f6ff;font-family:var(--font-body,'Exo 2'),sans-serif;isolation:isolate}
         .strike-canvas{display:block;width:100%;height:100%;touch-action:none;outline:none}
         .strike-render-error{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.55rem;padding:2rem;color:#b7d8e5;text-align:center}
         .strike-render-error small{max-width:min(80vw,720px);color:#7895a4;font:400 11px/1.5 var(--font-body,'Exo 2'),sans-serif;overflow-wrap:anywhere}
@@ -4499,6 +4499,9 @@ const GamePage = () => {
             .strike-header-button{padding:5px 4px;font-size:5px}
            .strike-switch{right:145px;width:52px}
            .strike-sprint{left:132px;width:56px}
+         }
+         @media(orientation:landscape) and (max-height:500px){
+           .strike-stick{left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));width:100px;height:100px}
          }
         @media(prefers-reduced-motion:reduce){.strike-lock{transition:none}}
       `}</style>
