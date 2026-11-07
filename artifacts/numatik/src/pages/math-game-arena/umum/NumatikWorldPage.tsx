@@ -2,10 +2,12 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { ArrowLeft, Sparkles } from "lucide-react";
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { VertexNormalsHelper } from "three/addons/helpers/VertexNormalsHelper.js";
 import { useNavigate } from "react-router-dom";
 import {
   buildCewekHalusGeometry,
   CEWEK_HALUS_BONE_NAMES,
+  measureCewekHalusArmBodyClearance,
   type CewekHalusCapsule,
 } from "./cewekHalusGeometry";
 
@@ -148,6 +150,80 @@ const CEWEK_HALUS_CONFIG = {
 
 const SHOW_TEST_AVATARS = true;
 const DEBUG_FREEZE_PHASE: number | null = null;
+const DEBUG_PANEL = false;
+const DEBUG_PANEL_PHASES = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875] as const;
+
+type DebugPanelOptions = {
+  avatarShadows: "normal" | "on" | "off";
+  sceneShadows: "normal" | "on" | "off";
+  body: boolean;
+  hair: boolean;
+  accessories: boolean;
+  rig: boolean;
+  otherPresets: boolean;
+  wireframe: boolean;
+  normalMaterial: boolean;
+  skeleton: boolean;
+  vertexNormals: boolean;
+  bodySide: "original" | "front" | "back" | "double";
+  flatShading: boolean;
+  directionalLight: boolean;
+  hemisphereLight: boolean;
+  basicMaterial: boolean;
+  lockArms: boolean;
+  lockBody: boolean;
+  lockLeftLeg: boolean;
+  lockRightLeg: boolean;
+  lockHipYawRoll: boolean;
+  lockSecondaryMotion: boolean;
+  fixedFacing: "left" | "right" | "front" | "back" | null;
+  freezePhase: number | null;
+};
+
+type DebugMeshInfo = {
+  name: string;
+  type: string;
+  castShadow: string;
+  receiveShadow: string;
+  material: string;
+  transparent: string;
+  depthWrite: string;
+  side: string;
+};
+
+type DebugAvatarStats = {
+  skinnedMeshes: number;
+  meshes: number;
+  drawCalls: number;
+  objects: DebugMeshInfo[];
+};
+
+const INITIAL_DEBUG_PANEL_OPTIONS: DebugPanelOptions = {
+  avatarShadows: "normal",
+  sceneShadows: "normal",
+  body: true,
+  hair: true,
+  accessories: true,
+  rig: false,
+  otherPresets: false,
+  wireframe: false,
+  normalMaterial: false,
+  skeleton: false,
+  vertexNormals: false,
+  bodySide: "original",
+  flatShading: false,
+  directionalLight: true,
+  hemisphereLight: true,
+  basicMaterial: false,
+  lockArms: false,
+  lockBody: false,
+  lockLeftLeg: false,
+  lockRightLeg: false,
+  lockHipYawRoll: false,
+  lockSecondaryMotion: false,
+  fixedFacing: null,
+  freezePhase: null,
+};
 
 const ROBLOX_SLIM_CONFIG = {
   parts: {
@@ -268,7 +344,7 @@ const CHIBI_CONFIG = {
   headWidth: 0.6,
   headDepth: 0.54,
   gridStep: 0.032,
-  bounds: { minX: -0.56, maxX: 0.56, minY: -0.08, maxY: 2.12, minZ: -0.4, maxZ: 0.4 },
+  bounds: { minX: -1, maxX: 1, minY: -0.08, maxY: 2.12, minZ: -0.4, maxZ: 0.4 },
   bodyBlend: 0.14,
   shoulderBlend: 0.055,
   elbowBlend: 0.035,
@@ -279,10 +355,10 @@ const CHIBI_CONFIG = {
   blendBand: 0.055,
   blendFraction: 0.32,
   hipWeightFraction: 0.38,
-  shoulderBlendRamp: [1.22, 1.4] as const,
+  shoulderBlendRamp: [1.235, 1.335] as const,
   hipBlendRamp: [0.62, 0.88] as const,
   shoulderBindEndY: 1.2,
-  armWeightZone: { minY: 0.72, maxY: 1.48, minAbsX: 0.19 },
+  armWeightZone: { minY: 0.72, maxY: 1.48, minAbsX: 0.12 },
   legWeightZone: { minY: -0.08, maxY: 0.96, minAbsX: 0.04 },
   minimumThighGap: 0.18,
   headBottomY: 1.23,
@@ -291,7 +367,8 @@ const CHIBI_CONFIG = {
   handWidth: 0.15,
   wristWidth: 0.12,
   handLength: 0.195,
-  shoulderAbduction: 12 * Math.PI / 180,
+  shoulderAbduction: 38 * Math.PI / 180,
+  shoulderRestAbduction: 10 * Math.PI / 180,
   shoulderForward: 40 * Math.PI / 180,
   shoulderBackward: -30 * Math.PI / 180,
   elbowForward: 90 * Math.PI / 180,
@@ -364,11 +441,12 @@ const CHIBI_CAPSULES: readonly CewekHalusCapsule[] = [
   ...([-1, 1] as const).flatMap((side): CewekHalusCapsule[] => {
     const prefix = side < 0 ? "left" : "right";
     const x = (amount: number) => side * amount;
+    const armX = (amount: number) => side * (amount + 0.01);
     return [
-      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.13), 1.34, 0], end: [x(0.22), 1.3, 0], startRadius: [0.07, 0.065], endRadius: [0.075, 0.068], owner: `${prefix}Clavicle`, proximal: "spine2", distal: `${prefix}UpperArm` },
-      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.22), 1.3, 0], end: [x(0.26), 1.04, 0], startRadius: [0.075, 0.068], endRadius: [0.07, 0.064], owner: `${prefix}UpperArm`, proximal: `${prefix}Clavicle`, distal: `${prefix}Forearm` },
-      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.26), 1.04, 0], end: [x(0.28), 0.81, 0], startRadius: [0.07, 0.064], endRadius: [0.058, 0.055], owner: `${prefix}Forearm`, proximal: `${prefix}UpperArm`, distal: `${prefix}Hand` },
-      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.28), 0.81, 0], end: [x(0.3), 0.74, 0], startRadius: [0.058, 0.055], endRadius: [0.052, 0.05], owner: `${prefix}Hand`, proximal: `${prefix}Forearm`, distal: `${prefix}Hand` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [armX(0.28), 1.34, 0], end: [armX(0.49), 1.3, 0], startRadius: [0.07, 0.065], endRadius: [0.075, 0.068], owner: `${prefix}Clavicle`, proximal: "spine2", distal: `${prefix}UpperArm` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [armX(0.49), 1.3, 0], end: [armX(0.69), 1.04, 0], startRadius: [0.075, 0.068], endRadius: [0.07, 0.064], owner: `${prefix}UpperArm`, proximal: `${prefix}Clavicle`, distal: `${prefix}Forearm` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [armX(0.69), 1.04, 0], end: [armX(0.81), 0.81, 0], startRadius: [0.07, 0.064], endRadius: [0.058, 0.055], owner: `${prefix}Forearm`, proximal: `${prefix}UpperArm`, distal: `${prefix}Hand` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [armX(0.81), 0.81, 0], end: [armX(0.85), 0.74, 0], startRadius: [0.058, 0.055], endRadius: [0.052, 0.05], owner: `${prefix}Hand`, proximal: `${prefix}Forearm`, distal: `${prefix}Hand` },
       { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.16), 0.83, 0], end: [x(0.18), 0.49, 0], startRadius: [0.12, 0.105], endRadius: [0.11, 0.1], owner: `${prefix}Thigh`, proximal: "pelvis", distal: `${prefix}Shin` },
       { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.18), 0.5, 0], end: [x(0.18), 0.17, 0], startRadius: [0.1, 0.09], endRadius: [0.075, 0.07], owner: `${prefix}Shin`, proximal: `${prefix}Thigh`, distal: `${prefix}Foot` },
       { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.18), 0.16, 0], end: [x(0.18), 0.1, 0.13], startRadius: [0.1, 0.1], endRadius: [0.09, 0.085], owner: `${prefix}Foot`, proximal: `${prefix}Shin`, distal: `${prefix}Toe` },
@@ -376,6 +454,104 @@ const CHIBI_CAPSULES: readonly CewekHalusCapsule[] = [
     ];
   }),
 ];
+
+const measureChibiArmClearances = (capsules: readonly CewekHalusCapsule[]) => {
+  let rest = Number.POSITIVE_INFINITY;
+  let widestSwing = Number.POSITIVE_INFINITY;
+  [-1, 1].forEach((side) => {
+    const sideName = side < 0 ? "left" : "right";
+    const sideIndex = side < 0 ? 0 : 1;
+    const abduction = side * (CHIBI_CONFIG.shoulderRestAbduction - CHIBI_CONFIG.shoulderAbduction);
+    rest = Math.min(rest, measureCewekHalusArmBodyClearance(capsules, CHIBI_CONFIG.bodyBlend, sideName, {
+      upperArmRotationX: 0,
+      upperArmRotationZ: abduction,
+      forearmRotationX: -12 * Math.PI / 180,
+      handRotationX: 0.025,
+    }));
+    CHIBI_CONFIG.runKeyframes.forEach((pose) => {
+      const wristAngle = Math.sin((pose.phase - CHIBI_CONFIG.forearmLagCycles) * Math.PI * 2) * 0.045;
+      widestSwing = Math.min(widestSwing, measureCewekHalusArmBodyClearance(
+        capsules,
+        CHIBI_CONFIG.bodyBlend,
+        sideName,
+        {
+          upperArmRotationX: -pose.shoulder[sideIndex]! * Math.PI / 180,
+          upperArmRotationZ: abduction,
+          forearmRotationX: -pose.elbow[sideIndex]! * Math.PI / 180,
+          handRotationX: wristAngle,
+        },
+      ));
+    });
+  });
+  return { rest, widestSwing };
+};
+
+const measureChibiJointWeights = (geometry: THREE.BufferGeometry) => {
+  const positions = geometry.getAttribute("position");
+  const indices = geometry.getAttribute("skinIndex");
+  const weights = geometry.getAttribute("skinWeight");
+  const regions = {
+    pangkalPaha: { minY: 0.62, maxY: 0.96, minAbsX: 0.06, maxAbsX: 0.34 },
+    lutut: { minY: 0.38, maxY: 0.62, minAbsX: 0.08, maxAbsX: 0.3 },
+  } as const;
+  const results = Object.fromEntries(Object.keys(regions).map((name) => [name, {
+    vertexCount: 0,
+    moreThanTwoBones: 0,
+    minimumBoneWeight: Number.POSITIVE_INFINITY,
+    maximumBoneWeight: 0,
+  }])) as Record<keyof typeof regions, {
+    vertexCount: number;
+    moreThanTwoBones: number;
+    minimumBoneWeight: number;
+    maximumBoneWeight: number;
+  }>;
+  for (let vertex = 0; vertex < positions.count; vertex += 1) {
+    const y = positions.getY(vertex);
+    const absX = Math.abs(positions.getX(vertex));
+    Object.entries(regions).forEach(([name, region]) => {
+      if (y < region.minY || y > region.maxY || absX < region.minAbsX || absX > region.maxAbsX) return;
+      const result = results[name as keyof typeof regions]!;
+      result.vertexCount += 1;
+      const boneWeights = new Map<number, number>();
+      for (let influence = 0; influence < 4; influence += 1) {
+        const weight = weights.getComponent(vertex, influence);
+        const boneIndex = indices.getComponent(vertex, influence);
+        if (weight > 0) boneWeights.set(boneIndex, (boneWeights.get(boneIndex) ?? 0) + weight);
+      }
+      if (boneWeights.size > 2) result.moreThanTwoBones += 1;
+      boneWeights.forEach((weight) => {
+        result.minimumBoneWeight = Math.min(result.minimumBoneWeight, weight);
+        result.maximumBoneWeight = Math.max(result.maximumBoneWeight, weight);
+      });
+    });
+  }
+  Object.values(results).forEach((result) => {
+    if (!Number.isFinite(result.minimumBoneWeight)) result.minimumBoneWeight = 0;
+  });
+  return results;
+};
+
+const measureChibiScaleDiagnostics = (layer: THREE.Group, bones: readonly THREE.Bone[]) => {
+  const nonUniformMeshes: string[] = [];
+  const negativeScaleObjects: string[] = [];
+  layer.traverse((object) => {
+    const scale = object.scale;
+    if (scale.x < 0 || scale.y < 0 || scale.z < 0) negativeScaleObjects.push(object.name || object.type);
+    if (object instanceof THREE.Mesh
+      && (Math.abs(scale.x - scale.y) > 1e-6 || Math.abs(scale.y - scale.z) > 1e-6)) {
+      nonUniformMeshes.push(object.name || object.type);
+    }
+  });
+  return {
+    layerScale: layer.scale.toArray().map((value) => Number(value.toFixed(5))),
+    boneScales: bones.map((bone) => ({
+      name: bone.name,
+      scale: bone.scale.toArray().map((value) => Number(value.toFixed(5))),
+    })),
+    nonUniformMeshes,
+    negativeScaleObjects,
+  };
+};
 
 type AvatarHairStyle = "swept" | "short" | "long" | "wavy";
 
@@ -598,6 +774,16 @@ const NumatikWorldPage = () => {
   const [question, setQuestion] = useState<WorldQuestion | null>(null);
   const [answerFeedback, setAnswerFeedback] = useState<string | null>(null);
   const [mobile, setMobile] = useState(false);
+  const [debugOptions, setDebugOptions] = useState<DebugPanelOptions>(INITIAL_DEBUG_PANEL_OPTIONS);
+  const debugOptionsRef = useRef(debugOptions);
+  debugOptionsRef.current = debugOptions;
+  const [debugPanelOpen, setDebugPanelOpen] = useState(true);
+  const [debugStats, setDebugStats] = useState<DebugAvatarStats>({
+    skinnedMeshes: 0,
+    meshes: 0,
+    drawCalls: 0,
+    objects: [],
+  });
 
   const selectAvatar = (presetId: AvatarPresetId) => {
     setSelectedAvatarId(presetId);
@@ -639,6 +825,11 @@ const NumatikWorldPage = () => {
     host.appendChild(renderer.domElement);
 
     const resources = new Set<THREE.BufferGeometry | THREE.Material>();
+    const originalShadowMapEnabled = renderer.shadowMap.enabled;
+    const debugNormalMaterial = DEBUG_PANEL
+      ? new THREE.MeshNormalMaterial({ side: THREE.DoubleSide })
+      : null;
+    if (debugNormalMaterial) resources.add(debugNormalMaterial);
     const makeMaterial = (color: THREE.ColorRepresentation, roughness = 0.8) => {
       const value = new THREE.MeshStandardMaterial({ color, roughness, metalness: 0 });
       resources.add(value);
@@ -693,10 +884,13 @@ const NumatikWorldPage = () => {
       scale: [number, number, number],
     ) => addMesh(boxGeometry, mat, parent, position, scale);
 
-    scene.add(new THREE.HemisphereLight("#e8fbff", "#83bd63", 2.7));
+    const hemisphereLight = new THREE.HemisphereLight("#e8fbff", "#83bd63", 2.7);
+    scene.add(hemisphereLight);
+    const originalHemisphereLightVisible = hemisphereLight.visible;
     const sunlight = new THREE.DirectionalLight("#fff1bf", 3);
     sunlight.position.set(-24, 38, 17);
     scene.add(sunlight);
+    const originalDirectionalLightVisible = sunlight.visible;
     scene.add(new THREE.AmbientLight("#ffffff", 0.35));
 
     addMesh(new THREE.PlaneGeometry(280, 280), mats.water, scene, [0, -1.45, 0]).rotation.x = -Math.PI / 2;
@@ -2388,10 +2582,10 @@ const NumatikWorldPage = () => {
       const ponytail = makeBone("ponytail", head, [0, 0.23, -0.035]);
       [-1, 1].forEach((side) => {
         const prefix = side < 0 ? "left" : "right";
-        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.13, 0.21, 0]);
-        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.09, -0.04, 0]);
-        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.04, -0.26, 0]);
-        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.02, -0.23, 0]);
+        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.29, 0.21, 0]);
+        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.21, -0.03, 0]);
+        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.2, -0.26, 0]);
+        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.12, -0.23, 0]);
         const thigh = makeBone(`${prefix}Thigh` as ChibiBoneName, pelvis, [side * 0.16, 0.03, 0]);
         const shin = makeBone(`${prefix}Shin` as ChibiBoneName, thigh, [side * 0.02, -0.33, 0]);
         const foot = makeBone(`${prefix}Foot` as ChibiBoneName, shin, [0, -0.32, 0]);
@@ -2466,6 +2660,7 @@ const NumatikWorldPage = () => {
         shoulderBlendRamp: CHIBI_CONFIG.shoulderBlendRamp,
         hipBlendRamp: CHIBI_CONFIG.hipBlendRamp,
         minimumThighGap: CHIBI_CONFIG.minimumThighGap,
+        includeTriangleDiagnostics: DEBUG_PANEL,
         colorAt: surfaceColorAt,
         uvAt,
       }, boneIndices, onProgress, shouldCancel);
@@ -2475,6 +2670,34 @@ const NumatikWorldPage = () => {
         chibiLayers.splice(chibiLayers.indexOf(layer), 1);
         chibiLayer = null;
         return;
+      }
+      const armClearance = measureChibiArmClearances(CHIBI_CAPSULES);
+      const jointWeightStats = measureChibiJointWeights(result.geometry);
+      const skinWeights = result.geometry.getAttribute("skinWeight");
+      const skinIndices = result.geometry.getAttribute("skinIndex");
+      let invalidWeightVertices = 0;
+      let zeroWeightVertices = 0;
+      for (let vertex = 0; vertex < result.vertexCount; vertex += 1) {
+        let sum = 0;
+        let valid = true;
+        let hasZeroWeight = false;
+        for (let influence = 0; influence < 4; influence += 1) {
+          const weight = skinWeights.getComponent(vertex, influence);
+          const boneIndex = skinIndices.getComponent(vertex, influence);
+          sum += weight;
+          valid &&= Number.isFinite(weight) && boneIndex >= 0 && boneIndex < bones.length;
+          hasZeroWeight ||= weight <= 0;
+        }
+        if (!valid || Math.abs(sum - 1) > 1e-4) invalidWeightVertices += 1;
+        if (hasZeroWeight) zeroWeightVertices += 1;
+      }
+      if (invalidWeightVertices > 0 || zeroWeightVertices > 0) {
+        result.geometry.dispose();
+        layer.clear();
+        layer.removeFromParent();
+        chibiLayers.splice(chibiLayers.indexOf(layer), 1);
+        chibiLayer = null;
+        throw new Error(`Si Imut memiliki ${invalidWeightVertices} vertex dengan skin weight tidak valid dan ${zeroWeightVertices} vertex berbobot nol.`);
       }
 
       const makeFaceTexture = (expression: "open" | "blink" | "happy" | "jump") => {
@@ -2569,6 +2792,7 @@ const NumatikWorldPage = () => {
       resources.add(result.geometry);
       const body = new THREE.SkinnedMesh(result.geometry, bodyMaterial);
       body.name = "chibi-halus-body";
+      body.userData.debugLayer = "body";
       body.castShadow = true;
       body.receiveShadow = false;
       body.visible = !DEBUG_AVATAR.enabled
@@ -2605,6 +2829,7 @@ const NumatikWorldPage = () => {
       const hairGeometry = new THREE.SphereGeometry(1, 8, 6);
       const hairMaterial = makeMaterial(palette.hair, 0.55);
       const shadowMaterial = makeMaterial(palette.hairShadow, 0.62);
+      let hairMeshIndex = 0;
       const addHair = (
         parent: THREE.Object3D,
         material: THREE.Material,
@@ -2613,6 +2838,9 @@ const NumatikWorldPage = () => {
         rotationZ = 0,
       ) => {
         const mesh = addMesh(hairGeometry, material, parent, position, scale);
+        hairMeshIndex += 1;
+        mesh.name = `chibi-halus-hair-${hairMeshIndex}`;
+        mesh.userData.debugLayer = "hair";
         mesh.rotation.z = rotationZ;
         mesh.castShadow = true;
         mesh.receiveShadow = false;
@@ -2673,6 +2901,14 @@ const NumatikWorldPage = () => {
         triangles: { tubuhPakaianWajah: result.triangleCount, rambut: totalTriangles - result.triangleCount, total: totalTriangles },
         vertices: result.vertexCount,
         bones: skeleton.bones.length,
+        scaleDiagnostics: measureChibiScaleDiagnostics(layer, bones),
+        invalidWeightVertices,
+        zeroWeightVertices,
+        armWeightLeakVertices: result.armWeightLeakVertexCount,
+        verticesInsideMultipleCapsules: result.verticesInsideMultipleCapsules,
+        inwardTriangles: result.inwardTriangleCount,
+        bobotPangkalPaha: jointWeightStats.pangkalPaha,
+        bobotLutut: jointWeightStats.lutut,
         tinggiTotal: Number(oldHeight.toFixed(3)),
         rasioKepala: Number((CHIBI_CONFIG.headHeight / oldHeight).toFixed(3)),
         lebarTanganVsPergelangan: Number((CHIBI_CONFIG.handWidth / CHIBI_CONFIG.wristWidth).toFixed(2)),
@@ -2680,6 +2916,9 @@ const NumatikWorldPage = () => {
         elapsedMs: Number(chibiElapsedMs.toFixed(1)),
         gridElapsedMs: Number(result.elapsedMs.toFixed(1)),
         minimumArmBodyGap: Number(result.minimumArmBodyGap.toFixed(3)),
+        minimumArmBodyGapRest: Number(armClearance.rest.toFixed(3)),
+        minimumArmBodyGapWidestSwing: Number(armClearance.widestSwing.toFixed(3)),
+        requiredArmBodyGap: Number((2 * CHIBI_CONFIG.shoulderBlend + 0.02).toFixed(3)),
         minimumThighGap: Number(result.minimumThighGap.toFixed(3)),
       });
     };
@@ -2716,10 +2955,10 @@ const NumatikWorldPage = () => {
       const hairBack1 = makeBone("ponytail", head, [0, 0.23, -0.035]);
       [-1, 1].forEach((side) => {
         const prefix = side < 0 ? "left" : "right";
-        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.13, 0.21, 0]);
-        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.09, -0.04, 0]);
-        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.04, -0.26, 0]);
-        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.02, -0.23, 0]);
+        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.29, 0.21, 0]);
+        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.21, -0.03, 0]);
+        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.2, -0.26, 0]);
+        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.12, -0.23, 0]);
         const thigh = makeBone(`${prefix}Thigh` as ChibiBoneName, pelvis, [side * 0.16, 0.03, 0]);
         const shin = makeBone(`${prefix}Shin` as ChibiBoneName, thigh, [side * 0.02, -0.33, 0]);
         const foot = makeBone(`${prefix}Foot` as ChibiBoneName, shin, [0, -0.32, 0]);
@@ -2802,8 +3041,8 @@ const NumatikWorldPage = () => {
         const prefix = side < 0 ? "left" : "right";
         kucingCapsules.push({
           group: side < 0 ? "leftArm" : "rightArm",
-          start: [side * 0.3, 0.76, 0.035],
-          end: [side * 0.35, 0.71, 0.075],
+          start: [side * 0.82, 0.76, 0.035],
+          end: [side * 0.87, 0.71, 0.075],
           startRadius: [0.035, 0.035],
           endRadius: [0.03, 0.03],
           owner: `${prefix}Hand`,
@@ -2834,6 +3073,7 @@ const NumatikWorldPage = () => {
         shoulderBlendRamp: KUCING_CONFIG.shoulderBlendRamp,
         hipBlendRamp: KUCING_CONFIG.hipBlendRamp,
         minimumThighGap: KUCING_CONFIG.minimumThighGap,
+        includeTriangleDiagnostics: DEBUG_PANEL,
         colorAt: surfaceColorAt,
         uvAt,
       }, boneIndices, onProgress, shouldCancel);
@@ -2844,12 +3084,16 @@ const NumatikWorldPage = () => {
         kucingLayer = null;
         return;
       }
+      const armClearance = measureChibiArmClearances(kucingCapsules);
+      const jointWeightStats = measureChibiJointWeights(result.geometry);
       const skinWeights = result.geometry.getAttribute("skinWeight");
       const skinIndices = result.geometry.getAttribute("skinIndex");
       let invalidWeightVertices = 0;
+      let zeroWeightVertices = 0;
       for (let vertex = 0; vertex < result.vertexCount; vertex += 1) {
         let sum = 0;
         let valid = true;
+        let hasZeroWeight = false;
         for (let influence = 0; influence < 4; influence += 1) {
           const weight = influence === 0 ? skinWeights.getX(vertex)
             : influence === 1 ? skinWeights.getY(vertex)
@@ -2858,16 +3102,18 @@ const NumatikWorldPage = () => {
           const boneIndex = skinIndices.getComponent(vertex, influence);
           sum += weight;
           valid &&= Number.isFinite(weight) && boneIndex >= 0 && boneIndex < bones.length;
+          hasZeroWeight ||= weight <= 0;
         }
         if (!valid || Math.abs(sum - 1) > 1e-4) invalidWeightVertices += 1;
+        if (hasZeroWeight) zeroWeightVertices += 1;
       }
-      if (invalidWeightVertices > 0) {
+      if (invalidWeightVertices > 0 || zeroWeightVertices > 0) {
         result.geometry.dispose();
         layer.clear();
         layer.removeFromParent();
         kucingLayers.splice(kucingLayers.indexOf(layer), 1);
         kucingLayer = null;
-        throw new Error(`Si Kucing memiliki ${invalidWeightVertices} vertex dengan skin weight tidak valid.`);
+        throw new Error(`Si Kucing memiliki ${invalidWeightVertices} vertex dengan skin weight tidak valid dan ${zeroWeightVertices} vertex berbobot nol.`);
       }
 
       const makeFaceTexture = (expression: "open" | "blink" | "happy" | "jump") => {
@@ -2956,6 +3202,7 @@ const NumatikWorldPage = () => {
       resources.add(result.geometry);
       const body = new THREE.SkinnedMesh(result.geometry, bodyMaterial);
       body.name = "chibi-kucing-body";
+      body.userData.debugLayer = "body";
       body.castShadow = true;
       body.receiveShadow = false;
       body.visible = !DEBUG_AVATAR.enabled
@@ -2977,6 +3224,7 @@ const NumatikWorldPage = () => {
       resources.add(hairGeometry);
       const hairMaterial = makeMaterial(palette.hair, 0.55);
       const hairShadowMaterial = makeMaterial(palette.hairShadow, 0.62);
+      let hairMeshIndex = 0;
       const addHair = (
         parent: THREE.Object3D,
         position: [number, number, number],
@@ -2984,6 +3232,9 @@ const NumatikWorldPage = () => {
         material: THREE.Material = hairMaterial,
       ) => {
         const mesh = new THREE.Mesh(hairGeometry, material);
+        hairMeshIndex += 1;
+        mesh.name = `chibi-kucing-hair-${hairMeshIndex}`;
+        mesh.userData.debugLayer = "hair";
         mesh.position.set(...position);
         mesh.scale.set(...scale);
         mesh.castShadow = true;
@@ -3020,6 +3271,8 @@ const NumatikWorldPage = () => {
       const bandGeometry = new THREE.TorusGeometry(0.26, 0.027, 7, 24, Math.PI);
       resources.add(bandGeometry);
       const bandMesh = new THREE.Mesh(bandGeometry, accessoryMaterial);
+      bandMesh.name = "chibi-kucing-headset-band";
+      bandMesh.userData.debugLayer = "accessory";
       bandMesh.position.set(0, 0.29, -0.055);
       bandMesh.castShadow = true;
       bandMesh.receiveShadow = false;
@@ -3029,6 +3282,8 @@ const NumatikWorldPage = () => {
       resources.add(earCupGeometry);
       [-1, 1].forEach((side) => {
         const cup = new THREE.Mesh(earCupGeometry, accessoryMaterial);
+        cup.name = `chibi-kucing-headset-cup-${side < 0 ? "left" : "right"}`;
+        cup.userData.debugLayer = "accessory";
         cup.position.set(side * 0.275, 0.02, -0.035);
         cup.scale.set(0.085, 0.105, 0.085);
         cup.castShadow = true;
@@ -3060,17 +3315,22 @@ const NumatikWorldPage = () => {
       kucingEarPivots = [];
       [-1, 1].forEach((side) => {
         const pivot = new THREE.Group();
+        pivot.name = `chibi-kucing-ear-pivot-${side < 0 ? "left" : "right"}`;
         pivot.position.set(side * 0.17, 0.37, -0.055);
         pivot.rotation.z = side * -0.12;
         head.add(pivot);
         kucingEarPivots.push(pivot);
         const outer = new THREE.Mesh(outerEarGeometry, accessoryMaterial);
+        outer.name = `chibi-kucing-ear-outer-${side < 0 ? "left" : "right"}`;
+        outer.userData.debugLayer = "accessory";
         outer.position.set(0, 0, 0);
         outer.castShadow = true;
         outer.receiveShadow = false;
         outer.visible = !DEBUG_AVATAR.enabled || !DEBUG_AVATAR.hideHair;
         pivot.add(outer);
         const inner = new THREE.Mesh(innerEarGeometry, innerEarMaterial);
+        inner.name = `chibi-kucing-ear-inner-${side < 0 ? "left" : "right"}`;
+        inner.userData.debugLayer = "accessory";
         inner.position.set(0, 0.035, 0.032);
         inner.castShadow = false;
         inner.receiveShadow = false;
@@ -3082,6 +3342,8 @@ const NumatikWorldPage = () => {
           new THREE.CylinderGeometry(0.008, 0.01, 0.18, 8),
           accessoryMaterial,
         );
+        microphone.name = "chibi-kucing-headset-microphone";
+        microphone.userData.debugLayer = "accessory";
         microphone.position.set(0.31, -0.1, 0.04);
         microphone.rotation.z = -0.85;
         head.add(microphone);
@@ -3138,7 +3400,14 @@ const NumatikWorldPage = () => {
       console.info("[chibi-kucing] mesh selesai", {
         triangles: { tubuhPakaianWajah: result.triangleCount, rambut: hairTriangles, headset: headsetTriangles, total: totalTriangles },
         vertices: result.vertexCount,
+        scaleDiagnostics: measureChibiScaleDiagnostics(layer, bones),
         invalidWeightVertices,
+        zeroWeightVertices,
+        armWeightLeakVertices: result.armWeightLeakVertexCount,
+        verticesInsideMultipleCapsules: result.verticesInsideMultipleCapsules,
+        inwardTriangles: result.inwardTriangleCount,
+        bobotPangkalPaha: jointWeightStats.pangkalPaha,
+        bobotLutut: jointWeightStats.lutut,
         bones: skeleton.bones.length,
         tinggiTotal: Number(oldHeight.toFixed(3)),
         rasioKepala: Number((KUCING_CONFIG.headHeight * layer.scale.y / oldHeight).toFixed(3)),
@@ -3150,6 +3419,9 @@ const NumatikWorldPage = () => {
         elapsedMs: Number(kucingElapsedMs.toFixed(1)),
         gridElapsedMs: Number(result.elapsedMs.toFixed(1)),
         minimumArmBodyGap: Number(result.minimumArmBodyGap.toFixed(3)),
+        minimumArmBodyGapRest: Number(armClearance.rest.toFixed(3)),
+        minimumArmBodyGapWidestSwing: Number(armClearance.widestSwing.toFixed(3)),
+        requiredArmBodyGap: Number((2 * CHIBI_CONFIG.shoulderBlend + 0.02).toFixed(3)),
         minimumThighGap: Number(result.minimumThighGap.toFixed(3)),
       });
     };
@@ -3767,6 +4039,250 @@ const NumatikWorldPage = () => {
       ["chibi-kucing", { layers: kucingLayers, build: buildKucingAvatar }],
     ]);
 
+    type DebugMeshState = {
+      visible: boolean;
+      castShadow: boolean;
+      material: THREE.Material | THREE.Material[];
+    };
+    const debugMeshStates = new Map<THREE.Mesh, DebugMeshState>();
+    const debugOriginalRenderCallbacks = new Map<THREE.Mesh, THREE.Object3D["onBeforeRender"]>();
+    const debugOriginalWireframes = new Map<THREE.Material, boolean>();
+    const debugOriginalMaterialSettings = new Map<THREE.Material, { side: THREE.Side; flatShading: boolean | null }>();
+    const debugBasicMaterials = new Map<THREE.SkinnedMesh, THREE.MeshBasicMaterial>();
+    let debugAvatarDrawCalls = 0;
+    let debugSkeletonHelper: THREE.SkeletonHelper | null = null;
+    let debugSkeletonMesh: THREE.SkinnedMesh | null = null;
+    let debugVertexNormalsHelper: VertexNormalsHelper | null = null;
+    let debugVertexNormalsMesh: THREE.SkinnedMesh | null = null;
+    let lastDebugStatsUpdate = 0;
+    const debugPreviousAngles = new Map<string, number>();
+    let debugLargestAngleDelta = 0;
+    let debugLargestAngleLabel = "";
+    let lastDebugAngleLog = performance.now();
+
+    const recordDebugAngle = (label: string, angle: number) => {
+      const previous = debugPreviousAngles.get(label);
+      debugPreviousAngles.set(label, angle);
+      if (previous === undefined) return;
+      const delta = Math.abs(Math.atan2(Math.sin(angle - previous), Math.cos(angle - previous)));
+      if (delta > debugLargestAngleDelta) {
+        debugLargestAngleDelta = delta;
+        debugLargestAngleLabel = label;
+      }
+    };
+
+    const debugMaterialSide = (side: THREE.Side) => {
+      if (side === THREE.DoubleSide) return "DoubleSide";
+      if (side === THREE.BackSide) return "BackSide";
+      return "FrontSide";
+    };
+    const debugMaterialInfo = (mesh: THREE.Mesh): DebugMeshInfo => {
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      return {
+        name: mesh.name || "(tanpa nama)",
+        type: mesh.type,
+        castShadow: String(mesh.castShadow),
+        receiveShadow: String(mesh.receiveShadow),
+        material: materials.map((material) => material.type).join(", "),
+        transparent: materials.map((material) => String(material.transparent)).join(", "),
+        depthWrite: materials.map((material) => String(material.depthWrite)).join(", "),
+        side: materials.map((material) => debugMaterialSide(material.side)).join(", "),
+      };
+    };
+    const isAvatarObjectVisible = (object: THREE.Object3D) => {
+      let current: THREE.Object3D | null = object;
+      while (current) {
+        if (!current.visible) return false;
+        if (current === avatar) return true;
+        current = current.parent;
+      }
+      return false;
+    };
+    const removeDebugSkeletonHelper = () => {
+      if (!debugSkeletonHelper) return;
+      debugSkeletonHelper.removeFromParent();
+      debugSkeletonHelper.geometry.dispose();
+      if (Array.isArray(debugSkeletonHelper.material)) {
+        debugSkeletonHelper.material.forEach((material) => material.dispose());
+      } else {
+        debugSkeletonHelper.material.dispose();
+      }
+      debugSkeletonHelper = null;
+      debugSkeletonMesh = null;
+    };
+    const removeDebugVertexNormalsHelper = () => {
+      if (!debugVertexNormalsHelper) return;
+      debugVertexNormalsHelper.removeFromParent();
+      debugVertexNormalsHelper.geometry.dispose();
+      if (Array.isArray(debugVertexNormalsHelper.material)) {
+        debugVertexNormalsHelper.material.forEach((material) => material.dispose());
+      } else {
+        debugVertexNormalsHelper.material.dispose();
+      }
+      debugVertexNormalsHelper = null;
+      debugVertexNormalsMesh = null;
+    };
+    const applyDebugPanelOptions = () => {
+      if (!DEBUG_PANEL) return;
+      const options = debugOptionsRef.current;
+      renderer.shadowMap.enabled = options.sceneShadows === "normal"
+        ? originalShadowMapEnabled
+        : options.sceneShadows === "on";
+      sunlight.visible = options.directionalLight;
+      hemisphereLight.visible = options.hemisphereLight;
+      avatarLayerRegistry.forEach((entry, id) => {
+        const visible = id === selectedAvatarId
+          ? id !== "anak-cokelat" || options.rig
+          : id === "anak-cokelat"
+            ? options.rig
+            : options.otherPresets;
+        entry.layers.forEach((layer) => { layer.visible = visible; });
+      });
+
+      avatar.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        let state = debugMeshStates.get(object);
+        if (!state) {
+          state = {
+            visible: object.visible,
+            castShadow: object.castShadow,
+            material: object.material,
+          };
+          debugMeshStates.set(object, state);
+          const previousCallback = object.onBeforeRender;
+          debugOriginalRenderCallbacks.set(object, previousCallback);
+          object.onBeforeRender = (...args) => {
+            if (args[2] === camera) debugAvatarDrawCalls += 1;
+            previousCallback.apply(object, args);
+          };
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach((material) => {
+            if (!debugOriginalMaterialSettings.has(material)) {
+              debugOriginalMaterialSettings.set(material, {
+                side: material.side,
+                flatShading: "flatShading" in material ? material.flatShading : null,
+              });
+            }
+            if ("wireframe" in material && !debugOriginalWireframes.has(material)) {
+              debugOriginalWireframes.set(material, material.wireframe);
+            }
+          });
+        }
+
+        const category = object.userData.debugLayer as string | undefined;
+        const categoryVisible = category === "body" ? options.body
+          : category === "hair" ? options.hair
+            : category === "accessory" ? options.accessories
+              : true;
+        object.visible = state.visible && categoryVisible;
+        object.castShadow = options.avatarShadows === "normal"
+          ? state.castShadow
+          : options.avatarShadows === "on";
+        const sourceMaterials = Array.isArray(state.material) ? state.material : [state.material];
+        const isBody = category === "body";
+        const selectedSide = options.bodySide === "front" ? THREE.FrontSide
+          : options.bodySide === "back" ? THREE.BackSide
+            : options.bodySide === "double" ? THREE.DoubleSide
+            : null;
+        sourceMaterials.forEach((material) => {
+          if (!isBody) return;
+          const original = debugOriginalMaterialSettings.get(material);
+          if (!original) return;
+          const side = selectedSide ?? original.side;
+          if (material.side !== side) {
+            material.side = side;
+            material.needsUpdate = true;
+          }
+          if (original.flatShading !== null && "flatShading" in material) {
+            const flatShading = options.flatShading || original.flatShading;
+            if (material.flatShading !== flatShading) {
+            material.flatShading = flatShading;
+            material.needsUpdate = true;
+            }
+          }
+        });
+        object.material = options.normalMaterial && debugNormalMaterial
+          ? Array.isArray(state.material)
+            ? state.material.map(() => debugNormalMaterial)
+            : debugNormalMaterial
+          : isBody && options.basicMaterial && object instanceof THREE.SkinnedMesh
+            ? (() => {
+            const baseMaterial = sourceMaterials[0];
+            if (!(baseMaterial instanceof THREE.MeshStandardMaterial)) return state.material;
+            let basicMaterial = debugBasicMaterials.get(object);
+            if (!basicMaterial) {
+              basicMaterial = new THREE.MeshBasicMaterial({
+                color: baseMaterial.color,
+                map: baseMaterial.map,
+                vertexColors: baseMaterial.vertexColors,
+                side: baseMaterial.side,
+                transparent: baseMaterial.transparent,
+                opacity: baseMaterial.opacity,
+                depthWrite: baseMaterial.depthWrite,
+              });
+              debugBasicMaterials.set(object, basicMaterial);
+            }
+            basicMaterial.color.copy(baseMaterial.color);
+            basicMaterial.map = baseMaterial.map;
+            basicMaterial.vertexColors = baseMaterial.vertexColors;
+            basicMaterial.side = selectedSide ?? baseMaterial.side;
+            basicMaterial.wireframe = options.wireframe;
+            return basicMaterial;
+            })()
+            : state.material;
+        sourceMaterials.forEach((material) => {
+          if ("wireframe" in material) {
+            material.wireframe = options.wireframe || (debugOriginalWireframes.get(material) ?? false);
+          }
+        });
+        if (debugNormalMaterial) {
+          debugNormalMaterial.wireframe = options.wireframe;
+          if (isBody) debugNormalMaterial.side = selectedSide ?? debugOriginalMaterialSettings.get(sourceMaterials[0]!)?.side ?? THREE.FrontSide;
+        }
+      });
+
+      const selectedBody = selectedAvatarId === "chibi-kucing" ? kucingBodyMesh : chibiBodyMesh;
+      if (options.skeleton && selectedBody) {
+        if (debugSkeletonMesh !== selectedBody) {
+          removeDebugSkeletonHelper();
+          debugSkeletonHelper = new THREE.SkeletonHelper(selectedBody);
+          debugSkeletonHelper.name = "debug-skeleton-avatar";
+          debugSkeletonMesh = selectedBody;
+          scene.add(debugSkeletonHelper);
+        }
+      } else {
+        removeDebugSkeletonHelper();
+      }
+      if (options.vertexNormals && selectedBody) {
+        if (debugVertexNormalsMesh !== selectedBody) {
+          removeDebugVertexNormalsHelper();
+          debugVertexNormalsHelper = new VertexNormalsHelper(selectedBody, 0.045, 0x00ffae);
+          debugVertexNormalsHelper.name = "debug-vertex-normals-bind-pose";
+          debugVertexNormalsMesh = selectedBody;
+          scene.add(debugVertexNormalsHelper);
+        }
+      } else {
+        removeDebugVertexNormalsHelper();
+      }
+    };
+    const updateDebugAvatarStats = () => {
+      let skinnedMeshes = 0;
+      let meshes = 0;
+      const objects: DebugMeshInfo[] = [];
+      avatar.traverse((object) => {
+        if (!(object instanceof THREE.Mesh) || !isAvatarObjectVisible(object)) return;
+        if (object instanceof THREE.SkinnedMesh) skinnedMeshes += 1;
+        else meshes += 1;
+        objects.push(debugMaterialInfo(object));
+      });
+      setDebugStats({
+        skinnedMeshes,
+        meshes,
+        drawCalls: debugAvatarDrawCalls,
+        objects,
+      });
+    };
+
     const applyAvatar = async (presetId: AvatarPresetId) => {
       const selectedLayer = avatarLayerRegistry.get(presetId);
       if (!selectedLayer) return;
@@ -3981,13 +4497,14 @@ const NumatikWorldPage = () => {
         }
       }
       const input = keysRef.current;
+      const fixedFacing = DEBUG_PANEL ? debugOptionsRef.current.fixedFacing : null;
       const forward = Number(input.has("w") || input.has("arrowup")) - Number(input.has("s") || input.has("arrowdown"));
       const sideways = Number(input.has("d") || input.has("arrowright")) - Number(input.has("a") || input.has("arrowleft"));
-      const moving = forward !== 0 || sideways !== 0;
+      const moving = fixedFacing === null && (forward !== 0 || sideways !== 0);
       const wasGrounded = grounded;
       let movementSpeed = 0;
 
-      if (!pendingTreasureRef.current && !gameCompleteRef.current) {
+      if (!pendingTreasureRef.current && !gameCompleteRef.current && fixedFacing === null) {
         const direction = new THREE.Vector3(
           Math.sin(cameraYaw) * forward + Math.cos(cameraYaw) * sideways,
           0,
@@ -4029,6 +4546,14 @@ const NumatikWorldPage = () => {
           setQuestion(makeQuestion());
           setAnswerFeedback(null);
         }
+      }
+      if (fixedFacing !== null) {
+        const facingYaw = fixedFacing === "left" ? -Math.PI / 2
+          : fixedFacing === "right" ? Math.PI / 2
+            : fixedFacing === "back" ? Math.PI
+              : 0;
+        avatar.rotation.y = facingYaw;
+        jumpRequestedRef.current = false;
       }
 
       if (!wasGrounded && grounded) animationState.landingBend = 1;
@@ -4363,7 +4888,8 @@ const NumatikWorldPage = () => {
         });
       }
       if (selectedAvatarId === "chibi-halus" && chibiBuilt && chibiLayer && chibiSkeleton && chibiBodyMesh) {
-        const frozenPhase = CHIBI_DEBUG_FREEZE_PHASE;
+        const debugLocks = DEBUG_PANEL ? debugOptionsRef.current : INITIAL_DEBUG_PANEL_OPTIONS;
+        const frozenPhase = DEBUG_PANEL ? debugOptionsRef.current.freezePhase : CHIBI_DEBUG_FREEZE_PHASE;
         const cycle = frozenPhase === null
           ? ((animationState.phase / (Math.PI * 2)) % 1 + 1) % 1
           : ((frozenPhase % 1) + 1) % 1;
@@ -4395,14 +4921,26 @@ const NumatikWorldPage = () => {
         const lift = gaitActive ? heightAt * chibiRunBlend : 0;
         const idleShift = grounded && !isRunning ? Math.sin(now * 0.0011) * 0.008 : 0;
         const pelvisBone = chibiBones.pelvis!;
-        pelvisBone.position.y = 0.8 + chibiBreath + idleShift + lift + jumpAmount * 0.045;
+        if (!debugLocks.lockBody) {
+          pelvisBone.position.y = 0.8 + chibiBreath + idleShift + lift + jumpAmount * 0.045;
+        }
+        if (debugLocks.lockHipYawRoll) {
+          pelvisBone.rotation.y = 0;
+          pelvisBone.rotation.z = 0;
+        }
         const spine1Bone = chibiBones.spine1!;
-        spine1Bone.rotation.x = gaitActive ? CHIBI_CONFIG.bodyLean * chibiRunBlend : chibiBreath * 0.2;
+        if (!debugLocks.lockBody) {
+          spine1Bone.rotation.x = gaitActive ? CHIBI_CONFIG.bodyLean * chibiRunBlend : chibiBreath * 0.2;
+        }
         const spine2Bone = chibiBones.spine2!;
-        spine2Bone.rotation.y = gaitActive ? Math.sin(cycle * Math.PI * 2) * RUN_CONFIG.torsoTwist * chibiRunBlend : idleShift;
+        if (!debugLocks.lockBody) {
+          spine2Bone.rotation.y = gaitActive ? Math.sin(cycle * Math.PI * 2) * RUN_CONFIG.torsoTwist * chibiRunBlend : idleShift;
+        }
         const headBone = chibiBones.head!;
-        headBone.rotation.x = -spine1Bone.rotation.x + Math.sin(now * 0.0013) * 0.006;
-        headBone.rotation.y = -spine2Bone.rotation.y * 0.45;
+        if (!debugLocks.lockBody) {
+          headBone.rotation.x = -spine1Bone.rotation.x + Math.sin(now * 0.0013) * 0.006;
+          headBone.rotation.y = -spine2Bone.rotation.y * 0.45;
+        }
 
         [-1, 1].forEach((side, sideIndex) => {
           const index = sideIndex as 0 | 1;
@@ -4411,38 +4949,48 @@ const NumatikWorldPage = () => {
           const upperArm = chibiBones[`${prefix}UpperArm` as ChibiBoneName]!;
           const forearm = chibiBones[`${prefix}Forearm` as ChibiBoneName]!;
           const wrist = chibiBones[`${prefix}Hand` as ChibiBoneName]!;
-          const armAngle = gaitActive
-            ? angleAt("shoulder", index) * chibiRunBlend * runScale
-            : 7 * Math.PI / 180;
-          clavicle.rotation.z = side * CHIBI_CONFIG.shoulderAbduction;
-          upperArm.rotation.x = -armAngle - jumpAmount * 0.72;
-          const elbowAngle = gaitActive ? angleAt("elbow", index) * chibiRunBlend : 12 * Math.PI / 180;
-          forearm.rotation.x = -elbowAngle;
-          wrist.rotation.x = gaitActive
-            ? Math.sin((cycle - CHIBI_CONFIG.forearmLagCycles) * Math.PI * 2) * 0.045
-            : 0.025;
+          const armAngle = gaitActive ? angleAt("shoulder", index) * chibiRunBlend * runScale : 0;
+          if (!debugLocks.lockArms) {
+            clavicle.rotation.z = 0;
+            upperArm.rotation.z = side * (CHIBI_CONFIG.shoulderRestAbduction - CHIBI_CONFIG.shoulderAbduction);
+            upperArm.rotation.x = -armAngle - jumpAmount * 0.72;
+            const elbowAngle = gaitActive ? angleAt("elbow", index) * chibiRunBlend : 12 * Math.PI / 180;
+            forearm.rotation.x = -elbowAngle;
+            wrist.rotation.x = gaitActive
+              ? Math.sin((cycle - CHIBI_CONFIG.forearmLagCycles) * Math.PI * 2) * 0.045
+              : 0.025;
+          }
 
           const thigh = chibiBones[`${prefix}Thigh` as ChibiBoneName]!;
           const shin = chibiBones[`${prefix}Shin` as ChibiBoneName]!;
           const foot = chibiBones[`${prefix}Foot` as ChibiBoneName]!;
           const toe = chibiBones[`${prefix}Toe` as ChibiBoneName]!;
+          const lockLeg = side < 0 ? debugLocks.lockLeftLeg : debugLocks.lockRightLeg;
           const hipAngle = gaitActive ? angleAt("hip", index) * chibiRunBlend * runScale : 0;
           const kneeAngle = gaitActive
             ? angleAt("knee", index) * chibiRunBlend
             : jumpAmount * 0.38;
-          thigh.rotation.x = -hipAngle + jumpAmount * 0.18;
-          shin.rotation.x = -kneeAngle;
-          foot.rotation.x = hipAngle + kneeAngle;
-          toe.rotation.x = -foot.rotation.x * 0.2;
+          if (!lockLeg) {
+            thigh.rotation.x = -hipAngle + jumpAmount * 0.18;
+            shin.rotation.x = -kneeAngle;
+            foot.rotation.x = hipAngle + kneeAngle;
+            toe.rotation.x = -foot.rotation.x * 0.2;
+          }
+          if (debugLocks.lockHipYawRoll) {
+            thigh.rotation.y = 0;
+            thigh.rotation.z = 0;
+          }
         });
 
         const ponytailBone = chibiBones.ponytail!;
-        ponytailBone.rotation.x = THREE.MathUtils.clamp(
-          gaitActive ? Math.sin(cycle * Math.PI * 2 - 0.45) * CHIBI_CONFIG.hairSway : 0,
-          -0.05,
-          0.05,
-        );
-        if (chibiHairRoot) {
+        if (!debugLocks.lockSecondaryMotion) {
+          ponytailBone.rotation.x = THREE.MathUtils.clamp(
+            gaitActive ? Math.sin(cycle * Math.PI * 2 - 0.45) * CHIBI_CONFIG.hairSway : 0,
+            -0.05,
+            0.05,
+          );
+        }
+        if (chibiHairRoot && !debugLocks.lockSecondaryMotion) {
           chibiHairRoot.rotation.x = THREE.MathUtils.lerp(
             chibiHairRoot.rotation.x,
             gaitActive ? -ponytailBone.rotation.x * 0.55 : 0,
@@ -4475,7 +5023,8 @@ const NumatikWorldPage = () => {
         chibiDebugSkeletonHelper?.updateMatrixWorld(true);
       }
       if (selectedAvatarId === "chibi-kucing" && kucingBuilt && kucingLayer && kucingSkeleton && kucingBodyMesh) {
-        const frozenPhase = KUCING_DEBUG_FREEZE_PHASE;
+        const debugLocks = DEBUG_PANEL ? debugOptionsRef.current : INITIAL_DEBUG_PANEL_OPTIONS;
+        const frozenPhase = DEBUG_PANEL ? debugOptionsRef.current.freezePhase : KUCING_DEBUG_FREEZE_PHASE;
         const cycle = frozenPhase === null
           ? ((animationState.phase / (Math.PI * 2)) % 1 + 1) % 1
           : ((frozenPhase % 1) + 1) % 1;
@@ -4507,14 +5056,26 @@ const NumatikWorldPage = () => {
         const lift = gaitActive ? heightAt * kucingRunBlend : 0;
         const idleShift = grounded && !isRunning ? Math.sin(now * 0.0011) * 0.008 : 0;
         const pelvisBone = kucingBones.pelvis!;
-        pelvisBone.position.y = 0.8 + kucingBreath + idleShift + lift + jumpAmount * 0.045;
+        if (!debugLocks.lockBody) {
+          pelvisBone.position.y = 0.8 + kucingBreath + idleShift + lift + jumpAmount * 0.045;
+        }
+        if (debugLocks.lockHipYawRoll) {
+          pelvisBone.rotation.y = 0;
+          pelvisBone.rotation.z = 0;
+        }
         const spine1Bone = kucingBones.spine1!;
-        spine1Bone.rotation.x = gaitActive ? KUCING_CONFIG.bodyLean * kucingRunBlend : kucingBreath * 0.2;
+        if (!debugLocks.lockBody) {
+          spine1Bone.rotation.x = gaitActive ? KUCING_CONFIG.bodyLean * kucingRunBlend : kucingBreath * 0.2;
+        }
         const spine2Bone = kucingBones.spine2!;
-        spine2Bone.rotation.y = gaitActive ? Math.sin(cycle * Math.PI * 2) * RUN_CONFIG.torsoTwist * kucingRunBlend : idleShift;
+        if (!debugLocks.lockBody) {
+          spine2Bone.rotation.y = gaitActive ? Math.sin(cycle * Math.PI * 2) * RUN_CONFIG.torsoTwist * kucingRunBlend : idleShift;
+        }
         const headBone = kucingBones.head!;
-        headBone.rotation.x = -spine1Bone.rotation.x + Math.sin(now * 0.0013) * 0.006;
-        headBone.rotation.y = -spine2Bone.rotation.y * 0.45;
+        if (!debugLocks.lockBody) {
+          headBone.rotation.x = -spine1Bone.rotation.x + Math.sin(now * 0.0013) * 0.006;
+          headBone.rotation.y = -spine2Bone.rotation.y * 0.45;
+        }
 
         [-1, 1].forEach((side, sideIndex) => {
           const index = sideIndex as 0 | 1;
@@ -4523,47 +5084,57 @@ const NumatikWorldPage = () => {
           const upperArm = kucingBones[`${prefix}UpperArm` as ChibiBoneName]!;
           const forearm = kucingBones[`${prefix}Forearm` as ChibiBoneName]!;
           const wrist = kucingBones[`${prefix}Hand` as ChibiBoneName]!;
-          const armAngle = gaitActive
-            ? angleAt("shoulder", index) * kucingRunBlend * runScale
-            : 7 * Math.PI / 180;
-          clavicle.rotation.z = side * KUCING_CONFIG.shoulderAbduction;
-          upperArm.rotation.x = -armAngle - jumpAmount * 0.72;
-          const elbowAngle = gaitActive ? angleAt("elbow", index) * kucingRunBlend : 12 * Math.PI / 180;
-          forearm.rotation.x = -elbowAngle;
-          wrist.rotation.x = gaitActive
-            ? Math.sin((cycle - KUCING_CONFIG.forearmLagCycles) * Math.PI * 2) * 0.045
-            : 0.025;
+          const armAngle = gaitActive ? angleAt("shoulder", index) * kucingRunBlend * runScale : 0;
+          if (!debugLocks.lockArms) {
+            clavicle.rotation.z = 0;
+            upperArm.rotation.z = side * (KUCING_CONFIG.shoulderRestAbduction - KUCING_CONFIG.shoulderAbduction);
+            upperArm.rotation.x = -armAngle - jumpAmount * 0.72;
+            const elbowAngle = gaitActive ? angleAt("elbow", index) * kucingRunBlend : 12 * Math.PI / 180;
+            forearm.rotation.x = -elbowAngle;
+            wrist.rotation.x = gaitActive
+              ? Math.sin((cycle - KUCING_CONFIG.forearmLagCycles) * Math.PI * 2) * 0.045
+              : 0.025;
+          }
 
           const thigh = kucingBones[`${prefix}Thigh` as ChibiBoneName]!;
           const shin = kucingBones[`${prefix}Shin` as ChibiBoneName]!;
           const foot = kucingBones[`${prefix}Foot` as ChibiBoneName]!;
           const toe = kucingBones[`${prefix}Toe` as ChibiBoneName]!;
+          const lockLeg = side < 0 ? debugLocks.lockLeftLeg : debugLocks.lockRightLeg;
           const hipAngle = gaitActive ? angleAt("hip", index) * kucingRunBlend * runScale : 0;
           const kneeAngle = gaitActive ? angleAt("knee", index) * kucingRunBlend : jumpAmount * 0.38;
-          thigh.rotation.x = -hipAngle + jumpAmount * 0.18;
-          shin.rotation.x = -kneeAngle;
-          foot.rotation.x = hipAngle + kneeAngle;
-          toe.rotation.x = -foot.rotation.x * 0.2;
+          if (!lockLeg) {
+            thigh.rotation.x = -hipAngle + jumpAmount * 0.18;
+            shin.rotation.x = -kneeAngle;
+            foot.rotation.x = hipAngle + kneeAngle;
+            toe.rotation.x = -foot.rotation.x * 0.2;
+          }
+          if (debugLocks.lockHipYawRoll) {
+            thigh.rotation.y = 0;
+            thigh.rotation.z = 0;
+          }
         });
 
-        kucingHairBones.forEach((bone, index) => {
-          const delay = 0.45 + index * 0.11;
-          const target = gaitActive
-            ? THREE.MathUtils.clamp(Math.sin(cycle * Math.PI * 2 - delay) * KUCING_CONFIG.hairSway, -0.07, 0.07)
-            : Math.sin(now * 0.001 + index * 0.4) * 0.006;
-          bone.rotation.x = THREE.MathUtils.lerp(
-            bone.rotation.x,
-            target,
-            1 - Math.exp(-KUCING_CONFIG.hairChainDamping * dt),
-          );
-        });
-        kucingEarPivots.forEach((pivot, index) => {
-          const side = index === 0 ? -1 : 1;
-          const target = gaitActive
-            ? Math.sin(cycle * Math.PI * 2 - 0.3) * KUCING_CONFIG.earSway * side
-            : 0;
-          pivot.rotation.z = THREE.MathUtils.lerp(pivot.rotation.z, side * -0.12 + target, 1 - Math.exp(-9 * dt));
-        });
+        if (!debugLocks.lockSecondaryMotion) {
+          kucingHairBones.forEach((bone, index) => {
+            const delay = 0.45 + index * 0.11;
+            const target = gaitActive
+              ? THREE.MathUtils.clamp(Math.sin(cycle * Math.PI * 2 - delay) * KUCING_CONFIG.hairSway, -0.07, 0.07)
+              : Math.sin(now * 0.001 + index * 0.4) * 0.006;
+            bone.rotation.x = THREE.MathUtils.lerp(
+              bone.rotation.x,
+              target,
+              1 - Math.exp(-KUCING_CONFIG.hairChainDamping * dt),
+            );
+          });
+          kucingEarPivots.forEach((pivot, index) => {
+            const side = index === 0 ? -1 : 1;
+            const target = gaitActive
+              ? Math.sin(cycle * Math.PI * 2 - 0.3) * KUCING_CONFIG.earSway * side
+              : 0;
+            pivot.rotation.z = THREE.MathUtils.lerp(pivot.rotation.z, side * -0.12 + target, 1 - Math.exp(-9 * dt));
+          });
+        }
         if (grounded && !isRunning) {
           if (now >= kucingNextBlinkAt) {
             kucingBlinkUntil = now + 130;
@@ -4697,6 +5268,34 @@ const NumatikWorldPage = () => {
         treasure.group.rotation.y = Math.sin(now * 0.0004 + treasure.phase) * 0.12;
         treasure.group.position.y = treasure.home.y + Math.sin(now * 0.002 + treasure.phase) * 0.08;
       });
+      if (DEBUG_PANEL && (selectedAvatarId === "chibi-halus" || selectedAvatarId === "chibi-kucing")) {
+        const bones = selectedAvatarId === "chibi-kucing" ? kucingBones : chibiBones;
+        ["left", "right"].forEach((side) => {
+          ["Thigh", "Shin", "Foot"].forEach((segment) => {
+            const bone = bones[`${side}${segment}` as ChibiBoneName];
+            if (!bone) return;
+            recordDebugAngle(`${side}${segment}.x`, bone.rotation.x);
+            recordDebugAngle(`${side}${segment}.y`, bone.rotation.y);
+            recordDebugAngle(`${side}${segment}.z`, bone.rotation.z);
+          });
+        });
+        const pelvisBone = bones.pelvis;
+        if (pelvisBone) {
+          recordDebugAngle("pelvis.yaw", pelvisBone.rotation.y);
+          recordDebugAngle("pelvis.roll", pelvisBone.rotation.z);
+        }
+        recordDebugAngle("avatar.yaw", avatar.rotation.y);
+        if (now - lastDebugAngleLog >= 1000) {
+          console.info("[debug-angle] perubahan terbesar antar frame", {
+            joint: debugLargestAngleLabel || "(belum ada perubahan)",
+            derajat: Number((debugLargestAngleDelta * 180 / Math.PI).toFixed(2)),
+            arahTetap: debugOptionsRef.current.fixedFacing ?? "nonaktif",
+          });
+          debugLargestAngleDelta = 0;
+          debugLargestAngleLabel = "";
+          lastDebugAngleLog = now;
+        }
+      }
       cameraTarget.set(playerPosition.x, playerPosition.y + 1.1, playerPosition.z);
       const cameraDistance = 5.2;
       cameraPosition.set(
@@ -4706,13 +5305,44 @@ const NumatikWorldPage = () => {
       );
       camera.position.lerp(cameraPosition, 1 - Math.exp(-7 * dt));
       camera.lookAt(cameraTarget);
+      applyDebugPanelOptions();
+      debugSkeletonHelper?.updateMatrixWorld(true);
+      debugVertexNormalsHelper?.update();
+      debugAvatarDrawCalls = 0;
       renderer.render(scene, camera);
+      if (DEBUG_PANEL && now - lastDebugStatsUpdate >= 250) {
+        lastDebugStatsUpdate = now;
+        updateDebugAvatarStats();
+      }
     };
     frameId = window.requestAnimationFrame(animate);
 
     return () => {
       effectDisposed = true;
       window.cancelAnimationFrame(frameId);
+      renderer.shadowMap.enabled = originalShadowMapEnabled;
+      sunlight.visible = originalDirectionalLightVisible;
+      hemisphereLight.visible = originalHemisphereLightVisible;
+      removeDebugSkeletonHelper();
+      removeDebugVertexNormalsHelper();
+      debugMeshStates.forEach((state, mesh) => {
+        mesh.visible = state.visible;
+        mesh.castShadow = state.castShadow;
+        mesh.material = state.material;
+        const previousCallback = debugOriginalRenderCallbacks.get(mesh);
+        if (previousCallback) mesh.onBeforeRender = previousCallback;
+      });
+      debugOriginalWireframes.forEach((wireframe, material) => {
+        if ("wireframe" in material) material.wireframe = wireframe;
+      });
+      debugOriginalMaterialSettings.forEach((settings, material) => {
+        material.side = settings.side;
+        if (settings.flatShading !== null && "flatShading" in material) {
+          material.flatShading = settings.flatShading;
+        }
+        material.needsUpdate = true;
+      });
+      debugBasicMaterials.forEach((material) => material.dispose());
       window.removeEventListener("resize", updateSize);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
@@ -4775,6 +5405,49 @@ const NumatikWorldPage = () => {
     keysRef.current.delete(key);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
+  type DebugBooleanOption =
+    | "body" | "hair" | "accessories" | "rig" | "otherPresets" | "wireframe" | "normalMaterial"
+    | "skeleton" | "vertexNormals" | "flatShading" | "directionalLight" | "hemisphereLight"
+    | "basicMaterial" | "lockArms" | "lockBody" | "lockLeftLeg" | "lockRightLeg"
+    | "lockHipYawRoll" | "lockSecondaryMotion";
+  const toggleDebugOption = (key: DebugBooleanOption) => {
+    setDebugOptions((current) => ({ ...current, [key]: !current[key] }));
+  };
+  const cycleDebugShadow = (key: "avatarShadows" | "sceneShadows") => {
+    setDebugOptions((current) => ({
+      ...current,
+      [key]: current[key] === "normal" ? "on" : current[key] === "on" ? "off" : "normal",
+    }));
+  };
+  const resetDebugOptions = () => setDebugOptions(INITIAL_DEBUG_PANEL_OPTIONS);
+  const closeDebugPanel = () => {
+    setDebugOptions(INITIAL_DEBUG_PANEL_OPTIONS);
+    setDebugPanelOpen(false);
+  };
+  const debugPanelToggles: Array<{
+    key: DebugBooleanOption;
+    label: string;
+  }> = [
+    { key: "body", label: "Tubuh" },
+    { key: "hair", label: "Rambut" },
+    { key: "accessories", label: "Headset / aksesori" },
+    { key: "rig", label: "Mesh bawaan rig" },
+    { key: "otherPresets", label: "Mesh preset lain" },
+    { key: "wireframe", label: "Wireframe" },
+    { key: "normalMaterial", label: "MeshNormalMaterial" },
+    { key: "skeleton", label: "SkeletonHelper" },
+    { key: "vertexNormals", label: "VertexNormalsHelper (bind pose)" },
+    { key: "flatShading", label: "Flat shading tubuh" },
+    { key: "directionalLight", label: "DirectionalLight" },
+    { key: "hemisphereLight", label: "HemisphereLight" },
+    { key: "basicMaterial", label: "MeshBasicMaterial tubuh" },
+    { key: "lockArms", label: "Kunci lengan" },
+    { key: "lockBody", label: "Kunci badan" },
+    { key: "lockLeftLeg", label: "Kunci kaki kiri" },
+    { key: "lockRightLeg", label: "Kunci kaki kanan" },
+    { key: "lockHipYawRoll", label: "Kunci yaw/roll pinggul" },
+    { key: "lockSecondaryMotion", label: "Kunci rambut/headset" },
+  ];
 
   return (
     <main className="world-page">
@@ -4783,6 +5456,26 @@ const NumatikWorldPage = () => {
         .world-canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
         .world-canvas:active{cursor:grabbing}
         .world-hud{position:absolute;inset:0;pointer-events:none}
+        .world-debug-panel{position:absolute;z-index:6;top:76px;right:12px;width:min(360px,calc(100vw - 24px));max-height:calc(100dvh - 92px);overflow:auto;padding:12px;border:2px solid rgba(255,255,255,.95);border-radius:16px;background:rgba(17,35,57,.94);color:#fff;font:600 12px/1.45 var(--font-body,'Exo 2'),sans-serif;box-shadow:0 10px 28px rgba(0,0,0,.32);pointer-events:auto;overscroll-behavior:contain}
+        .world-debug-reopen{position:absolute;z-index:6;top:76px;right:12px;min-height:44px;padding:8px 12px;border:2px solid #fff;border-radius:12px;background:rgba(17,35,57,.94);color:#fff;font:800 12px var(--font-body,'Exo 2'),sans-serif;pointer-events:auto;touch-action:manipulation}
+        .world-debug-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font:800 13px var(--font-display,'Orbitron'),sans-serif}
+        .world-debug-counts{margin-bottom:8px;color:#c7e9ff}
+        .world-debug-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+        .world-debug-button,.world-debug-phase button{min-height:44px;padding:7px;border:1px solid rgba(255,255,255,.55);border-radius:10px;background:#315d87;color:#fff;font:700 11px/1.25 var(--font-body,'Exo 2'),sans-serif;touch-action:manipulation}
+        .world-debug-button[aria-pressed="true"],.world-debug-phase button[aria-pressed="true"]{background:#167e6b;border-color:#76f0d0}
+        .world-debug-button:disabled{background:#424b57;color:#c5cbd1}
+        .world-debug-group{display:grid;gap:5px;margin-top:8px}
+        .world-debug-group>strong{color:#c7e9ff}
+        .world-debug-choice-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+        .world-debug-choice-row.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+        .world-debug-phase{display:grid;grid-template-columns:1fr;gap:6px;margin-top:8px}
+        .world-debug-phase-buttons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+        .world-debug-objects{margin-top:8px}
+        .world-debug-objects summary{min-height:36px;padding:7px 0;color:#c7e9ff;font-weight:800;cursor:pointer}
+        .world-debug-object-list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+        .world-debug-object{padding:7px;border-radius:8px;background:rgba(255,255,255,.09);overflow-wrap:anywhere}
+        .world-debug-object strong{display:block;color:#fff}
+        .world-debug-object span{display:block;color:#c8d6e5;font-size:10px}
         .world-top{position:absolute;top:clamp(14px,3vh,28px);left:clamp(14px,3vw,34px);right:clamp(14px,3vw,34px);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
         .world-brand{display:flex;align-items:center;gap:12px}
         .world-back,.world-score{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:9px 14px;border:1px solid rgba(255,255,255,.92);border-radius:16px;background:rgba(255,255,255,.88);color:#315d87;font:800 11px var(--font-display,'Orbitron'),sans-serif;box-shadow:0 6px 20px rgba(34,99,137,.16);backdrop-filter:blur(8px)}
@@ -5048,6 +5741,114 @@ const NumatikWorldPage = () => {
               </>
             )}
           </div>
+        )}
+        {DEBUG_PANEL && gameStarted && !debugPanelOpen && (
+          <button className="world-debug-reopen" type="button" onClick={() => setDebugPanelOpen(true)}>Buka Uji Avatar</button>
+        )}
+        {DEBUG_PANEL && gameStarted && debugPanelOpen && (
+          <aside className="world-debug-panel" aria-label="Panel uji avatar">
+            <div className="world-debug-title">
+              <span>UJI AVATAR · {selectedAvatarId}</span>
+              <button className="world-debug-button" type="button" onClick={closeDebugPanel}>Tutup</button>
+            </div>
+            <div className="world-debug-counts">
+              SkinnedMesh: {debugStats.skinnedMeshes} · Mesh: {debugStats.meshes} · Draw call avatar: {debugStats.drawCalls}
+            </div>
+            <div className="world-debug-group">
+              <strong>Bayangan (Normal mengembalikan pengaturan asli)</strong>
+              <div className="world-debug-choice-row three">
+                <button className="world-debug-button" type="button" aria-pressed={debugOptions.avatarShadows === "on"} onClick={() => cycleDebugShadow("avatarShadows")}>
+                  Avatar: {debugOptions.avatarShadows === "normal" ? "Normal" : debugOptions.avatarShadows.toUpperCase()}
+                </button>
+                <button className="world-debug-button" type="button" aria-pressed={debugOptions.sceneShadows === "on"} onClick={() => cycleDebugShadow("sceneShadows")}>
+                  ShadowMap: {debugOptions.sceneShadows === "normal" ? "Normal" : debugOptions.sceneShadows.toUpperCase()}
+                </button>
+                <button className="world-debug-button" type="button" onClick={resetDebugOptions}>Pulihkan semua</button>
+              </div>
+            </div>
+            <div className="world-debug-group">
+              <strong>Sisi permukaan tubuh</strong>
+              <div className="world-debug-choice-row">
+                {([
+                  ["original", "Normal"],
+                  ["front", "Front"],
+                  ["back", "Back"],
+                  ["double", "Double"],
+                ] as const).map(([side, label]) => (
+                  <button key={side} className="world-debug-button" type="button" aria-pressed={debugOptions.bodySide === side} onClick={() => setDebugOptions((current) => ({ ...current, bodySide: side }))}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="world-debug-group">
+              <strong>Arah tetap (gerak dinonaktifkan)</strong>
+              <div className="world-debug-choice-row">
+                {([
+                  ["left", "Kiri"],
+                  ["right", "Kanan"],
+                  ["front", "Depan"],
+                  ["back", "Belakang"],
+                ] as const).map(([facing, label]) => (
+                  <button key={facing} className="world-debug-button" type="button" aria-pressed={debugOptions.fixedFacing === facing} onClick={() => setDebugOptions((current) => ({ ...current, fixedFacing: facing }))}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <button className="world-debug-button" type="button" aria-pressed={debugOptions.fixedFacing === null} onClick={() => setDebugOptions((current) => ({ ...current, fixedFacing: null }))}>
+                Arah normal
+              </button>
+            </div>
+            <div className="world-debug-buttons">
+              {debugPanelToggles.map(({ key, label }) => (
+                <button
+                  key={key}
+                  className="world-debug-button"
+                  type="button"
+                  aria-pressed={debugOptions[key]}
+                  onClick={() => toggleDebugOption(key)}
+                >
+                  {label}: {debugOptions[key] ? "ON" : "OFF"}
+                </button>
+              ))}
+              <button className="world-debug-button" type="button" disabled>Foot-lock / IK: tidak tersedia</button>
+            </div>
+            <div className="world-debug-phase">
+              <strong>Bekukan animasi pada fase</strong>
+              <div className="world-debug-phase-buttons">
+                {DEBUG_PANEL_PHASES.map((phase) => (
+                  <button
+                    key={phase}
+                    type="button"
+                    aria-pressed={debugOptions.freezePhase === phase}
+                    onClick={() => setDebugOptions((current) => ({ ...current, freezePhase: phase }))}
+                  >
+                    {phase.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  aria-pressed={debugOptions.freezePhase === null}
+                  onClick={() => setDebugOptions((current) => ({ ...current, freezePhase: null }))}
+                >
+                  Langsung
+                </button>
+              </div>
+            </div>
+            <details className="world-debug-objects">
+              <summary>Objek Mesh visible ({debugStats.skinnedMeshes + debugStats.meshes})</summary>
+              <ul className="world-debug-object-list">
+                {debugStats.objects.map((object, index) => (
+                  <li className="world-debug-object" key={`${object.name}-${index}`}>
+                    <strong>{object.name} · {object.type}</strong>
+                    <span>castShadow: {object.castShadow} · receiveShadow: {object.receiveShadow}</span>
+                    <span>material: {object.material} · transparent: {object.transparent} · depthWrite: {object.depthWrite} · side: {object.side}</span>
+                  </li>
+                ))}
+                {debugStats.objects.length === 0 && <li className="world-debug-object">Belum ada mesh visible.</li>}
+              </ul>
+            </details>
+          </aside>
         )}
         {gameComplete && (
           <div className="world-question-layer">

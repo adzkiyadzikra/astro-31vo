@@ -28,6 +28,7 @@ export type CewekHalusGeometryConfig = {
   shoulderBlendRamp?: readonly [number, number];
   hipBlendRamp?: readonly [number, number];
   minimumThighGap?: number;
+  includeTriangleDiagnostics?: boolean;
   colorAt?: (point: readonly [number, number, number], target: THREE.Color) => void;
   uvAt?: (point: readonly [number, number, number], target: THREE.Vector2) => void;
 };
@@ -47,6 +48,12 @@ export type CewekHalusCapsule = {
 
 type Capsule = CewekHalusCapsule;
 type CapsuleDistance = { distance: number; t: number };
+export type CewekHalusArmPose = {
+  upperArmRotationX: number;
+  upperArmRotationZ: number;
+  forearmRotationX: number;
+  handRotationX: number;
+};
 
 export type CewekHalusGeometryResult = {
   geometry: THREE.BufferGeometry;
@@ -55,6 +62,11 @@ export type CewekHalusGeometryResult = {
   elapsedMs: number;
   minimumArmBodyGap: number;
   minimumThighGap: number;
+  zeroWeightVertexCount: number;
+  invalidWeightVertexCount: number;
+  verticesInsideMultipleCapsules: number;
+  armWeightLeakVertexCount: number;
+  inwardTriangleCount?: number;
 };
 
 const smoothStep = (value: number) => {
@@ -130,6 +142,79 @@ const capsuleFieldDistance = (x: number, y: number, z: number, capsule: Capsule)
     return (Math.sqrt((offsetX / radiusX) ** 2 + (offsetZ / radiusZ) ** 2 + (axial / capRadius) ** 2) - 1) * capRadius;
   }
   return (Math.hypot(offsetX / radiusX, offsetZ / radiusZ) - 1) * Math.min(radiusX, radiusZ);
+};
+
+export const measureCewekHalusArmBodyClearance = (
+  capsules: readonly CewekHalusCapsule[],
+  bodyBlend: number,
+  side: "left" | "right",
+  pose: CewekHalusArmPose,
+) => {
+  const bodyCapsules = capsules.filter((capsule) => capsule.group === "body");
+  const armCapsules = capsules.filter((capsule) => capsule.group === `${side}Arm`);
+  const upperArm = armCapsules.find((capsule) => capsule.owner === `${side}UpperArm`);
+  const forearm = armCapsules.find((capsule) => capsule.owner === `${side}Forearm`);
+  const hand = armCapsules.find((capsule) => capsule.owner === `${side}Hand`);
+  if (!upperArm || !forearm || !hand || bodyCapsules.length === 0) {
+    throw new Error(`Kapsul lengan atau tubuh ${side} tidak lengkap untuk pengukuran celah.`);
+  }
+
+  const upperOrigin = new THREE.Vector3(...upperArm.start);
+  const upperRotation = new THREE.Euler(
+    pose.upperArmRotationX,
+    0,
+    pose.upperArmRotationZ,
+    "XYZ",
+  );
+  const forearmRotation = new THREE.Euler(pose.forearmRotationX, 0, 0, "XYZ");
+  const handRotation = new THREE.Euler(pose.handRotationX, 0, 0, "XYZ");
+  const forearmOrigin = new THREE.Vector3(...forearm.start)
+    .sub(upperOrigin)
+    .applyEuler(upperRotation)
+    .add(upperOrigin);
+  const handOrigin = new THREE.Vector3(...hand.start)
+    .sub(upperOrigin)
+    .applyEuler(upperRotation)
+    .add(upperOrigin)
+    .sub(forearmOrigin)
+    .applyEuler(forearmRotation)
+    .add(forearmOrigin);
+  const transformPoint = (source: THREE.Vector3, owner: string) => {
+    if (owner.endsWith("Clavicle")) return source.clone();
+    const point = source.sub(upperOrigin).applyEuler(upperRotation).add(upperOrigin);
+    if (owner.endsWith("Forearm") || owner.endsWith("Hand")) {
+      point.sub(forearmOrigin).applyEuler(forearmRotation).add(forearmOrigin);
+    }
+    if (owner.endsWith("Hand")) {
+      point.sub(handOrigin).applyEuler(handRotation).add(handOrigin);
+    }
+    return point;
+  };
+  const bodyDistance = (point: THREE.Vector3) => bodyCapsules.reduce((distance, capsule, index) => {
+    const current = capsuleFieldDistance(point.x, point.y, point.z, capsule);
+    return index === 0 ? current : smoothMinimum(distance, current, bodyBlend);
+  }, Number.POSITIVE_INFINITY);
+
+  let minimumGap = Number.POSITIVE_INFINITY;
+  armCapsules.forEach((capsule) => {
+    if (capsule.owner.endsWith("Clavicle")) return;
+    const firstSample = capsule.owner.endsWith("UpperArm") ? 0.25 : 0;
+    for (let sample = 0; sample <= 96; sample += 1) {
+      const t = firstSample + (1 - firstSample) * sample / 96;
+      const source = new THREE.Vector3(
+        THREE.MathUtils.lerp(capsule.start[0], capsule.end[0], t),
+        THREE.MathUtils.lerp(capsule.start[1], capsule.end[1], t),
+        THREE.MathUtils.lerp(capsule.start[2], capsule.end[2], t),
+      );
+      const point = transformPoint(source, capsule.owner);
+      const radius = Math.max(
+        THREE.MathUtils.lerp(capsule.startRadius[0], capsule.endRadius[0], t),
+        THREE.MathUtils.lerp(capsule.startRadius[1], capsule.endRadius[1], t),
+      );
+      minimumGap = Math.min(minimumGap, bodyDistance(point) - radius);
+    }
+  });
+  return minimumGap;
 };
 
 export const buildCewekHalusGeometry = async (
@@ -261,6 +346,10 @@ export const buildCewekHalusGeometry = async (
   const skinIndices: number[] = [];
   const skinWeights: number[] = [];
   const uvs: number[] = [];
+  let zeroWeightVertexCount = 0;
+  let invalidWeightVertexCount = 0;
+  let verticesInsideMultipleCapsules = 0;
+  let armWeightLeakVertexCount = 0;
   const cornerOffsets: ReadonlyArray<readonly [number, number, number]> = [
     [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
     [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1],
@@ -282,14 +371,32 @@ export const buildCewekHalusGeometry = async (
     const side = point[0] < 0 ? "left" : "right";
     const armZone = config.armWeightZone ?? { minY: 0.72, maxY: 1.4, minAbsX: 0.2 };
     const legZone = config.legWeightZone ?? { minY: -0.08, maxY: 1, minAbsX: 0.12 };
+    const armCandidates = capsules.filter((capsule) => (
+      capsule.group === `${side}Arm`
+      && point[1] >= armZone.minY
+      && point[1] <= armZone.maxY
+      && Math.abs(point[0]) >= armZone.minAbsX
+    ));
+    const nearestArm = armCandidates
+      .map((capsule) => ({ capsule, ...capsuleDistance(point, capsule) }))
+      .sort((first, second) => first.distance - second.distance)[0];
+    const armField = armCandidates.length > 0
+      ? groupDistance(point[0], point[1], point[2], `${side}Arm`, [config.elbowBlend, config.wristBlend])
+      : Number.POSITIVE_INFINITY;
+    const bodyField = armCandidates.length > 0
+      ? bodyDistance(point[0], point[1], point[2])
+      : Number.POSITIVE_INFINITY;
+    const isShoulderRoot = (nearestArm?.capsule.owner.endsWith("Clavicle") && nearestArm.t >= 0.75)
+      || (nearestArm?.capsule.owner.endsWith("UpperArm") && nearestArm.t <= 0.25);
+    const shoulderBlendWidth = config.shoulderBlend + step * 0.1;
+    const armWeightAllowed = armCandidates.length > 0 && (
+      armField <= bodyField
+      || (isShoulderRoot && armField - bodyField <= shoulderBlendWidth)
+    );
     const allowed = capsules.filter((capsule) => {
       if (capsule.group === "body") return true;
       if (capsule.group.endsWith("Arm")) {
-        const inArmZone = config.armWeightZone
-          ? point[1] >= armZone.minY && point[1] <= armZone.maxY && Math.abs(point[0]) >= armZone.minAbsX
-          : (point[1] >= 1.22 && Math.abs(point[0]) >= 0.12)
-            || (point[1] < 1.22 && point[1] >= 0.72 && Math.abs(point[0]) >= 0.2);
-        return capsule.group === `${side}Arm` && inArmZone;
+        return armWeightAllowed && capsule.group === `${side}Arm` && armCandidates.includes(capsule);
       }
       const inLegZone = point[1] >= legZone.minY
         && point[1] <= legZone.maxY
@@ -331,14 +438,43 @@ export const buildCewekHalusGeometry = async (
       strongest = [[owner, 1]];
     }
     const totalWeight = strongest.reduce((sum, [, weight]) => sum + weight, 0);
-    const normalized = totalWeight > 0
+    if (!armWeightAllowed && strongest.some(([name]) => /^(left|right)(Clavicle|UpperArm|Forearm|Hand)$/.test(name))) {
+      armWeightLeakVertexCount += 1;
+    }
+    const normalized: Array<readonly [number, number]> = totalWeight > 0
       ? strongest.map(([name, weight]) => [boneIndices.get(name) ?? 0, weight / totalWeight] as const)
-      : [[0, 1] as const];
-    while (normalized.length < 4) normalized.push([normalized[0]![0], 0]);
+      : [[0, 1]];
+    const paddingCount = 4 - normalized.length;
+    const paddingWeight = 1e-6;
+    const retainedWeight = 1 - paddingCount * paddingWeight;
     normalized.forEach(([bone, weight]) => {
       skinIndices.push(bone);
-      skinWeights.push(weight);
+      skinWeights.push(weight * retainedWeight);
     });
+    for (let influence = 0; influence < paddingCount; influence += 1) {
+      skinIndices.push(normalized[0]![0]);
+      skinWeights.push(paddingWeight);
+    }
+
+    let vertexWeightSum = 0;
+    let invalidWeight = false;
+    let hasZeroWeight = false;
+    for (let influence = 0; influence < 4; influence += 1) {
+      const weight = skinWeights[skinWeights.length - 4 + influence]!;
+      vertexWeightSum += weight;
+      if (!Number.isFinite(weight)) invalidWeight = true;
+      if (weight <= 0) hasZeroWeight = true;
+    }
+    if (Math.abs(vertexWeightSum - 1) > 1e-4) invalidWeight = true;
+    if (invalidWeight) invalidWeightVertexCount += 1;
+    if (hasZeroWeight) zeroWeightVertexCount += 1;
+    let containingCapsules = 0;
+    capsules.forEach((capsule) => {
+      if (capsuleFieldDistance(point[0], point[1], point[2], capsule) < 0) containingCapsules += 1;
+    });
+    if (containingCapsules > 1) {
+      verticesInsideMultipleCapsules += 1;
+    }
 
     if (config.colorAt) {
       config.colorAt(point, outputColor);
@@ -460,6 +596,34 @@ export const buildCewekHalusGeometry = async (
   }
 
   if (shouldCancel?.()) return null;
+  let inwardTriangleCount: number | undefined;
+  if (config.includeTriangleDiagnostics) {
+    inwardTriangleCount = 0;
+    const normalProbe = step * 0.25;
+    for (let triangle = 0; triangle < indices.length; triangle += 3) {
+      const first = indices[triangle]! * 3;
+      const second = indices[triangle + 1]! * 3;
+      const third = indices[triangle + 2]! * 3;
+      const edge1X = positions[second]! - positions[first]!;
+      const edge1Y = positions[second + 1]! - positions[first + 1]!;
+      const edge1Z = positions[second + 2]! - positions[first + 2]!;
+      const edge2X = positions[third]! - positions[first]!;
+      const edge2Y = positions[third + 1]! - positions[first + 1]!;
+      const edge2Z = positions[third + 2]! - positions[first + 2]!;
+      const faceNormalX = edge1Y * edge2Z - edge1Z * edge2Y;
+      const faceNormalY = edge1Z * edge2X - edge1X * edge2Z;
+      const faceNormalZ = edge1X * edge2Y - edge1Y * edge2X;
+      const centerX = (positions[first]! + positions[second]! + positions[third]!) / 3;
+      const centerY = (positions[first + 1]! + positions[second + 1]! + positions[third + 1]!) / 3;
+      const centerZ = (positions[first + 2]! + positions[second + 2]! + positions[third + 2]!) / 3;
+      const gradientX = fieldAt(centerX + normalProbe, centerY, centerZ) - fieldAt(centerX - normalProbe, centerY, centerZ);
+      const gradientY = fieldAt(centerX, centerY + normalProbe, centerZ) - fieldAt(centerX, centerY - normalProbe, centerZ);
+      const gradientZ = fieldAt(centerX, centerY, centerZ + normalProbe) - fieldAt(centerX, centerY, centerZ - normalProbe);
+      if (faceNormalX * gradientX + faceNormalY * gradientY + faceNormalZ * gradientZ < 0) {
+        inwardTriangleCount += 1;
+      }
+    }
+  }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
   geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
@@ -479,5 +643,10 @@ export const buildCewekHalusGeometry = async (
     elapsedMs: performance.now() - startedAt,
     minimumArmBodyGap,
     minimumThighGap,
+    zeroWeightVertexCount,
+    invalidWeightVertexCount,
+    verticesInsideMultipleCapsules,
+    armWeightLeakVertexCount,
+    inwardTriangleCount,
   };
 };
