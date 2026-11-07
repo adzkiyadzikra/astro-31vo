@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
-import Starfihapus eld from "@/components/Starfield";
+import Starfield from "@/components/Starfield";
 import PageNavigation from "@/components/PageNavigation";
 import { playPopSound } from "@/hooks/useAudio";
 import { InlineMath } from "react-katex";
