@@ -91,7 +91,32 @@ const RUN_CONFIG = {
   maxDeltaTime: 0.04,
 } as const;
 
-type AvatarHairStyle = "swept" | "short" | "long";
+const ROBLOX_SLIM_CONFIG = {
+  parts: {
+    head: [0.56, 0.52, 0.46],
+    upperTorso: [0.54, 0.44, 0.28],
+    lowerTorso: [0.44, 0.3, 0.27],
+    hand: [0.105, 0.095, 0.075],
+    thigh: [0.17, 0.31, 0.16],
+    calf: [0.145, 0.3, 0.135],
+    foot: [0.16, 0.08, 0.26],
+  },
+  armReference: {
+    upper: [0.24, 0.3, 0.24],
+    forearm: [0.164, 0.24, 0.164],
+  },
+  elbowForward: 70 * Math.PI / 180,
+  elbowBackward: 15 * Math.PI / 180,
+  kneeBackward: 90 * Math.PI / 180,
+  forearmLagCycles: 0.2,
+  handLagCycles: 0.27,
+  armThicknessScale: 0.58,
+  bevelRatio: 0.12,
+  bodyLean: 6 * Math.PI / 180,
+  transitionSeconds: 0.2,
+} as const;
+
+type AvatarHairStyle = "swept" | "short" | "long" | "wavy";
 
 type AvatarColors = {
   skin: string;
@@ -100,6 +125,108 @@ type AvatarColors = {
   vest: string;
   pants: string;
   shoes: string;
+};
+
+type OrganicAvatarPalette = {
+  skin: string;
+  hair: string;
+  jacket: string;
+  shirt: string;
+  skirt: string;
+  shorts: string;
+  socks: string;
+  shoes: string;
+  accent: string;
+  metal: string;
+};
+
+type AvatarPreset = {
+  id: string;
+  name: string;
+  description: string;
+  colors: AvatarColors;
+  hairstyle: AvatarHairStyle;
+  clothing: "hoodie-vest" | "shirt-suspenders" | "streetwear-crop" | "organic-pastel" | "roblox-slim";
+  accessories: readonly string[];
+  perutTerbuka?: boolean;
+  organicPalette?: OrganicAvatarPalette;
+};
+
+const AVATAR_PRESETS: readonly AvatarPreset[] = [
+  {
+    id: "anak-cokelat",
+    name: "Anak Cokelat",
+    description: "Hoodie krem dengan rambut cokelat",
+    colors: { skin: "#f2c9a5", hair: "#7a4a32", hoodie: "#e8c98a", vest: "#3b3f44", pants: "#292c30", shoes: "#c98b4e" },
+    hairstyle: "swept",
+    clothing: "hoodie-vest",
+    accessories: ["kalung", "sarung-tangan-gelap"],
+  },
+  {
+    id: "kacamata-hitam",
+    name: "Kacamata Hitam",
+    description: "Rambut bergelombang, kacamata, dan suspender",
+    colors: { skin: "#F3D2BC", hair: "#14110F", hoodie: "#F5F5F5", vest: "#111111", pants: "#1A1A1A", shoes: "#111111" },
+    hairstyle: "wavy",
+    clothing: "shirt-suspenders",
+    accessories: ["kacamata", "permen-karet", "aksesori-rambut"],
+  },
+  {
+    id: "cewek-streetwear",
+    name: "Si Streetwear",
+    description: "Beanie hitam, lengan merah, dan celana cargo",
+    colors: { skin: "#F3D2BC", hair: "#14110F", hoodie: "#151515", vest: "#1A1A1A", pants: "#1A1A1A", shoes: "#D63A2F" },
+    hairstyle: "long",
+    clothing: "streetwear-crop",
+    accessories: ["beanie", "resleting", "sabuk", "saku-cargo"],
+    perutTerbuka: true,
+  },
+  {
+    id: "cewek-gaul",
+    name: "Si Gaul",
+    description: "Rambut panjang dan outfit pastel",
+    colors: { skin: "#F3D2BC", hair: "#2B1B17", hoodie: "#C9B6F2", vest: "#F5F5F5", pants: "#F3F3F3", shoes: "#F5F5F5" },
+    hairstyle: "long",
+    clothing: "organic-pastel",
+    accessories: ["jepit-pink", "tas-selempang", "kalung-bintang", "gelang"],
+    organicPalette: {
+      skin: "#F3D2BC",
+      hair: "#2B1B17",
+      jacket: "#C9B6F2",
+      shirt: "#F5F5F5",
+      skirt: "#F3F3F3",
+      shorts: "#171717",
+      socks: "#F5F5F5",
+      shoes: "#F5F5F5",
+      accent: "#F4A3C0",
+      metal: "#D6D1DA",
+    },
+  },
+  {
+    id: "roblox-slim",
+    name: "Si Roblox",
+    description: "Avatar ramping bergaya Roblox R15",
+    colors: { skin: "#F3D2BC", hair: "#171313", hoodie: "#3188D8", vest: "#3188D8", pants: "#315C91", shoes: "#F5F5F5" },
+    hairstyle: "short",
+    clothing: "roblox-slim",
+    accessories: [],
+  },
+];
+
+const DEFAULT_AVATAR_PRESET = AVATAR_PRESETS[0]!;
+type AvatarPresetId = AvatarPreset["id"];
+
+const AVATAR_STORAGE_KEY = "numatik-world-avatar";
+
+const readSavedAvatar = (): AvatarPresetId => {
+  try {
+    const savedId = window.localStorage.getItem(AVATAR_STORAGE_KEY);
+    return AVATAR_PRESETS.some((preset) => preset.id === savedId)
+      ? (savedId as AvatarPresetId)
+      : "anak-cokelat";
+  } catch {
+    return "anak-cokelat";
+  }
 };
 
 type DustParticle = {
@@ -134,6 +261,8 @@ const NumatikWorldPage = () => {
   const gameCompleteRef = useRef(false);
   const jumpRequestedRef = useRef(false);
   const [selectedIsland, setSelectedIsland] = useState<IslandId>("rainbow");
+  const [selectedAvatarId, setSelectedAvatarId] = useState<AvatarPresetId>(readSavedAvatar);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(true);
   const [gameStarted, setGameStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [treasuresFound, setTreasuresFound] = useState(0);
@@ -141,6 +270,16 @@ const NumatikWorldPage = () => {
   const [question, setQuestion] = useState<WorldQuestion | null>(null);
   const [answerFeedback, setAnswerFeedback] = useState<string | null>(null);
   const [mobile, setMobile] = useState(false);
+
+  const selectAvatar = (presetId: AvatarPresetId) => {
+    setSelectedAvatarId(presetId);
+    try {
+      window.localStorage.setItem(AVATAR_STORAGE_KEY, presetId);
+    } catch {
+      // Pilihan tetap berlaku untuk sesi ini meski penyimpanan browser tidak tersedia.
+    }
+    setAvatarPickerOpen(false);
+  };
 
   useEffect(() => {
     if (!gameStarted) return;
@@ -186,12 +325,12 @@ const NumatikWorldPage = () => {
       blue: makeMaterial(island.palette.blue),
       yellow: makeMaterial("#ffd858"),
       white: makeMaterial("#fff6dc"),
-      skin: makeMaterial("#f2c9a5", 0.6),
-      hair: makeMaterial("#7a4a32", 0.6),
-      hoodie: makeMaterial("#e8c98a", 0.6),
-      vest: makeMaterial("#3b3f44", 0.6),
-      pants: makeMaterial("#292c30", 0.6),
-      shoes: makeMaterial("#c98b4e", 0.6),
+      skin: makeMaterial(DEFAULT_AVATAR_PRESET.colors.skin, 0.6),
+      hair: makeMaterial(DEFAULT_AVATAR_PRESET.colors.hair, 0.6),
+      hoodie: makeMaterial(DEFAULT_AVATAR_PRESET.colors.hoodie, 0.6),
+      vest: makeMaterial(DEFAULT_AVATAR_PRESET.colors.vest, 0.6),
+      pants: makeMaterial(DEFAULT_AVATAR_PRESET.colors.pants, 0.6),
+      shoes: makeMaterial(DEFAULT_AVATAR_PRESET.colors.shoes, 0.6),
       shoeSole: makeMaterial("#292722", 0.65),
       glove: makeMaterial("#242629", 0.6),
       pendant: makeMaterial("#d8b15e", 0.6),
@@ -202,36 +341,6 @@ const NumatikWorldPage = () => {
       leaf: makeMaterial(island.palette.leaf),
       leafLight: makeMaterial(island.palette.leafLight),
     };
-    const hairStyleGroups = new Map<AvatarHairStyle, THREE.Group>();
-    const avatarConfig: {
-      colors: AvatarColors;
-      hairstyle: AvatarHairStyle;
-      applyColors: (colors?: Partial<AvatarColors>, hairstyle?: AvatarHairStyle) => void;
-    } = {
-      colors: {
-        skin: "#f2c9a5",
-        hair: "#7a4a32",
-        hoodie: "#e8c98a",
-        vest: "#3b3f44",
-        pants: "#292c30",
-        shoes: "#c98b4e",
-      },
-      hairstyle: "swept",
-      applyColors: (colors = {}, hairstyle) => {
-        Object.assign(avatarConfig.colors, colors);
-        mats.skin.color.set(avatarConfig.colors.skin);
-        mats.hair.color.set(avatarConfig.colors.hair);
-        mats.hoodie.color.set(avatarConfig.colors.hoodie);
-        mats.vest.color.set(avatarConfig.colors.vest);
-        mats.pants.color.set(avatarConfig.colors.pants);
-        mats.shoes.color.set(avatarConfig.colors.shoes);
-        if (hairstyle) avatarConfig.hairstyle = hairstyle;
-        hairStyleGroups.forEach((group, style) => {
-          group.visible = style === avatarConfig.hairstyle;
-        });
-      },
-    };
-    avatarConfig.applyColors();
     const addMesh = <T extends THREE.BufferGeometry>(
       geometry: T,
       mat: THREE.Material,
@@ -446,36 +555,43 @@ const NumatikWorldPage = () => {
     const bodyRig = new THREE.Group();
     bodyRig.position.y = 1;
     avatarRig.add(bodyRig);
-    addMesh(torsoGeometry, mats.skin, bodyRig, [0, 0, 0]);
-    addMesh(hoodieGeometry, mats.hoodie, bodyRig, [0, 0, 0]);
-    addMesh(vestGeometry, mats.vest, bodyRig, [0, -0.015, 0.31]);
-    addMesh(vestBackGeometry, mats.vest, bodyRig, [0, 0, -0.3]);
-    addMesh(pocketGeometry, mats.hoodie, bodyRig, [0, -0.19, 0.355]);
+    const legacyLayers: THREE.Group[] = [];
+    const legacyBody = new THREE.Group();
+    bodyRig.add(legacyBody);
+    legacyLayers.push(legacyBody);
+    addMesh(torsoGeometry, mats.skin, legacyBody, [0, 0, 0]);
+    addMesh(hoodieGeometry, mats.hoodie, legacyBody, [0, 0, 0]);
+    addMesh(vestGeometry, mats.vest, legacyBody, [0, -0.015, 0.31]);
+    addMesh(vestBackGeometry, mats.vest, legacyBody, [0, 0, -0.3]);
+    addMesh(pocketGeometry, mats.hoodie, legacyBody, [0, -0.19, 0.355]);
     const hoodPivot = new THREE.Group();
     hoodPivot.position.set(0, 0.43, -0.3);
-    bodyRig.add(hoodPivot);
+    legacyBody.add(hoodPivot);
     addMesh(hoodGeometry, mats.hoodie, hoodPivot, [0, 0, 0]);
-    addMesh(neckGeometry, mats.skin, bodyRig, [0, 0.47, 0]);
-    const necklace = addMesh(cuffGeometry, mats.pendant, bodyRig, [0, 0.29, 0.06], [0.72, 0.14, 0.72]);
+    addMesh(neckGeometry, mats.skin, legacyBody, [0, 0.47, 0]);
+    const necklace = addMesh(cuffGeometry, mats.pendant, legacyBody, [0, 0.29, 0.06], [0.72, 0.14, 0.72]);
     necklace.rotation.x = -0.16;
     const pendantPivot = new THREE.Group();
     pendantPivot.position.set(0, 0.17, 0.16);
-    bodyRig.add(pendantPivot);
+    legacyBody.add(pendantPivot);
     addMesh(pendantGeometry, mats.pendant, pendantPivot, [0, 0, 0]);
 
-    const hairMotion = new THREE.Group();
     const head = new THREE.Group();
     head.position.set(0, 0.72, 0);
     bodyRig.add(head);
-    addMesh(headGeometry, mats.skin, head, [0, 0, 0]);
-    addMesh(faceGeometry, faceMaterial, head, [0, 0, 0.264]);
+    const legacyHead = new THREE.Group();
+    head.add(legacyHead);
+    legacyLayers.push(legacyHead);
+    addMesh(headGeometry, mats.skin, legacyHead, [0, 0, 0]);
+    addMesh(faceGeometry, faceMaterial, legacyHead, [0, 0, 0.264]);
     [-1, 1].forEach((side) => {
-      addMesh(earGeometry, mats.skin, head, [side * 0.32, 0, 0]);
+      addMesh(earGeometry, mats.skin, legacyHead, [side * 0.32, 0, 0]);
     });
 
+    const hairMotion = new THREE.Group();
     const makeHairStyle = (style: AvatarHairStyle) => {
       const group = new THREE.Group();
-      group.visible = style === avatarConfig.hairstyle;
+      group.visible = style === "swept";
       hairMotion.add(group);
       addMesh(hairCapGeometry, mats.hair, group, [0, 0.22, -0.015]);
       if (style === "swept") {
@@ -514,42 +630,52 @@ const NumatikWorldPage = () => {
           spike.rotation.z = x * -1.5;
         });
       }
-      hairStyleGroups.set(style, group);
     };
     (["swept", "short", "long"] as const).forEach(makeHairStyle);
-    head.add(hairMotion);
-    avatarConfig.applyColors();
+    legacyHead.add(hairMotion);
 
     type LimbRig = { pivot: THREE.Group; elbow: THREE.Group; hand: THREE.Group };
     const makeArm = (side: number): LimbRig => {
       const shoulder = new THREE.Group();
       shoulder.position.set(side * 0.47, 0.28, 0);
       bodyRig.add(shoulder);
-      addMesh(armGeometry, mats.skin, shoulder, [0, -0.16, 0]);
-      addMesh(sleeveGeometry, mats.hoodie, shoulder, [0, -0.08, 0], [1.06, 1, 1.06]);
+      const legacyUpper = new THREE.Group();
+      shoulder.add(legacyUpper);
+      legacyLayers.push(legacyUpper);
+      addMesh(armGeometry, mats.skin, legacyUpper, [0, -0.16, 0]);
+      addMesh(sleeveGeometry, mats.hoodie, legacyUpper, [0, -0.08, 0], [1.06, 1, 1.06]);
       const elbow = new THREE.Group();
       elbow.position.y = -0.25;
       shoulder.add(elbow);
-      addMesh(forearmGeometry, mats.skin, elbow, [0, -0.15, 0]);
-      addMesh(forearmSleeveGeometry, mats.hoodie, elbow, [0, -0.14, 0], [1.04, 1, 1.04]);
-      addMesh(cuffGeometry, mats.hoodie, elbow, [0, -0.2, 0]);
+      const legacyForearm = new THREE.Group();
+      elbow.add(legacyForearm);
+      legacyLayers.push(legacyForearm);
+      addMesh(forearmGeometry, mats.skin, legacyForearm, [0, -0.15, 0]);
+      addMesh(forearmSleeveGeometry, mats.hoodie, legacyForearm, [0, -0.14, 0], [1.04, 1, 1.04]);
+      addMesh(cuffGeometry, mats.hoodie, legacyForearm, [0, -0.2, 0]);
       const hand = new THREE.Group();
       hand.position.y = -0.22;
       elbow.add(hand);
-      addMesh(handGeometry, mats.skin, hand, [0, -0.045, 0]);
-      addMesh(gloveGeometry, mats.glove, hand, [0, -0.13, 0.015]);
-      addMesh(cuffGeometry, mats.glove, hand, [0, 0.055, 0]);
+      const legacyHand = new THREE.Group();
+      hand.add(legacyHand);
+      legacyLayers.push(legacyHand);
+      addMesh(handGeometry, mats.skin, legacyHand, [0, -0.045, 0]);
+      addMesh(gloveGeometry, mats.glove, legacyHand, [0, -0.13, 0.015]);
+      addMesh(cuffGeometry, mats.glove, legacyHand, [0, 0.055, 0]);
       return { pivot: shoulder, elbow, hand };
     };
     const makeLeg = (side: number): { pivot: THREE.Group; baseY: number } => {
       const hip = new THREE.Group();
       hip.position.set(side * 0.2, 0.64, 0);
       avatarRig.add(hip);
-      addMesh(legGeometry, mats.pants, hip, [0, -0.22, 0]);
-      addMesh(kneePadGeometry, mats.glove, hip, [0, -0.28, 0.2]);
+      const legacyLeg = new THREE.Group();
+      hip.add(legacyLeg);
+      legacyLayers.push(legacyLeg);
+      addMesh(legGeometry, mats.pants, legacyLeg, [0, -0.22, 0]);
+      addMesh(kneePadGeometry, mats.glove, legacyLeg, [0, -0.28, 0.2]);
       const boot = new THREE.Group();
       boot.position.set(0, -0.445, 0.08);
-      hip.add(boot);
+      legacyLeg.add(boot);
       addMesh(bootGeometry, mats.shoes, boot, [0, 0.02, 0.03]);
       addMesh(soleGeometry, mats.shoeSole, boot, [0, -0.15, 0.02]);
       return { pivot: hip, baseY: hip.position.y };
@@ -558,6 +684,838 @@ const NumatikWorldPage = () => {
     const rightArm = makeArm(1);
     const leftLeg = makeLeg(-1);
     const rightLeg = makeLeg(1);
+    const newAvatarLayers: THREE.Group[] = [];
+    const blackPreset = AVATAR_PRESETS.find((preset) => preset.id === "kacamata-hitam")!;
+    const streetwearPreset = AVATAR_PRESETS.find((preset) => preset.id === "cewek-streetwear")!;
+    const gaulPreset = AVATAR_PRESETS.find((preset) => preset.id === "cewek-gaul")!;
+    let blackAvatarBuilt = false;
+    let streetwearBuilt = false;
+    let gaulBuilt = false;
+    let blackHairMotion: THREE.Group | null = null;
+    let streetwearHairMotion: THREE.Group | null = null;
+    let gumMesh: THREE.Mesh | null = null;
+    let gaulTorsoMotion: THREE.Group | null = null;
+    let gaulHeadLayer: THREE.Group | null = null;
+    let gaulHairMotion: THREE.Group | null = null;
+    let gaulSkirtMotion: THREE.Group | null = null;
+    let gaulBagMotion: THREE.Group | null = null;
+    let gaulLeftKnee: THREE.Group | null = null;
+    let gaulRightKnee: THREE.Group | null = null;
+    let gaulLeftKneeAngle = 0.08;
+    let gaulRightKneeAngle = 0.08;
+    const gaulShoulders: Array<{ layer: THREE.Group; side: number }> = [];
+    const gaulForearms: THREE.Group[] = [];
+    const gaulHairSegments: Array<{ pivot: THREE.Group; delay: number; phase: number }> = [];
+    const gaulEyeLids: THREE.Mesh[] = [];
+    let gaulNextBlinkAt = 0;
+    let gaulBlinkStartedAt = -1;
+    type RobloxSlimArm = { upper: THREE.Group; elbow: THREE.Group; wrist: THREE.Group; limb: LimbRig; side: number };
+    type RobloxSlimLeg = { upper: THREE.Group; knee: THREE.Group; ankle: THREE.Group; limb: typeof leftLeg; side: number };
+    const robloxSlimLayers: THREE.Group[] = [];
+    const robloxSlimArms: RobloxSlimArm[] = [];
+    const robloxSlimLegs: RobloxSlimLeg[] = [];
+    let robloxSlimBuilt = false;
+    let robloxSlimTorso: THREE.Group | null = null;
+    let robloxSlimUpperTorso: THREE.Group | null = null;
+    let robloxSlimHead: THREE.Group | null = null;
+
+    const buildBlackAvatar = () => {
+      if (blackAvatarBuilt) return;
+      const blackMats = {
+        skin: makeMaterial(blackPreset.colors.skin, 0.6),
+        hair: makeMaterial(blackPreset.colors.hair, 0.6),
+        shirt: makeMaterial(blackPreset.colors.hoodie, 0.72),
+        black: makeMaterial(blackPreset.colors.vest, 0.58),
+        pants: makeMaterial(blackPreset.colors.pants, 0.72),
+        shoes: makeMaterial(blackPreset.colors.shoes, 0.65),
+        sole: makeMaterial("#292722", 0.65),
+        glove: makeMaterial("#F5F5F5", 0.68),
+        gum: makeMaterial("#F4A3C0", 0.28),
+      };
+
+      const torsoLayer = new THREE.Group();
+      bodyRig.add(torsoLayer);
+      newAvatarLayers.push(torsoLayer);
+      addMesh(torsoGeometry, blackMats.skin, torsoLayer, [0, 0, 0]);
+      addMesh(hoodieGeometry, blackMats.shirt, torsoLayer, [0, 0, 0]);
+      addMesh(neckGeometry, blackMats.skin, torsoLayer, [0, 0.47, 0]);
+      const collarLeft = addMesh(hairFringeGeometry, blackMats.shirt, torsoLayer, [-0.105, 0.29, 0.27], [0.55, 0.8, 0.72]);
+      const collarRight = addMesh(hairFringeGeometry, blackMats.shirt, torsoLayer, [0.105, 0.29, 0.27], [0.55, 0.8, 0.72]);
+      collarLeft.rotation.z = -0.5;
+      collarRight.rotation.z = 0.5;
+      addMesh(cuffGeometry, blackMats.black, torsoLayer, [0, 0.17, 0.32], [0.38, 0.7, 0.4]);
+      addMesh(pendantGeometry, blackMats.black, torsoLayer, [0, -0.01, 0.34], [0.75, 3.5, 0.8]);
+      [-1, 1].forEach((side) => {
+        addMesh(cuffGeometry, blackMats.black, torsoLayer, [side * 0.2, 0.02, 0.31], [0.44, 3.5, 0.2]);
+        addMesh(cuffGeometry, blackMats.black, torsoLayer, [side * 0.2, 0.02, -0.31], [0.44, 3.5, 0.2]);
+      });
+
+      const headLayer = new THREE.Group();
+      head.add(headLayer);
+      newAvatarLayers.push(headLayer);
+      addMesh(headGeometry, blackMats.skin, headLayer, [0, 0, 0]);
+
+      const faceCanvas = document.createElement("canvas");
+      faceCanvas.width = 128;
+      faceCanvas.height = 128;
+      const faceContext = faceCanvas.getContext("2d");
+      if (!faceContext) throw new Error("Canvas 2D tidak tersedia untuk wajah avatar.");
+      faceContext.fillStyle = "#C2182B";
+      faceContext.beginPath();
+      faceContext.moveTo(32, 50);
+      faceContext.lineTo(53, 56);
+      faceContext.lineTo(43, 62);
+      faceContext.closePath();
+      faceContext.fill();
+      faceContext.beginPath();
+      faceContext.moveTo(75, 56);
+      faceContext.lineTo(96, 50);
+      faceContext.lineTo(85, 62);
+      faceContext.closePath();
+      faceContext.fill();
+      faceContext.fillStyle = "#171313";
+      faceContext.beginPath();
+      faceContext.arc(44, 56, 2.5, 0, Math.PI * 2);
+      faceContext.arc(84, 56, 2.5, 0, Math.PI * 2);
+      faceContext.fill();
+      faceContext.strokeStyle = "#171313";
+      faceContext.lineWidth = 2;
+      faceContext.beginPath();
+      faceContext.moveTo(34, 39);
+      faceContext.quadraticCurveTo(43, 35, 52, 39);
+      faceContext.moveTo(76, 39);
+      faceContext.quadraticCurveTo(85, 35, 94, 39);
+      faceContext.stroke();
+      faceContext.lineWidth = 5;
+      faceContext.lineCap = "round";
+      faceContext.beginPath();
+      faceContext.moveTo(31, 47);
+      faceContext.lineTo(53, 49);
+      faceContext.moveTo(75, 49);
+      faceContext.lineTo(97, 47);
+      faceContext.stroke();
+      faceContext.strokeStyle = "#36221E";
+      faceContext.lineWidth = 2;
+      faceContext.beginPath();
+      faceContext.moveTo(59, 83);
+      faceContext.quadraticCurveTo(64, 86, 69, 83);
+      faceContext.stroke();
+      const blackFaceTexture = new THREE.CanvasTexture(faceCanvas);
+      blackFaceTexture.colorSpace = THREE.SRGBColorSpace;
+      textures.add(blackFaceTexture);
+      const blackFaceMaterial = new THREE.MeshStandardMaterial({
+        map: blackFaceTexture,
+        transparent: true,
+        roughness: 0.6,
+        metalness: 0,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      resources.add(blackFaceMaterial);
+      addMesh(faceGeometry, blackFaceMaterial, headLayer, [0, 0, 0.264]);
+      [-1, 1].forEach((side) => {
+        addMesh(earGeometry, blackMats.skin, headLayer, [side * 0.32, 0, 0]);
+      });
+
+      const blackHair = new THREE.Group();
+      blackHairMotion = blackHair;
+      headLayer.add(blackHair);
+      addMesh(hairCapGeometry, blackMats.hair, blackHair, [0, 0.22, -0.015]);
+      [-1, 0, 1].forEach((side) => {
+        const fringe = addMesh(hairFringeGeometry, blackMats.hair, blackHair, [side * 0.11, 0.17, 0.22], [0.82, 1.15, 1]);
+        fringe.rotation.z = side * -0.17;
+      });
+      [-1, 1].forEach((side) => {
+        const lock = addMesh(hairLockGeometry, blackMats.hair, blackHair, [side * 0.25, 0.015, 0.14], [1.1, 1.35, 1]);
+        lock.rotation.z = side * -0.14;
+      });
+      [-0.24, -0.08, 0.08, 0.24].forEach((x, index) => {
+        const wave = addMesh(hairSpikeGeometry, blackMats.hair, blackHair, [x, 0.29 + (index % 2) * 0.025, -0.035], [1.35, 1.2, 1.25]);
+        wave.rotation.z = (index - 1.5) * 0.17;
+      });
+      const hairAccessory = addMesh(hairSpikeGeometry, blackMats.black, blackHair, [-0.22, 0.14, 0.235], [0.62, 0.38, 0.5]);
+      hairAccessory.rotation.z = -0.4;
+
+      const glassesGeometry = makeRoundedGeometry(0.25, 0.045, 0.035, 0.018);
+      const glassesLayer = new THREE.Group();
+      headLayer.add(glassesLayer);
+      newAvatarLayers.push(glassesLayer);
+      [-1, 1].forEach((side) => {
+        const centerX = side * 0.09;
+        addMesh(glassesGeometry, blackMats.black, glassesLayer, [centerX, 0.075, 0.3]);
+        addMesh(glassesGeometry, blackMats.black, glassesLayer, [centerX, -0.025, 0.3]);
+        const outerBar = addMesh(glassesGeometry, blackMats.black, glassesLayer, [centerX + side * 0.1, 0.025, 0.3], [0.2, 1, 1]);
+        const innerBar = addMesh(glassesGeometry, blackMats.black, glassesLayer, [centerX - side * 0.1, 0.025, 0.3], [0.2, 1, 1]);
+        outerBar.rotation.z = Math.PI / 2;
+        innerBar.rotation.z = Math.PI / 2;
+      });
+      addMesh(glassesGeometry, blackMats.black, glassesLayer, [0, 0.025, 0.3], [0.42, 0.8, 1]);
+      const gumGeometry = new THREE.SphereGeometry(0.055, 12, 10);
+      gumMesh = addMesh(gumGeometry, blackMats.gum, headLayer, [0, -0.075, 0.315]);
+
+      const buildSleevedArm = (limb: LimbRig) => {
+        const upper = new THREE.Group();
+        limb.pivot.add(upper);
+        newAvatarLayers.push(upper);
+        addMesh(armGeometry, blackMats.skin, upper, [0, -0.16, 0]);
+        addMesh(sleeveGeometry, blackMats.shirt, upper, [0, -0.08, 0], [1.1, 1.08, 1.1]);
+        const forearm = new THREE.Group();
+        limb.elbow.add(forearm);
+        newAvatarLayers.push(forearm);
+        addMesh(forearmGeometry, blackMats.skin, forearm, [0, -0.15, 0]);
+        addMesh(forearmSleeveGeometry, blackMats.shirt, forearm, [0, -0.14, 0], [1.08, 1.08, 1.08]);
+        const hand = new THREE.Group();
+        limb.hand.add(hand);
+        newAvatarLayers.push(hand);
+        addMesh(handGeometry, blackMats.skin, hand, [0, -0.045, 0]);
+        addMesh(gloveGeometry, blackMats.glove, hand, [0, -0.13, 0.015], [1.02, 1, 1.02]);
+      };
+      buildSleevedArm(leftArm);
+      buildSleevedArm(rightArm);
+
+      const buildBlackLeg = (leg: typeof leftLeg) => {
+        const pantsLayer = new THREE.Group();
+        leg.pivot.add(pantsLayer);
+        newAvatarLayers.push(pantsLayer);
+        addMesh(legGeometry, blackMats.pants, pantsLayer, [0, -0.22, 0], [1.24, 1.08, 1.12]);
+        const boot = new THREE.Group();
+        boot.position.set(0, -0.445, 0.08);
+        pantsLayer.add(boot);
+        addMesh(bootGeometry, blackMats.shoes, boot, [0, 0.02, 0.03]);
+        addMesh(soleGeometry, blackMats.sole, boot, [0, -0.15, 0.02]);
+      };
+      buildBlackLeg(leftLeg);
+      buildBlackLeg(rightLeg);
+      blackAvatarBuilt = true;
+    };
+
+    const streetwearLayers: THREE.Group[] = [];
+    const buildStreetwearAvatar = () => {
+      if (streetwearBuilt) return;
+      const streetMats = {
+        skin: makeMaterial(streetwearPreset.colors.skin, 0.62),
+        hair: makeMaterial(streetwearPreset.colors.hair, 0.7),
+        beanie: makeMaterial("#1A1A1A", 0.88),
+        top: makeMaterial(streetwearPreset.colors.hoodie, 0.74),
+        black: makeMaterial(streetwearPreset.colors.vest, 0.72),
+        red: makeMaterial("#D63A2F", 0.7),
+        silver: makeMaterial("#C7C7C7", 0.38),
+        pants: makeMaterial(streetwearPreset.colors.pants, 0.82),
+        shoes: makeMaterial(streetwearPreset.colors.shoes, 0.55),
+        sole: makeMaterial("#F2F2F2", 0.76),
+        glove: makeMaterial("#111111", 0.76),
+      };
+
+      const torsoLayer = new THREE.Group();
+      bodyRig.add(torsoLayer);
+      streetwearLayers.push(torsoLayer);
+      addMesh(torsoGeometry, streetMats.skin, torsoLayer, [0, 0, 0]);
+      addMesh(hoodieGeometry, streetMats.top, torsoLayer, [0, 0.13, 0], [1, 0.56, 1]);
+      addMesh(neckGeometry, streetMats.skin, torsoLayer, [0, 0.47, 0]);
+      addMesh(cuffGeometry, streetMats.top, torsoLayer, [0, 0.31, 0.11], [1.55, 1, 1.15]);
+      addMesh(cuffGeometry, streetMats.silver, torsoLayer, [0, 0.12, 0.324], [0.1, 2.2, 0.12]);
+      addMesh(pendantGeometry, streetMats.silver, torsoLayer, [0, 0.25, 0.343], [0.35, 0.4, 0.35]);
+      addMesh(cuffGeometry, streetMats.black, torsoLayer, [0, -0.27, 0.31], [2.4, 0.9, 0.22]);
+      addMesh(pendantGeometry, streetMats.silver, torsoLayer, [0, -0.27, 0.348], [0.9, 0.8, 0.3]);
+      if (!streetwearPreset.perutTerbuka) {
+        addMesh(pocketGeometry, streetMats.black, torsoLayer, [0, -0.13, 0.302], [1.7, 0.72, 0.3]);
+      }
+
+      const headLayer = new THREE.Group();
+      head.add(headLayer);
+      streetwearLayers.push(headLayer);
+      addMesh(headGeometry, streetMats.skin, headLayer, [0, 0, 0]);
+      const streetFaceCanvas = document.createElement("canvas");
+      streetFaceCanvas.width = 128;
+      streetFaceCanvas.height = 128;
+      const streetFaceContext = streetFaceCanvas.getContext("2d");
+      if (!streetFaceContext) throw new Error("Canvas 2D tidak tersedia untuk wajah avatar.");
+      streetFaceContext.fillStyle = "#111111";
+      streetFaceContext.beginPath();
+      streetFaceContext.arc(43, 55, 3.2, 0, Math.PI * 2);
+      streetFaceContext.arc(85, 55, 3.2, 0, Math.PI * 2);
+      streetFaceContext.fill();
+      streetFaceContext.fillStyle = "#FFFFFF";
+      streetFaceContext.beginPath();
+      streetFaceContext.arc(44, 54, 1, 0, Math.PI * 2);
+      streetFaceContext.arc(86, 54, 1, 0, Math.PI * 2);
+      streetFaceContext.fill();
+      streetFaceContext.strokeStyle = "#171313";
+      streetFaceContext.lineWidth = 1.5;
+      streetFaceContext.lineCap = "round";
+      streetFaceContext.beginPath();
+      streetFaceContext.moveTo(36, 48);
+      streetFaceContext.lineTo(42, 44);
+      streetFaceContext.moveTo(48, 47);
+      streetFaceContext.lineTo(53, 49);
+      streetFaceContext.moveTo(75, 49);
+      streetFaceContext.lineTo(80, 47);
+      streetFaceContext.moveTo(86, 44);
+      streetFaceContext.lineTo(92, 48);
+      streetFaceContext.moveTo(60, 83);
+      streetFaceContext.lineTo(68, 83);
+      streetFaceContext.stroke();
+      const streetFaceTexture = new THREE.CanvasTexture(streetFaceCanvas);
+      streetFaceTexture.colorSpace = THREE.SRGBColorSpace;
+      textures.add(streetFaceTexture);
+      const streetFaceMaterial = new THREE.MeshStandardMaterial({
+        map: streetFaceTexture,
+        transparent: true,
+        roughness: 0.7,
+        metalness: 0,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      resources.add(streetFaceMaterial);
+      addMesh(faceGeometry, streetFaceMaterial, headLayer, [0, 0, 0.264]);
+      [-1, 1].forEach((side) => {
+        addMesh(earGeometry, streetMats.skin, headLayer, [side * 0.32, 0, 0]);
+      });
+
+      streetwearHairMotion = new THREE.Group();
+      headLayer.add(streetwearHairMotion);
+      [-0.18, -0.06, 0.06, 0.18].forEach((x) => {
+        addMesh(hairLockGeometry, streetMats.hair, streetwearHairMotion!, [x, -0.35, -0.37], [1.05, 3.8, 0.65]);
+      });
+      [-1, 1].forEach((side) => {
+        const frontLock = addMesh(hairLockGeometry, streetMats.hair, streetwearHairMotion!, [side * 0.19, -0.2, 0.35], [0.8, 2.6, 0.65]);
+        frontLock.rotation.z = side * -0.045;
+      });
+      [-1, 1].forEach((side) => {
+        const bang = addMesh(hairFringeGeometry, streetMats.hair, streetwearHairMotion!, [side * 0.12, 0.04, 0.22], [0.72, 0.65, 0.78]);
+        bang.rotation.z = side * -0.2;
+      });
+      addMesh(hairCapGeometry, streetMats.beanie, headLayer, [0, 0.22, -0.015]);
+      const beanieBrimGeometry = new THREE.TorusGeometry(0.255, 0.026, 6, 20);
+      const beanieBrim = addMesh(beanieBrimGeometry, streetMats.beanie, headLayer, [0, 0.13, 0]);
+      beanieBrim.rotation.x = Math.PI / 2;
+
+      const addStreetSleeve = (limb: LimbRig) => {
+        const upper = new THREE.Group();
+        limb.pivot.add(upper);
+        streetwearLayers.push(upper);
+        addMesh(armGeometry, streetMats.skin, upper, [0, -0.16, 0]);
+        addMesh(sleeveGeometry, streetMats.red, upper, [0, -0.08, 0], [1.22, 1.18, 1.2]);
+        addMesh(cuffGeometry, streetMats.black, upper, [0, -0.08, 0.18], [0.52, 1.25, 0.22]);
+        addMesh(cuffGeometry, streetMats.black, upper, [0, -0.19, 0], [1.25, 0.36, 1.15]);
+        const forearm = new THREE.Group();
+        limb.elbow.add(forearm);
+        streetwearLayers.push(forearm);
+        addMesh(forearmGeometry, streetMats.skin, forearm, [0, -0.15, 0]);
+        addMesh(forearmSleeveGeometry, streetMats.red, forearm, [0, -0.14, 0], [1.24, 1.18, 1.2]);
+        addMesh(cuffGeometry, streetMats.black, forearm, [0, -0.14, 0.18], [0.5, 1.22, 0.22]);
+        addMesh(cuffGeometry, streetMats.black, forearm, [0, -0.24, 0], [1.2, 0.36, 1.12]);
+        const hand = new THREE.Group();
+        limb.hand.add(hand);
+        streetwearLayers.push(hand);
+        addMesh(handGeometry, streetMats.skin, hand, [0, -0.045, 0]);
+        addMesh(gloveGeometry, streetMats.glove, hand, [0, -0.13, 0.015]);
+        addMesh(cuffGeometry, streetMats.black, hand, [0, 0.055, 0], [1, 0.7, 1]);
+      };
+      addStreetSleeve(leftArm);
+      addStreetSleeve(rightArm);
+
+      const addCargoLeg = (leg: typeof leftLeg) => {
+        const cargoLayer = new THREE.Group();
+        leg.pivot.add(cargoLayer);
+        streetwearLayers.push(cargoLayer);
+        addMesh(legGeometry, streetMats.pants, cargoLayer, [0, -0.22, 0], [1.08, 1.08, 1.06]);
+        const outside = Math.sign(leg.pivot.position.x);
+        addMesh(cuffGeometry, streetMats.red, cargoLayer, [outside * 0.155, -0.22, 0], [0.22, 3.5, 0.15]);
+        addMesh(pocketGeometry, streetMats.pants, cargoLayer, [outside * 0.065, -0.2, 0.205], [0.52, 1, 0.65]);
+        const sneaker = new THREE.Group();
+        sneaker.position.set(0, -0.445, 0.08);
+        cargoLayer.add(sneaker);
+        addMesh(bootGeometry, streetMats.shoes, sneaker, [0, 0.02, 0.03]);
+        addMesh(soleGeometry, streetMats.sole, sneaker, [0, -0.13, 0.02], [1.04, 1.45, 1.04]);
+      };
+      addCargoLeg(leftLeg);
+      addCargoLeg(rightLeg);
+      streetwearBuilt = true;
+    };
+
+    const organicLayers: THREE.Group[] = [];
+    const buildOrganicAvatar = () => {
+      if (gaulBuilt) return;
+      const palette = gaulPreset.organicPalette!;
+      const organicMats = {
+        skin: makeMaterial(palette.skin, 0.56),
+        hair: makeMaterial(palette.hair, 0.62),
+        jacket: makeMaterial(palette.jacket, 0.68),
+        shirt: makeMaterial(palette.shirt, 0.78),
+        skirt: makeMaterial(palette.skirt, 0.8),
+        shorts: makeMaterial(palette.shorts, 0.72),
+        socks: makeMaterial(palette.socks, 0.8),
+        shoes: makeMaterial(palette.shoes, 0.58),
+        accent: makeMaterial(palette.accent, 0.56),
+        metal: makeMaterial(palette.metal, 0.34),
+        eyelid: makeMaterial(palette.skin, 0.56),
+      };
+      const makeLathe = (profile: Array<[number, number]>, segments: number) => new THREE.LatheGeometry(
+        profile.map(([radius, height]) => new THREE.Vector2(radius, height)),
+        segments,
+      );
+      const smoothSphere = new THREE.SphereGeometry(1, 16, 12);
+      const torsoGeometry = makeLathe([
+        [0.1, -0.36], [0.17, -0.31], [0.19, -0.22], [0.145, -0.08],
+        [0.15, 0.06], [0.205, 0.19], [0.22, 0.27], [0.15, 0.35],
+      ], 24);
+      const shirtGeometry = makeLathe([
+        [0.105, -0.34], [0.175, -0.29], [0.195, -0.2], [0.153, -0.07],
+        [0.16, 0.07], [0.215, 0.2], [0.23, 0.27], [0.16, 0.34],
+      ], 20);
+      const jacketGeometry = makeLathe([
+        [0.16, 0.015], [0.17, 0.07], [0.22, 0.2], [0.235, 0.27], [0.17, 0.34],
+      ], 20);
+      const upperArmGeometry = makeLathe([[0.075, -0.25], [0.095, -0.19], [0.09, -0.1], [0.11, -0.035], [0.085, 0]], 12);
+      const forearmGeometry = makeLathe([[0.045, -0.22], [0.055, -0.17], [0.073, -0.09], [0.075, -0.035], [0.07, 0]], 12);
+      const upperSleeveGeometry = makeLathe([[0.083, -0.25], [0.105, -0.19], [0.1, -0.1], [0.12, -0.035], [0.092, 0]], 12);
+      const forearmSleeveGeometry = makeLathe([[0.052, -0.22], [0.063, -0.17], [0.082, -0.09], [0.084, -0.035], [0.079, 0]], 12);
+      const thighGeometry = makeLathe([[0.055, -0.25], [0.075, -0.2], [0.09, -0.1], [0.1, -0.035], [0.095, 0]], 12);
+      const calfGeometry = makeLathe([[0.045, -0.22], [0.052, -0.17], [0.073, -0.08], [0.078, -0.025], [0.07, 0]], 12);
+      const sockGeometry = makeLathe([[0.053, -0.21], [0.06, -0.17], [0.081, -0.08], [0.086, -0.02], [0.083, 0]], 12);
+      const hairSegmentGeometry = makeLathe([[0.008, -0.12], [0.028, -0.09], [0.035, -0.035], [0.032, 0.035], [0.016, 0.1]], 10);
+      const faceGeometry = new THREE.PlaneGeometry(0.32, 0.32);
+      const eyeLidGeometry = new THREE.PlaneGeometry(0.09, 0.055);
+      const collarGeometry = new THREE.TorusGeometry(0.11, 0.014, 6, 20);
+      const necklaceGeometry = new THREE.TorusGeometry(0.075, 0.004, 5, 20);
+      const sockStripeGeometry = new THREE.TorusGeometry(0.081, 0.009, 5, 16);
+      const shoeGeometry = new THREE.SphereGeometry(1, 14, 10);
+      const shoeSoleGeometry = new RoundedBoxGeometry(0.22, 0.045, 0.32, 3, 0.016);
+      const bagGeometry = new THREE.SphereGeometry(1, 12, 10);
+
+      const torsoLayer = new THREE.Group();
+      bodyRig.add(torsoLayer);
+      organicLayers.push(torsoLayer);
+      gaulTorsoMotion = torsoLayer;
+      addMesh(torsoGeometry, organicMats.skin, torsoLayer, [0, 0, 0]);
+      addMesh(shirtGeometry, organicMats.shirt, torsoLayer, [0, 0, 0]);
+      addMesh(jacketGeometry, organicMats.jacket, torsoLayer, [0, 0, 0]);
+      const shirtPanelGeometry = new THREE.PlaneGeometry(0.12, 0.28);
+      addMesh(shirtPanelGeometry, organicMats.shirt, torsoLayer, [0, 0.17, 0.235]);
+      const zipperGeometry = new THREE.CylinderGeometry(0.004, 0.004, 0.26, 6);
+      addMesh(zipperGeometry, organicMats.metal, torsoLayer, [-0.074, 0.16, 0.237]);
+      addMesh(zipperGeometry, organicMats.metal, torsoLayer, [0.074, 0.16, 0.237]);
+      addMesh(smoothSphere, organicMats.metal, torsoLayer, [0.074, 0.27, 0.245], [0.012, 0.018, 0.008]);
+      const jacketCollar = addMesh(collarGeometry, organicMats.shirt, torsoLayer, [0, 0.34, 0]);
+      jacketCollar.rotation.x = Math.PI / 2;
+
+      const shortsGeometry = new THREE.CylinderGeometry(0.16, 0.19, 0.12, 16, 1, false);
+      addMesh(shortsGeometry, organicMats.shorts, torsoLayer, [0, -0.27, 0]);
+      const skirtMotion = new THREE.Group();
+      skirtMotion.position.y = -0.255;
+      torsoLayer.add(skirtMotion);
+      gaulSkirtMotion = skirtMotion;
+      const skirtGeometry = new THREE.CylinderGeometry(0.18, 0.29, 0.2, 24, 1, false);
+      const skirtMaterial = makeMaterial(palette.skirt, 0.8);
+      skirtMaterial.flatShading = true;
+      skirtMaterial.needsUpdate = true;
+      addMesh(skirtGeometry, skirtMaterial, skirtMotion, [0, 0, 0]);
+
+      const necklace = addMesh(necklaceGeometry, organicMats.metal, torsoLayer, [0, 0.39, 0.08]);
+      necklace.rotation.x = Math.PI / 2;
+      const starShape = new THREE.Shape();
+      for (let point = 0; point < 10; point += 1) {
+        const angle = -Math.PI / 2 + point * Math.PI / 5;
+        const radius = point % 2 === 0 ? 0.025 : 0.012;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        if (point === 0) starShape.moveTo(x, y);
+        else starShape.lineTo(x, y);
+      }
+      starShape.closePath();
+      addMesh(new THREE.ShapeGeometry(starShape), organicMats.accent, torsoLayer, [0, 0.31, 0.16]);
+
+      const bagMotion = new THREE.Group();
+      torsoLayer.add(bagMotion);
+      gaulBagMotion = bagMotion;
+      const bagPath = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-0.12, 0.33, 0.19),
+        new THREE.Vector3(0.02, 0.21, 0.23),
+        new THREE.Vector3(0.2, 0.02, 0.22),
+        new THREE.Vector3(0.29, -0.16, 0.17),
+      ]);
+      const bagStrapGeometry = new THREE.TubeGeometry(bagPath, 16, 0.009, 5, false);
+      addMesh(bagStrapGeometry, organicMats.accent, bagMotion, [0, 0, 0]);
+      addMesh(bagGeometry, organicMats.accent, bagMotion, [0.29, -0.17, 0.18], [0.075, 0.095, 0.045]);
+
+      const headLayer = new THREE.Group();
+      head.add(headLayer);
+      organicLayers.push(headLayer);
+      gaulHeadLayer = headLayer;
+      addMesh(smoothSphere, organicMats.skin, headLayer, [0, 0, 0], [0.22, 0.28, 0.18]);
+      const chinGeometry = new THREE.ConeGeometry(0.15, 0.16, 16, 1);
+      const chin = addMesh(chinGeometry, organicMats.skin, headLayer, [0, -0.19, 0.035]);
+      chin.rotation.z = Math.PI;
+      [-1, 1].forEach((side) => {
+        addMesh(smoothSphere, organicMats.skin, headLayer, [side * 0.22, -0.005, 0], [0.045, 0.065, 0.045]);
+      });
+      addMesh(smoothSphere, organicMats.skin, headLayer, [0, -0.015, 0.194], [0.021, 0.032, 0.026]);
+
+      const faceCanvas = document.createElement("canvas");
+      faceCanvas.width = 512;
+      faceCanvas.height = 512;
+      const faceContext = faceCanvas.getContext("2d");
+      if (!faceContext) throw new Error("Canvas 2D tidak tersedia untuk wajah avatar.");
+      faceContext.clearRect(0, 0, 512, 512);
+      [125, 387].forEach((x) => {
+        const blush = faceContext.createRadialGradient(x, 310, 3, x, 310, 48);
+        blush.addColorStop(0, "rgba(244,163,192,0.34)");
+        blush.addColorStop(1, "rgba(244,163,192,0)");
+        faceContext.fillStyle = blush;
+        faceContext.beginPath();
+        faceContext.arc(x, 310, 48, 0, Math.PI * 2);
+        faceContext.fill();
+      });
+      [165, 347].forEach((x) => {
+        faceContext.fillStyle = "#FFFDFC";
+        faceContext.beginPath();
+        faceContext.ellipse(x, 218, 42, 30, 0, 0, Math.PI * 2);
+        faceContext.fill();
+        const iris = faceContext.createRadialGradient(x - 5, 211, 2, x, 220, 24);
+        iris.addColorStop(0, "#8B6049");
+        iris.addColorStop(0.68, "#4E3025");
+        iris.addColorStop(1, "#2B1B17");
+        faceContext.fillStyle = iris;
+        faceContext.beginPath();
+        faceContext.arc(x, 220, 22, 0, Math.PI * 2);
+        faceContext.fill();
+        faceContext.fillStyle = "#171313";
+        faceContext.beginPath();
+        faceContext.arc(x, 221, 12, 0, Math.PI * 2);
+        faceContext.fill();
+        faceContext.fillStyle = "#FFFFFF";
+        faceContext.beginPath();
+        faceContext.arc(x - 7, 211, 6, 0, Math.PI * 2);
+        faceContext.arc(x + 7, 228, 2.7, 0, Math.PI * 2);
+        faceContext.fill();
+        faceContext.strokeStyle = "#2B1B17";
+        faceContext.lineWidth = 12;
+        faceContext.lineCap = "round";
+        faceContext.beginPath();
+        faceContext.ellipse(x, 218, 43, 31, 0, Math.PI + 0.12, Math.PI * 2 - 0.12);
+        faceContext.stroke();
+        faceContext.lineWidth = 4;
+        for (let lash = -1; lash <= 1; lash += 1) {
+          faceContext.beginPath();
+          faceContext.moveTo(x + lash * 24, 191);
+          faceContext.lineTo(x + lash * 27, 181);
+          faceContext.stroke();
+        }
+      });
+      faceContext.strokeStyle = "#51372C";
+      faceContext.lineWidth = 5;
+      faceContext.lineCap = "round";
+      faceContext.beginPath();
+      faceContext.quadraticCurveTo(145, 169, 190, 179);
+      faceContext.moveTo(322, 179);
+      faceContext.quadraticCurveTo(367, 169, 390, 181);
+      faceContext.stroke();
+      const noseShade = faceContext.createLinearGradient(249, 235, 267, 300);
+      noseShade.addColorStop(0, "rgba(114,72,56,0)");
+      noseShade.addColorStop(1, "rgba(114,72,56,0.18)");
+      faceContext.fillStyle = noseShade;
+      faceContext.beginPath();
+      faceContext.ellipse(256, 275, 16, 38, 0, 0, Math.PI * 2);
+      faceContext.fill();
+      faceContext.fillStyle = "#D97991";
+      faceContext.beginPath();
+      faceContext.ellipse(256, 359, 26, 10, 0, 0, Math.PI * 2);
+      faceContext.fill();
+      faceContext.strokeStyle = "#A84F69";
+      faceContext.lineWidth = 3;
+      faceContext.beginPath();
+      faceContext.moveTo(228, 356);
+      faceContext.quadraticCurveTo(256, 370, 284, 356);
+      faceContext.stroke();
+      faceContext.fillStyle = "rgba(255,255,255,0.85)";
+      faceContext.beginPath();
+      faceContext.ellipse(249, 352, 8, 2.5, 0, 0, Math.PI * 2);
+      faceContext.fill();
+      const faceTexture = new THREE.CanvasTexture(faceCanvas);
+      faceTexture.colorSpace = THREE.SRGBColorSpace;
+      textures.add(faceTexture);
+      const faceMaterial = new THREE.MeshStandardMaterial({
+        map: faceTexture,
+        transparent: true,
+        roughness: 0.58,
+        metalness: 0,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      resources.add(faceMaterial);
+      addMesh(faceGeometry, faceMaterial, headLayer, [0, 0, 0.17]);
+      const eyelidMaterial = makeMaterial(palette.skin, 0.56);
+      [-1, 1].forEach((side) => {
+        const eyelid = addMesh(eyeLidGeometry, eyelidMaterial, headLayer, [side * 0.057, 0.024, 0.185]);
+        eyelid.scale.y = 0.001;
+        gaulEyeLids.push(eyelid);
+      });
+
+      const hairMotion = new THREE.Group();
+      headLayer.add(hairMotion);
+      gaulHairMotion = hairMotion;
+      const addHairChain = (side: number, rootY: number, rootZ: number, segmentCount: number, delay: number) => {
+        let parent = hairMotion;
+        for (let segment = 0; segment < segmentCount; segment += 1) {
+          const pivot = new THREE.Group();
+          if (segment === 0) pivot.position.set(side * 0.13, rootY, rootZ);
+          else pivot.position.set(side * 0.018, -0.22, 0);
+          parent.add(pivot);
+          addMesh(hairSegmentGeometry, organicMats.hair, pivot, [0, -0.1, 0]);
+          gaulHairSegments.push({ pivot, delay: delay + segment * 0.28, phase: side * 0.35 });
+          parent = pivot;
+        }
+      };
+      addHairChain(-1, 0.12, -0.29, 4, 0.1);
+      addHairChain(1, 0.12, -0.29, 4, 0.35);
+      addHairChain(-1, 0.17, 0.205, 2, 0.18);
+      addHairChain(1, 0.17, 0.205, 2, 0.42);
+      const hairClipGeometry = new THREE.SphereGeometry(1, 10, 8);
+      addMesh(hairClipGeometry, organicMats.accent, headLayer, [-0.18, 0.105, 0.19], [0.035, 0.015, 0.012]);
+
+      const beanieGeometry = new THREE.SphereGeometry(1, 16, 10);
+      addMesh(beanieGeometry, organicMats.hair, headLayer, [0, 0.19, -0.015], [0.235, 0.125, 0.19]);
+
+      const shoulderJointGeometry = new THREE.SphereGeometry(1, 12, 8);
+      const upperLegJointGeometry = new THREE.SphereGeometry(1, 12, 8);
+      const kneeJointGeometry = new THREE.SphereGeometry(1, 12, 8);
+      const addOrganicArm = (limb: LimbRig, side: number) => {
+        const upper = new THREE.Group();
+        limb.pivot.add(upper);
+        organicLayers.push(upper);
+        gaulShoulders.push({ layer: upper, side });
+        addMesh(shoulderJointGeometry, organicMats.skin, upper, [-side * 0.12, 0.015, 0], [0.14, 0.11, 0.13]);
+        addMesh(upperArmGeometry, organicMats.skin, upper, [0, 0, 0]);
+        addMesh(upperSleeveGeometry, organicMats.jacket, upper, [0, 0, 0]);
+        const forearm = new THREE.Group();
+        limb.elbow.add(forearm);
+        organicLayers.push(forearm);
+        gaulForearms.push(forearm);
+        addMesh(shoulderJointGeometry, organicMats.skin, forearm, [0, 0, 0], [0.078, 0.078, 0.078]);
+        addMesh(forearmGeometry, organicMats.skin, forearm, [0, 0, 0]);
+        addMesh(forearmSleeveGeometry, organicMats.jacket, forearm, [0, 0, 0]);
+        const handLayer = new THREE.Group();
+        limb.hand.add(handLayer);
+        organicLayers.push(handLayer);
+        const handShape = new THREE.Shape();
+        handShape.moveTo(-0.04, -0.075);
+        handShape.quadraticCurveTo(-0.065, -0.03, -0.055, 0.015);
+        handShape.lineTo(-0.064, 0.07);
+        handShape.quadraticCurveTo(-0.062, 0.095, -0.046, 0.075);
+        handShape.lineTo(-0.035, 0.035);
+        handShape.lineTo(-0.022, 0.098);
+        handShape.quadraticCurveTo(-0.013, 0.119, 0, 0.096);
+        handShape.lineTo(0.005, 0.04);
+        handShape.lineTo(0.018, 0.105);
+        handShape.quadraticCurveTo(0.03, 0.123, 0.039, 0.096);
+        handShape.lineTo(0.037, 0.035);
+        handShape.lineTo(0.05, 0.087);
+        handShape.quadraticCurveTo(0.066, 0.102, 0.07, 0.072);
+        handShape.lineTo(0.06, -0.04);
+        handShape.quadraticCurveTo(0.055, -0.082, 0.025, -0.09);
+        handShape.closePath();
+        const handGeometry = new THREE.ExtrudeGeometry(handShape, {
+          depth: 0.035,
+          bevelEnabled: true,
+          bevelSegments: 2,
+          steps: 1,
+          bevelSize: 0.006,
+          bevelThickness: 0.006,
+        });
+        addMesh(handGeometry, organicMats.skin, handLayer, [0, -0.03, 0.015]);
+      };
+      addOrganicArm(leftArm, -1);
+      addOrganicArm(rightArm, 1);
+
+      const gaulKnees: THREE.Group[] = [];
+      const addOrganicLeg = (leg: typeof leftLeg) => {
+        const thigh = new THREE.Group();
+        leg.pivot.add(thigh);
+        organicLayers.push(thigh);
+        addMesh(upperLegJointGeometry, organicMats.skin, thigh, [0, -0.015, 0], [0.105, 0.105, 0.095]);
+        addMesh(thighGeometry, organicMats.skin, thigh, [0, 0, 0]);
+        const knee = new THREE.Group();
+        knee.position.y = -0.25;
+        thigh.add(knee);
+        organicLayers.push(knee);
+        gaulKnees.push(knee);
+        addMesh(kneeJointGeometry, organicMats.skin, knee, [0, 0, 0], [0.075, 0.075, 0.07]);
+        addMesh(calfGeometry, organicMats.skin, knee, [0, 0, 0]);
+        addMesh(sockGeometry, organicMats.socks, knee, [0, 0, 0]);
+        const stripeGeometry = new THREE.TorusGeometry(0.081, 0.008, 5, 12);
+        const stripe = addMesh(stripeGeometry, organicMats.accent, knee, [0, -0.015, 0]);
+        stripe.rotation.x = Math.PI / 2;
+        addMesh(shoeGeometry, organicMats.shoes, knee, [0, -0.3, 0.065], [0.115, 0.065, 0.17]);
+        addMesh(shoeSoleGeometry, organicMats.shirt, knee, [0, -0.3625, 0.065]);
+      };
+      addOrganicLeg(leftLeg);
+      addOrganicLeg(rightLeg);
+      gaulLeftKnee = gaulKnees[0] ?? null;
+      gaulRightKnee = gaulKnees[1] ?? null;
+      gaulNextBlinkAt = performance.now() + 3000 + Math.random() * 2000;
+      gaulBuilt = true;
+    };
+
+    const buildRobloxSlimAvatar = () => {
+      if (robloxSlimBuilt) return;
+      const preset = AVATAR_PRESETS.find(({ id }) => id === "roblox-slim")!;
+      const slimMats = {
+        skin: makeMaterial(preset.colors.skin, 0.84),
+        hair: makeMaterial(preset.colors.hair, 0.9),
+        shirt: makeMaterial(preset.colors.hoodie, 0.86),
+        denim: makeMaterial(preset.colors.pants, 0.88),
+        shoes: makeMaterial(preset.colors.shoes, 0.72),
+        sole: makeMaterial("#d8dce2", 0.9),
+      };
+      const rounded = (size: readonly [number, number, number], segments = 2) => (
+        new RoundedBoxGeometry(...size, segments, Math.min(...size) * ROBLOX_SLIM_CONFIG.bevelRatio)
+      );
+      const slimUpperArmSize = ROBLOX_SLIM_CONFIG.armReference.upper.map((size, axis) => (
+        axis === 1 ? size : size * ROBLOX_SLIM_CONFIG.armThicknessScale
+      )) as unknown as readonly [number, number, number];
+      const slimForearmSize = ROBLOX_SLIM_CONFIG.armReference.forearm.map((size, axis) => (
+        axis === 1 ? size : size * ROBLOX_SLIM_CONFIG.armThicknessScale
+      )) as unknown as readonly [number, number, number];
+      const partGeometry = {
+        head: rounded(ROBLOX_SLIM_CONFIG.parts.head),
+        upperTorso: rounded(ROBLOX_SLIM_CONFIG.parts.upperTorso),
+        lowerTorso: rounded(ROBLOX_SLIM_CONFIG.parts.lowerTorso),
+        upperArm: rounded(slimUpperArmSize),
+        forearm: rounded(slimForearmSize),
+        hand: rounded(ROBLOX_SLIM_CONFIG.parts.hand),
+        thigh: rounded(ROBLOX_SLIM_CONFIG.parts.thigh),
+        calf: rounded(ROBLOX_SLIM_CONFIG.parts.calf),
+        foot: rounded(ROBLOX_SLIM_CONFIG.parts.foot),
+        neck: rounded([0.16, 0.2, 0.15], 1),
+        hairCap: rounded([0.56, 0.16, 0.47], 1),
+        hairFringe: rounded([0.38, 0.1, 0.13], 1),
+        hairLock: rounded([0.12, 0.16, 0.13], 1),
+        sole: rounded([0.16, 0.025, 0.26], 1),
+      };
+      const jointGeometry = new THREE.SphereGeometry(1, 6, 4);
+
+      // Torso dan kepala tetap menumpang rig umum; seluruh detail visual berada di layer baru.
+      const torso = new THREE.Group();
+      bodyRig.add(torso);
+      robloxSlimLayers.push(torso);
+      robloxSlimTorso = torso;
+      addMesh(partGeometry.lowerTorso, slimMats.denim, torso, [0, -0.2, 0]);
+      const upperTorso = new THREE.Group();
+      upperTorso.position.y = 0.1;
+      torso.add(upperTorso);
+      robloxSlimUpperTorso = upperTorso;
+      addMesh(partGeometry.upperTorso, slimMats.shirt, upperTorso, [0, 0.1, 0]);
+
+      const headLayer = new THREE.Group();
+      head.add(headLayer);
+      robloxSlimLayers.push(headLayer);
+      robloxSlimHead = headLayer;
+      addMesh(partGeometry.head, slimMats.skin, headLayer, [0, 0, 0]);
+      addMesh(partGeometry.neck, slimMats.skin, headLayer, [0, -0.34, 0]);
+
+      const faceCanvas = document.createElement("canvas");
+      faceCanvas.width = 128;
+      faceCanvas.height = 128;
+      const faceContext = faceCanvas.getContext("2d");
+      if (!faceContext) throw new Error("Canvas 2D tidak tersedia untuk wajah avatar.");
+      faceContext.fillStyle = "#171313";
+      faceContext.beginPath();
+      faceContext.arc(43, 54, 4, 0, Math.PI * 2);
+      faceContext.arc(85, 54, 4, 0, Math.PI * 2);
+      faceContext.fill();
+      faceContext.strokeStyle = "#171313";
+      faceContext.lineWidth = 3;
+      faceContext.lineCap = "round";
+      faceContext.beginPath();
+      faceContext.moveTo(55, 81);
+      faceContext.quadraticCurveTo(64, 89, 73, 81);
+      faceContext.stroke();
+      const faceTexture = new THREE.CanvasTexture(faceCanvas);
+      faceTexture.colorSpace = THREE.SRGBColorSpace;
+      textures.add(faceTexture);
+      const faceMaterial = new THREE.MeshStandardMaterial({
+        map: faceTexture,
+        transparent: true,
+        roughness: 0.82,
+        metalness: 0,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      resources.add(faceMaterial);
+      addMesh(new THREE.PlaneGeometry(0.32, 0.22), faceMaterial, headLayer, [0, 0, 0.232]);
+      addMesh(partGeometry.hairCap, slimMats.hair, headLayer, [0, 0.19, -0.015]);
+      [-1, 0, 1].forEach((side) => {
+        const bang = addMesh(partGeometry.hairFringe, slimMats.hair, headLayer, [side * 0.11, 0.12, 0.2]);
+        bang.rotation.z = side * -0.08;
+      });
+      [-1, 1].forEach((side) => {
+        addMesh(partGeometry.hairLock, slimMats.hair, headLayer, [side * 0.205, 0.01, 0.12]);
+      });
+
+      const addArm = (limb: LimbRig, side: number) => {
+        const upper = new THREE.Group();
+        upper.position.x = -side * 0.26;
+        upper.rotation.z = side * 0.12;
+        limb.pivot.add(upper);
+        robloxSlimLayers.push(upper);
+        addMesh(partGeometry.upperArm, slimMats.shirt, upper, [0, -0.15, 0]);
+        const elbow = new THREE.Group();
+        elbow.position.y = -0.29;
+        upper.add(elbow);
+        addMesh(jointGeometry, slimMats.skin, elbow, [0, 0, 0], [0.057, 0.057, 0.057]);
+        addMesh(partGeometry.forearm, slimMats.shirt, elbow, [0, -0.12, 0]);
+        const wrist = new THREE.Group();
+        wrist.position.y = -0.23;
+        elbow.add(wrist);
+        addMesh(jointGeometry, slimMats.skin, wrist, [0, 0, 0], [0.047, 0.047, 0.047]);
+        addMesh(partGeometry.hand, slimMats.skin, wrist, [0, -0.035, 0.008]);
+        robloxSlimArms.push({ upper, elbow, wrist, limb, side });
+      };
+      addArm(leftArm, -1);
+      addArm(rightArm, 1);
+
+      const addLeg = (limb: typeof leftLeg, side: number) => {
+        const upper = new THREE.Group();
+        limb.pivot.add(upper);
+        robloxSlimLayers.push(upper);
+        addMesh(partGeometry.thigh, slimMats.denim, upper, [0, -0.15, 0]);
+        const knee = new THREE.Group();
+        knee.position.y = -0.3;
+        upper.add(knee);
+        addMesh(jointGeometry, slimMats.denim, knee, [0, 0, 0], [0.068, 0.068, 0.068]);
+        addMesh(partGeometry.calf, slimMats.denim, knee, [0, -0.15, 0]);
+        const ankle = new THREE.Group();
+        ankle.position.y = -0.29;
+        knee.add(ankle);
+        addMesh(jointGeometry, slimMats.skin, ankle, [0, 0, 0], [0.055, 0.055, 0.055]);
+        addMesh(partGeometry.foot, slimMats.shoes, ankle, [0, 0, 0.035]);
+        addMesh(partGeometry.sole, slimMats.sole, ankle, [0, -0.037, 0.035]);
+        robloxSlimLegs.push({ upper, knee, ankle, limb, side });
+      };
+      addLeg(leftLeg, -1);
+      addLeg(rightLeg, 1);
+      robloxSlimBuilt = true;
+    };
+
+    const avatarLayerRegistry = new Map<AvatarPresetId, { layers: THREE.Group[]; build?: () => void }>([
+      ["anak-cokelat", { layers: legacyLayers }],
+      ["kacamata-hitam", { layers: newAvatarLayers, build: buildBlackAvatar }],
+      ["cewek-streetwear", { layers: streetwearLayers, build: buildStreetwearAvatar }],
+      ["cewek-gaul", { layers: organicLayers, build: buildOrganicAvatar }],
+      ["roblox-slim", { layers: robloxSlimLayers, build: buildRobloxSlimAvatar }],
+    ]);
+
+    const applyAvatar = (presetId: AvatarPresetId) => {
+      const selectedLayer = avatarLayerRegistry.get(presetId);
+      if (!selectedLayer) return;
+      selectedLayer.build?.();
+      avatarLayerRegistry.forEach((entry, id) => {
+        entry.layers.forEach((layer) => { layer.visible = id === presetId; });
+      });
+    };
+    applyAvatar(selectedAvatarId);
+
     const animationState = {
       phase: 0,
       runBlend: 0,
@@ -843,8 +1801,9 @@ const NumatikWorldPage = () => {
       rightArm.pivot.rotation.x = -animationState.armSwing * animationState.runBlend;
       const jumpLift = grounded ? 0 : 2.2;
       animationState.armLift = THREE.MathUtils.lerp(animationState.armLift, jumpLift, 1 - Math.exp(-12 * dt));
-      leftArm.pivot.rotation.z = animationState.armLift;
-      rightArm.pivot.rotation.z = -leftArm.pivot.rotation.z;
+      const idleArmRaise = selectedAvatarId === "kacamata-hitam" ? 0.46 * (1 - animationState.runBlend) : 0;
+      leftArm.pivot.rotation.z = animationState.armLift - idleArmRaise;
+      rightArm.pivot.rotation.z = -animationState.armLift + idleArmRaise;
       leftArm.elbow.rotation.x = -animationState.elbowBend * animationState.runBlend;
       rightArm.elbow.rotation.x = -animationState.elbowBend * animationState.runBlend;
       bodyRig.position.y = 1 + Math.max(0, animationState.bodyBounce) + animationState.breath;
@@ -853,9 +1812,97 @@ const NumatikWorldPage = () => {
       bodyRig.scale.y = 1 - animationState.landingBend * 0.06;
       head.rotation.x = -animationState.torsoLean;
       head.rotation.y = -animationState.torsoTwist;
-      hoodPivot.rotation.x = animationState.hoodSway;
-      hairMotion.rotation.x = animationState.hairSway;
-      pendantPivot.rotation.x = animationState.pendantSway;
+      if (selectedAvatarId === "roblox-slim" && robloxSlimBuilt && robloxSlimTorso && robloxSlimUpperTorso && robloxSlimHead) {
+        const slimAlpha = 1 - Math.exp(-dt / ROBLOX_SLIM_CONFIG.transitionSeconds);
+        const idleWave = Math.sin(now * 0.00125);
+        const torsoLeanTarget = (isRunning ? ROBLOX_SLIM_CONFIG.bodyLean * runWeight : 0) - animationState.torsoLean;
+        robloxSlimTorso.rotation.x = THREE.MathUtils.lerp(robloxSlimTorso.rotation.x, torsoLeanTarget, slimAlpha);
+        robloxSlimTorso.position.x = THREE.MathUtils.lerp(robloxSlimTorso.position.x, grounded ? idleWave * 0.012 : 0, slimAlpha);
+        robloxSlimUpperTorso.rotation.y = THREE.MathUtils.lerp(
+          robloxSlimUpperTorso.rotation.y,
+          -animationState.torsoTwist * 1.4,
+          slimAlpha,
+        );
+        robloxSlimHead.rotation.x = THREE.MathUtils.lerp(robloxSlimHead.rotation.x, idleWave * 0.01, slimAlpha);
+        robloxSlimHead.rotation.y = THREE.MathUtils.lerp(robloxSlimHead.rotation.y, -animationState.torsoTwist * 0.3, slimAlpha);
+
+        robloxSlimArms.forEach(({ upper, elbow, wrist, limb, side }) => {
+          const delayedPhase = animationState.phase - ROBLOX_SLIM_CONFIG.forearmLagCycles * Math.PI * 2;
+          const phaseDrive = -side * Math.sin(delayedPhase);
+          const sharedShoulderDrive = -limb.pivot.rotation.x / RUN_CONFIG.legSwing;
+          const forwardAmount = THREE.MathUtils.clamp((0.65 * sharedShoulderDrive + 0.35 * phaseDrive + 1) / 2, 0, 1);
+          const elbowTarget = isRunning
+            ? THREE.MathUtils.lerp(ROBLOX_SLIM_CONFIG.elbowBackward, ROBLOX_SLIM_CONFIG.elbowForward, forwardAmount)
+            : grounded
+              ? 0.22 + Math.sin(now * 0.0015 + side) * 0.018
+              : 0.38;
+          const jumpSpread = grounded ? 0 : 0.3;
+          upper.rotation.z = THREE.MathUtils.lerp(upper.rotation.z, side * (0.12 + jumpSpread), slimAlpha);
+          elbow.rotation.x = THREE.MathUtils.lerp(elbow.rotation.x, elbowTarget, slimAlpha);
+          const handPhase = animationState.phase - ROBLOX_SLIM_CONFIG.handLagCycles * Math.PI * 2;
+          const wristTarget = isRunning
+            ? Math.sin(handPhase) * 0.09 + elbow.rotation.x * 0.12
+            : grounded ? 0.035 : -0.06;
+          wrist.rotation.x = THREE.MathUtils.lerp(wrist.rotation.x, wristTarget, slimAlpha);
+          wrist.rotation.z = THREE.MathUtils.lerp(wrist.rotation.z, side * 0.035, slimAlpha);
+        });
+
+        robloxSlimLegs.forEach(({ upper, knee, ankle, limb, side }) => {
+          const sharedHipDrive = limb.pivot.rotation.x / RUN_CONFIG.legSwing;
+          const phaseBack = side < 0
+            ? Math.max(0, -Math.sin(animationState.phase))
+            : Math.max(0, Math.sin(animationState.phase));
+          const backwardAmount = THREE.MathUtils.clamp(
+            phaseBack * (0.75 + 0.25 * Math.min(1, Math.abs(sharedHipDrive))),
+            0,
+            1,
+          );
+          const kneeTarget = isRunning
+            ? ROBLOX_SLIM_CONFIG.kneeBackward * backwardAmount
+            : grounded
+              ? 0.025 + animationState.landingBend * 0.28
+              : 0.28;
+          knee.rotation.x = THREE.MathUtils.lerp(knee.rotation.x, kneeTarget, slimAlpha);
+          const footTarget = isRunning
+            ? -Math.sin(animationState.phase + side * 0.2) * 0.08 + limb.pivot.rotation.x * 0.06
+            : grounded ? 0 : 0.1;
+          ankle.rotation.x = THREE.MathUtils.lerp(ankle.rotation.x, footTarget, slimAlpha);
+
+          const hipAngle = limb.pivot.rotation.x;
+          const kneeAngle = knee.rotation.x;
+          const ankleBaseAngle = hipAngle + kneeAngle;
+          const footAngle = ankleBaseAngle + ankle.rotation.x;
+          const absCos = Math.abs(Math.cos(footAngle));
+          const absSin = Math.abs(Math.sin(footAngle));
+          const footBottom = -0.035 * Math.sin(footAngle) - 0.04 * absCos - 0.13 * absSin;
+          const soleBottom = -0.037 * Math.cos(footAngle) - 0.035 * Math.sin(footAngle)
+            - 0.0125 * absCos - 0.13 * absSin;
+          const lowestPoint = limb.pivot.position.y
+            - 0.3 * Math.cos(hipAngle)
+            + ankle.position.y * Math.cos(ankleBaseAngle)
+            + Math.min(footBottom, soleBottom);
+          const localLift = Math.max(0, -lowestPoint / Math.max(0.5, Math.cos(hipAngle)));
+          upper.position.y = THREE.MathUtils.lerp(upper.position.y, localLift, slimAlpha);
+        });
+      }
+      if (legacyBody.visible) {
+        hoodPivot.rotation.x = animationState.hoodSway;
+        hairMotion.rotation.x = animationState.hairSway;
+        pendantPivot.rotation.x = animationState.pendantSway;
+      }
+      if (blackHairMotion?.visible && blackHairMotion.parent?.visible) {
+        blackHairMotion.rotation.x = animationState.hairSway * 1.25;
+        blackHairMotion.rotation.z = Math.sin(animationState.phase - 0.55) * 0.025 * animationState.runBlend;
+      }
+      if (streetwearHairMotion?.visible && streetwearHairMotion.parent?.visible) {
+        streetwearHairMotion.rotation.x = THREE.MathUtils.clamp(animationState.hairSway * 0.55, -0.035, 0.035);
+        streetwearHairMotion.rotation.z = THREE.MathUtils.clamp(Math.sin(animationState.phase - 0.65) * 0.018 * animationState.runBlend, -0.018, 0.018);
+      }
+      if (gumMesh?.visible && gumMesh.parent?.visible) {
+        const gumCycle = now * 0.001 * (Math.PI * 2);
+        gumMesh.scale.setScalar(1 + Math.sin(gumCycle) * 0.1 + Math.sin(animationState.phase) * animationState.runBlend * 0.025);
+        gumMesh.position.y = -0.04 + Math.sin(gumCycle) * 0.009;
+      }
 
       dustParticles.forEach((particle) => {
         if (!particle.mesh.visible) return;
@@ -909,7 +1956,7 @@ const NumatikWorldPage = () => {
       renderer.domElement.remove();
       keysRef.current.clear();
     };
-  }, [gameStarted, selectedIsland]);
+  }, [gameStarted, selectedIsland, selectedAvatarId]);
 
   const answerQuestion = (answer: number) => {
     if (!question || !pendingTreasureRef.current) return;
@@ -1007,6 +2054,43 @@ const NumatikWorldPage = () => {
         .world-island-emoji{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,#eff9ff,#dff1ff);font-size:25px}
         .world-island-name{display:block;font:900 10px var(--font-display,'Orbitron'),sans-serif;line-height:1.35}
         .world-island-description{display:block;margin-top:4px;color:#8195ad;font-size:10px;font-weight:600;line-height:1.25}
+        .world-avatar-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:min(760px,100%);margin:0 auto 18px}
+        .world-avatar-card{display:flex;flex-direction:column;align-items:stretch;min-width:0;padding:13px;border:2px solid #dceaf6;border-radius:18px;background:linear-gradient(145deg,#fff,#f6fbff);color:#3d5d85;text-align:left;box-shadow:0 4px 0 rgba(74,114,165,.08)}
+        .world-avatar-card[data-selected="true"]{border-color:#5bbce9;background:linear-gradient(145deg,#f1fcff,#e2f4ff);box-shadow:0 4px 0 rgba(74,156,203,.2),0 0 0 3px rgba(91,188,233,.13)}
+        .world-avatar-preview{position:relative;display:grid;place-items:center;height:154px;overflow:hidden;border-radius:13px;background:radial-gradient(ellipse at 50% 80%,#c5edfa 0 22%,transparent 23%),linear-gradient(150deg,#effaff,#dceeff)}
+        .world-avatar-doll{position:relative;width:84px;height:135px}
+        .world-avatar-head{position:absolute;z-index:2;top:7px;left:20px;width:44px;height:45px;border:2px solid rgba(51,64,75,.12);border-radius:13px;background:#f2c9a5}
+        .world-avatar-hair{position:absolute;z-index:3;top:2px;left:18px;width:48px;height:23px;border-radius:17px 17px 7px 7px;background:#7a4a32}
+        .world-avatar-shirt{position:absolute;top:49px;left:14px;width:56px;height:45px;border-radius:13px 13px 10px 10px;background:#e8c98a}
+        .world-avatar-vest{position:absolute;z-index:1;top:52px;left:26px;width:32px;height:38px;border-radius:8px;background:#3b3f44}
+        .world-avatar-legs{position:absolute;top:88px;left:20px;width:44px;height:35px;border-radius:7px 7px 9px 9px;background:#292c30}
+        .world-avatar-shoes{position:absolute;top:118px;left:15px;width:27px;height:12px;border-radius:6px 6px 4px 4px;background:#c98b4e;box-shadow:30px 0 #c98b4e}
+        .world-avatar-card[data-avatar="kacamata-hitam"] .world-avatar-head{background:#F3D2BC}
+        .world-avatar-card[data-avatar="kacamata-hitam"] .world-avatar-hair{top:0;left:16px;width:52px;height:28px;border-radius:20px 19px 10px 9px;background:#14110F;box-shadow:-5px 8px 0 -2px #14110F,7px 9px 0 -2px #14110F}
+        .world-avatar-card[data-avatar="kacamata-hitam"] .world-avatar-shirt{background:#F5F5F5}
+        .world-avatar-card[data-avatar="kacamata-hitam"] .world-avatar-vest{z-index:2;top:49px;left:32px;width:5px;height:43px;border-radius:2px;background:#111;box-shadow:15px 0 #111}
+        .world-avatar-card[data-avatar="kacamata-hitam"] .world-avatar-legs{left:18px;width:48px;background:#1A1A1A}
+        .world-avatar-card[data-avatar="kacamata-hitam"] .world-avatar-shoes{background:#111;box-shadow:30px 0 #111}
+        .world-avatar-card[data-avatar="cewek-streetwear"] .world-avatar-head{background:#F3D2BC}
+        .world-avatar-card[data-avatar="cewek-streetwear"] .world-avatar-hair{z-index:1;top:8px;left:17px;width:50px;height:76px;border-radius:20px 20px 9px 9px;background:#14110F;box-shadow:-5px 24px 0 -2px #14110F,7px 28px 0 -2px #14110F}
+        .world-avatar-card[data-avatar="cewek-streetwear"] .world-avatar-shirt{top:52px;left:19px;width:46px;height:29px;border-radius:9px;background:#151515}
+        .world-avatar-card[data-avatar="cewek-streetwear"] .world-avatar-vest{z-index:3;top:48px;left:18px;width:11px;height:37px;border-radius:6px;background:#D63A2F;box-shadow:38px 0 #D63A2F}
+        .world-avatar-card[data-avatar="cewek-streetwear"] .world-avatar-legs{left:17px;width:50px;height:40px;background:#1A1A1A}
+        .world-avatar-card[data-avatar="cewek-streetwear"] .world-avatar-shoes{top:121px;background:#D63A2F;box-shadow:30px 0 #D63A2F}
+        .world-avatar-card[data-avatar="roblox-slim"] .world-avatar-head{background:#F3D2BC}
+        .world-avatar-card[data-avatar="roblox-slim"] .world-avatar-hair{top:2px;left:18px;width:48px;height:21px;border-radius:15px 15px 6px 6px;background:#171313;box-shadow:-4px 8px 0 -2px #171313,5px 8px 0 -2px #171313}
+        .world-avatar-card[data-avatar="roblox-slim"] .world-avatar-shirt{top:49px;left:18px;width:48px;height:40px;border-radius:8px;background:#3188D8}
+        .world-avatar-card[data-avatar="roblox-slim"] .world-avatar-vest{display:none}
+        .world-avatar-card[data-avatar="roblox-slim"] .world-avatar-legs{top:87px;left:23px;width:38px;height:37px;border-radius:4px;background:#315C91}
+        .world-avatar-card[data-avatar="roblox-slim"] .world-avatar-shoes{top:119px;left:14px;background:#F5F5F5;box-shadow:30px 0 #F5F5F5}
+        .world-avatar-beanie{position:absolute;z-index:4;top:2px;left:15px;width:54px;height:20px;border:3px solid #1A1A1A;border-radius:16px 16px 7px 7px;background:#1A1A1A}
+        .world-avatar-glasses{position:absolute;z-index:4;top:23px;left:22px;width:40px;height:12px;border:3px solid #111;border-radius:4px;box-shadow:17px 0 0 -2px #F3D2BC}
+        .world-avatar-gum{position:absolute;z-index:4;top:42px;left:40px;width:9px;height:9px;border-radius:50%;background:#F4A3C0}
+        .world-avatar-title{margin:12px 0 4px;font:900 12px var(--font-display,'Orbitron'),sans-serif}
+        .world-avatar-description{min-height:30px;color:#8195ad;font-size:11px;font-weight:600;line-height:1.4}
+        .world-avatar-pick{min-height:43px;margin-top:12px;border:0;border-radius:13px;background:linear-gradient(135deg,#29cda9,#16a991);color:#fff;font:900 11px var(--font-display,'Orbitron'),sans-serif;cursor:pointer}
+        .world-avatar-pick:focus-visible,.world-avatar-change:focus-visible{outline:3px solid #ffbc58;outline-offset:3px}
+        .world-avatar-change{display:flex;justify-content:center;align-items:center;width:100%;min-height:44px;margin-top:14px;border:2px solid #cce4f4;border-radius:14px;background:#f5fbff;color:#456b94;font:800 10px var(--font-display,'Orbitron'),sans-serif;cursor:pointer}
         .world-rules{display:grid;gap:11px;margin:16px 0 0;padding:14px;border:1px dashed #bfd7ea;border-radius:17px;background:#f5fbff}
         .world-rule{display:grid;grid-template-columns:27px 1fr;align-items:start;gap:8px;color:#607b9c;font-size:11px;font-weight:650;line-height:1.45}
         .world-rule-icon{display:grid;place-items:center;width:25px;height:25px;border-radius:9px;background:#e2f3ff;font-size:14px}
@@ -1014,9 +2098,9 @@ const NumatikWorldPage = () => {
         .world-start-button{display:flex;justify-content:center;align-items:center;gap:10px;width:100%;min-height:54px;margin-top:15px;border:0;border-radius:17px;background:linear-gradient(135deg,#29cda9,#16a991);color:#fff;font:900 12px var(--font-display,'Orbitron'),sans-serif;letter-spacing:.04em;box-shadow:0 6px 0 #168d7d,0 10px 20px rgba(28,174,148,.2);cursor:pointer;transition:transform .15s,filter .15s}
         .world-start-button:hover{transform:translateY(-2px);filter:brightness(1.05)}
         .world-start-button:active{transform:translateY(3px);box-shadow:0 3px 0 #168d7d}
-        .world-start-button:focus-visible,.world-island-card:focus-visible,.world-start-back:focus-visible{outline:3px solid #ffbc58;outline-offset:3px}
+        .world-start-button:focus-visible,.world-island-card:focus-visible,.world-start-back:focus-visible,.world-avatar-card:focus-visible{outline:3px solid #ffbc58;outline-offset:3px}
         @media(max-width:600px){.world-top{align-items:flex-start}.world-brand{gap:7px}.world-title{font-size:clamp(11px,3.2vw,17px)}.world-subtitle{display:none}.world-brand-mark{width:34px;height:34px}.world-back{min-height:36px;padding:7px 9px;font-size:9px}.world-score{min-height:36px;padding:7px 10px;font-size:11px}.world-bottom{bottom:102px;max-width:calc(100vw - 26px);font-size:10px}.world-mobile-controls{grid-template-columns:repeat(3,42px);grid-template-rows:repeat(2,42px);gap:4px;left:12px;bottom:14px}.world-jump{right:14px;bottom:20px;width:58px;height:58px}}
-        @media(max-width:760px){.world-start-screen{place-items:start center;padding:14px}.world-start-content{margin:auto}.world-start-top{margin-bottom:13px}.world-start-heading{margin-bottom:16px}.world-start-mark{width:47px;height:47px;margin-bottom:9px;border-radius:16px}.world-lobby{grid-template-columns:1fr;gap:11px}.world-lobby-panel{padding:15px;border-radius:20px}.world-lobby-panel h2{font-size:13px}.world-lobby-intro{margin-bottom:12px;font-size:11px}.world-rules{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;padding:10px}.world-rule{font-size:10px}.world-start-button{min-height:48px;margin-top:12px}}
+        @media(max-width:760px){.world-start-screen{place-items:start center;padding:14px}.world-start-content{margin:auto}.world-start-top{margin-bottom:13px}.world-start-heading{margin-bottom:16px}.world-start-mark{width:47px;height:47px;margin-bottom:9px;border-radius:16px}.world-lobby{grid-template-columns:1fr;gap:11px}.world-lobby-panel{padding:15px;border-radius:20px}.world-lobby-panel h2{font-size:13px}.world-lobby-intro{margin-bottom:12px;font-size:11px}.world-rules{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;padding:10px}.world-rule{font-size:10px}.world-start-button{min-height:48px;margin-top:12px}.world-avatar-grid{grid-auto-flow:column;grid-auto-columns:minmax(250px,82vw);grid-template-columns:none;overflow-x:auto;padding:5px 4px 12px;scroll-snap-type:x mandatory;touch-action:pan-x}.world-avatar-card{scroll-snap-align:center;height:100%}.world-avatar-preview{height:142px}.world-avatar-pick{flex:none}}
         @media(max-width:390px){.world-island-grid{gap:7px}.world-island-card{grid-template-columns:34px minmax(0,1fr);gap:7px;min-height:66px;padding:8px}.world-island-emoji{width:34px;height:34px;font-size:21px}.world-island-name{font-size:9px}.world-island-description{font-size:9px}.world-start-badge{font-size:9px;padding:7px 9px}}
         @media(prefers-reduced-motion:reduce){.world-answer:hover{transform:none}}
       `}</style>
@@ -1033,8 +2117,40 @@ const NumatikWorldPage = () => {
               <header className="world-start-heading">
                 <div className="world-start-mark"><Sparkles size={28} /></div>
                 <h1 className="world-start-title" id="world-start-title">NUMATIK WORLD</h1>
-                <p className="world-start-subtitle">Pilih pulau, jelajahi dunia, dan cari {TREASURE_COUNT} harta karun! ✨</p>
+                <p className="world-start-subtitle">{avatarPickerOpen ? "Pilih teman untuk menemani petualanganmu!" : `Pilih pulau, jelajahi dunia, dan cari ${TREASURE_COUNT} harta karun! ✨`}</p>
               </header>
+              {avatarPickerOpen ? (
+                <section aria-labelledby="world-avatar-title">
+                  <div className="world-avatar-grid">
+                    {AVATAR_PRESETS.map((preset) => (
+                      <article
+                        key={preset.id}
+                        className="world-avatar-card"
+                        data-avatar={preset.id}
+                        data-selected={selectedAvatarId === preset.id}
+                      >
+                        <div className="world-avatar-preview" aria-hidden="true">
+                          <div className="world-avatar-doll">
+                            <span className="world-avatar-hair" />
+                            <span className="world-avatar-head" />
+                            {preset.id === "cewek-streetwear" && <span className="world-avatar-beanie" />}
+                            <span className="world-avatar-shirt" />
+                            <span className="world-avatar-vest" />
+                            <span className="world-avatar-legs" />
+                            <span className="world-avatar-shoes" />
+                            {preset.id === "kacamata-hitam" && <><span className="world-avatar-glasses" /><span className="world-avatar-gum" /></>}
+                          </div>
+                        </div>
+                        <h2 className="world-avatar-title" id={preset.id === "anak-cokelat" ? "world-avatar-title" : undefined}>{preset.name}</h2>
+                        <span className="world-avatar-description">{preset.description}</span>
+                        <button className="world-avatar-pick" type="button" aria-pressed={selectedAvatarId === preset.id} onClick={() => selectAvatar(preset.id)}>
+                          {selectedAvatarId === preset.id ? "PILIH AVATAR INI" : "PILIH"}
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ) : (
               <div className="world-lobby">
                 <section className="world-lobby-panel" aria-labelledby="world-rules-title">
                   <h2 id="world-rules-title">CARA BERMAIN</h2>
@@ -1066,11 +2182,15 @@ const NumatikWorldPage = () => {
                       </button>
                     ))}
                   </div>
+                  <button className="world-avatar-change" type="button" onClick={() => setAvatarPickerOpen(true)}>
+                    GANTI AVATAR · {AVATAR_PRESETS.find((preset) => preset.id === selectedAvatarId)?.name}
+                  </button>
                   <button className="world-start-button" type="button" onClick={() => setGameStarted(true)}>
                     <Sparkles size={17} /> MULAI PETUALANGAN <span aria-hidden="true">→</span>
                   </button>
                 </section>
               </div>
+              )}
             </div>
           </section>
         )}
