@@ -3,6 +3,11 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { useNavigate } from "react-router-dom";
+import {
+  buildCewekHalusGeometry,
+  CEWEK_HALUS_BONE_NAMES,
+  type CewekHalusCapsule,
+} from "./cewekHalusGeometry";
 
 type IslandId = "rainbow" | "snow" | "candy" | "cloud" | "volcano";
 type IslandTheme = {
@@ -91,6 +96,59 @@ const RUN_CONFIG = {
   maxDeltaTime: 0.04,
 } as const;
 
+const CEWEK_HALUS_CONFIG = {
+  skinColor: "#F3D2BC",
+  hairColor: "#2B1B17",
+  shirtColor: "#F5F5F5",
+  jacketColor: "#5B7FA6",
+  pantsColor: "#3E5C86",
+  shoesColor: "#F2F2F2",
+  stepLength: RUN_CONFIG.cycleLength,
+  maxCyclesPerSecond: RUN_CONFIG.maxCyclesPerSecond,
+  gridStep: 0.032,
+  bounds: { minX: -0.42, maxX: 0.42, minY: -0.08, maxY: 2.12, minZ: -0.3, maxZ: 0.3 },
+  hipSwing: 0.72,
+  kneeForwardBend: 1.64,
+  kneeMaxBend: 1.72,
+  elbowBend: 1.62,
+  elbowMaxBend: 1.72,
+  shoulderAbduction: 2 * Math.PI / 180,
+  shoulderSwing: 0.48,
+  bodyLean: 0.17,
+  pelvisYaw: 0.08,
+  torsoCounterYaw: 0.055,
+  ankleSwing: 0.12,
+  runBounce: 0.06,
+  breathAmplitude: 0.012,
+  idleWeightShift: 0.012,
+  idleHeadNod: 0.01,
+  forearmLagCycles: 0.06,
+  bodyBlend: 0.075,
+  shoulderBlend: 0.026,
+  elbowBlend: 0.03,
+  wristBlend: 0.026,
+  hipBlend: 0.12,
+  kneeBlend: 0.028,
+  ankleBlend: 0.026,
+  blendBand: 0.065,
+  jointBlendFraction: 0.25,
+  hipWeightFraction: 0.36,
+  idleElbowBend: 0.2,
+  jumpArmRaise: 0.9,
+  jumpKneeBend: 0.35,
+  landingKneeBend: 0.32,
+  transitionSeconds: 0.2,
+  groundOffset: 0,
+  shoulderBindEndY: 1.13,
+  armLength: 0.57,
+  legLength: 0.70,
+  bodyHeight: 2.04,
+  headHeight: 0.68,
+} as const;
+
+const SHOW_TEST_AVATARS = true;
+const DEBUG_FREEZE_PHASE: number | null = null;
+
 const ROBLOX_SLIM_CONFIG = {
   parts: {
     head: [0.56, 0.52, 0.46],
@@ -115,6 +173,161 @@ const ROBLOX_SLIM_CONFIG = {
   bodyLean: 6 * Math.PI / 180,
   transitionSeconds: 0.2,
 } as const;
+
+const KEMEJA_CONFIG = {
+  colors: {
+    skin: "#D8A982",
+    warmSkin: "#C98F6B",
+    hair: "#D9A441",
+    hairShadow: "#B9822C",
+    shirt: "#8E949B",
+    flannelRed: "#B3262E",
+    flannelBlack: "#1A1A1A",
+    flannelWhite: "#EDEDED",
+    shorts: "#4F78B0",
+    socks: "#3C8CE0",
+    shoes: "#E6D8C3",
+    sole: "#B83228",
+    glasses: "#111820",
+    lenses: "#2A4D9B",
+    glassesHighlight: "#BBD9FF",
+    brow: "#49332B",
+    lip: "#A95B55",
+    denimDetail: "#81A0CA",
+    button: "#E8D8B8",
+  },
+  head: [0.52, 0.48, 0.46] as const,
+  upperTorso: [0.8, 0.5, 0.48] as const,
+  lowerTorso: [0.78, 0.28, 0.5] as const,
+  upperArm: [0.24, 0.34, 0.24] as const,
+  forearm: [0.22, 0.32, 0.22] as const,
+  thigh: [0.34, 0.38, 0.34] as const,
+  calf: [0.3, 0.34, 0.3] as const,
+  hand: [0.24, 0.2, 0.12] as const,
+  shoe: [0.36, 0.14, 0.54] as const,
+  totalHeight: 2.1,
+  glasses: true,
+  bevelRatio: 0.22,
+  headSegments: 5,
+  torsoSegments: 2,
+  pelvisSegments: 2,
+  torsoY: 1,
+  headPivotY: 0.67,
+  shoulderY: 1.22,
+  hipY: 0.65,
+  shoulderWidth: 0.4,
+  shoulderAbduction: 7 * Math.PI / 180,
+  shoulderSwing: 0.62,
+  elbowFrontBend: Math.PI / 2,
+  elbowBackBend: Math.PI / 6,
+  kneeBend: 1.68,
+  bodyLean: 0.17,
+  runBounce: 0.06,
+  forearmLagCycles: 0.045,
+  transitionSeconds: 0.2,
+  groundOffset: 0,
+  idleBreathAmplitude: 0.012,
+  idleWeightShift: 0.012,
+  hairSway: 0.025,
+  jumpArmRaise: 0.85,
+  jumpKneeBend: 0.35,
+  landingKneeBend: 0.28,
+} as const;
+
+const KEMEJA_DEBUG_FREEZE_PHASE: number | null = null;
+const CHIBI_DEBUG_FREEZE_PHASE: number | null = null;
+
+const CHIBI_CONFIG = {
+  colors: {
+    skin: "#D8A982",
+    blush: "#EE9CA7",
+    hoodie: "#C9B6F2",
+    hoodieDetail: "#B39DE3",
+    shorts: "#E9D9BE",
+    socks: "#FFFFFF",
+    shoes: "#F2F2F2",
+    sole: "#D8D8D8",
+    hair: "#5A3A24",
+    hairShadow: "#382316",
+    faceInk: "#382B35",
+    eyeHighlight: "#FFFFFF",
+  },
+  totalHeight: 2.1,
+  headHeight: 0.8,
+  headWidth: 0.6,
+  headDepth: 0.54,
+  gridStep: 0.032,
+  bounds: { minX: -0.56, maxX: 0.56, minY: -0.08, maxY: 2.12, minZ: -0.4, maxZ: 0.4 },
+  bodyBlend: 0.14,
+  shoulderBlend: 0.055,
+  elbowBlend: 0.035,
+  wristBlend: 0.03,
+  hipBlend: 0.09,
+  kneeBlend: 0.035,
+  ankleBlend: 0.03,
+  blendBand: 0.055,
+  blendFraction: 0.32,
+  hipWeightFraction: 0.38,
+  shoulderBlendRamp: [1.22, 1.4] as const,
+  hipBlendRamp: [0.62, 0.88] as const,
+  shoulderBindEndY: 1.2,
+  armWeightZone: { minY: 0.72, maxY: 1.48, minAbsX: 0.19 },
+  legWeightZone: { minY: -0.08, maxY: 0.96, minAbsX: 0.12 },
+  minimumThighGap: 0.18,
+  headBottomY: 1.23,
+  headTopY: 2.03,
+  faceForwardZ: 0.08,
+  handWidth: 0.15,
+  wristWidth: 0.12,
+  handLength: 0.195,
+  shoulderAbduction: 12 * Math.PI / 180,
+  shoulderForward: 40 * Math.PI / 180,
+  shoulderBackward: -30 * Math.PI / 180,
+  elbowForward: 90 * Math.PI / 180,
+  elbowBackward: 40 * Math.PI / 180,
+  hipForward: 35 * Math.PI / 180,
+  hipBackward: -25 * Math.PI / 180,
+  kneeCross: 105 * Math.PI / 180,
+  bodyLean: 10 * Math.PI / 180,
+  flightHeight: 0.06,
+  transitionSeconds: 0.2,
+  forearmLagCycles: 0.045,
+  hairSway: 0.035,
+  idleBreath: 0.012,
+  debugFreezePhases: [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875] as const,
+  runKeyframes: [
+    { phase: 0, shoulder: [-30, 40], elbow: [40, 90], hip: [35, -25], knee: [5, 95], height: 0 },
+    { phase: 0.125, shoulder: [-5, 10], elbow: [55, 65], hip: [5, -5], knee: [28, 25], height: -0.035 },
+    { phase: 0.25, shoulder: [25, -20], elbow: [85, 50], hip: [-15, 15], knee: [55, 105], height: 0 },
+    { phase: 0.375, shoulder: [40, -30], elbow: [90, 40], hip: [-25, 35], knee: [90, 65], height: 0.06 },
+    { phase: 0.5, shoulder: [40, -30], elbow: [90, 40], hip: [-25, 35], knee: [95, 5], height: 0 },
+    { phase: 0.625, shoulder: [10, -5], elbow: [65, 55], hip: [-5, 5], knee: [25, 28], height: -0.035 },
+    { phase: 0.75, shoulder: [-20, 25], elbow: [50, 85], hip: [15, -15], knee: [105, 55], height: 0 },
+    { phase: 0.875, shoulder: [-30, 40], elbow: [40, 90], hip: [35, -25], knee: [65, 90], height: 0.06 },
+  ],
+} as const;
+
+const CHIBI_CAPSULES: readonly CewekHalusCapsule[] = [
+  { group: "body", start: [0, 0.72, 0], end: [0, 0.91, 0], startRadius: [0.21, 0.18], endRadius: [0.22, 0.18], owner: "pelvis", proximal: "pelvis", distal: "spine1" },
+  { group: "body", start: [0, 0.88, 0], end: [0, 1.12, 0], startRadius: [0.2, 0.17], endRadius: [0.19, 0.16], owner: "spine1", proximal: "pelvis", distal: "spine2" },
+  { group: "body", start: [0, 1.08, 0], end: [0, 1.35, 0], startRadius: [0.19, 0.16], endRadius: [0.17, 0.14], owner: "spine2", proximal: "spine1", distal: "neck" },
+  { group: "body", start: [0, 1.28, 0], end: [0, 1.49, 0], startRadius: [0.13, 0.12], endRadius: [0.11, 0.1], owner: "neck", proximal: "spine2", distal: "head" },
+  { group: "body", start: [0, 1.5, 0], end: [0, 1.76, 0], startRadius: [0.3, 0.27], endRadius: [0.3, 0.27], owner: "head", proximal: "neck", distal: "head" },
+  ...([-1, 1] as const).flatMap((side): CewekHalusCapsule[] => {
+    const prefix = side < 0 ? "left" : "right";
+    const x = (amount: number) => side * amount;
+    return [
+      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.13), 1.34, 0], end: [x(0.22), 1.3, 0], startRadius: [0.07, 0.065], endRadius: [0.075, 0.068], owner: `${prefix}Clavicle`, proximal: "spine2", distal: `${prefix}UpperArm` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.22), 1.3, 0], end: [x(0.26), 1.04, 0], startRadius: [0.075, 0.068], endRadius: [0.07, 0.064], owner: `${prefix}UpperArm`, proximal: `${prefix}Clavicle`, distal: `${prefix}Forearm` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.26), 1.04, 0], end: [x(0.28), 0.81, 0], startRadius: [0.07, 0.064], endRadius: [0.058, 0.055], owner: `${prefix}Forearm`, proximal: `${prefix}UpperArm`, distal: `${prefix}Hand` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.28), 0.81, 0], end: [x(0.3), 0.74, 0], startRadius: [0.058, 0.055], endRadius: [0.052, 0.05], owner: `${prefix}Hand`, proximal: `${prefix}Forearm`, distal: `${prefix}Hand` },
+      { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.16), 0.83, 0], end: [x(0.18), 0.49, 0], startRadius: [0.12, 0.105], endRadius: [0.11, 0.1], owner: `${prefix}Thigh`, proximal: "pelvis", distal: `${prefix}Shin` },
+      { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.18), 0.5, 0], end: [x(0.18), 0.17, 0], startRadius: [0.1, 0.09], endRadius: [0.075, 0.07], owner: `${prefix}Shin`, proximal: `${prefix}Thigh`, distal: `${prefix}Foot` },
+      { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.18), 0.16, 0], end: [x(0.18), 0.1, 0.13], startRadius: [0.1, 0.1], endRadius: [0.09, 0.085], owner: `${prefix}Foot`, proximal: `${prefix}Shin`, distal: `${prefix}Toe` },
+      { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.18), 0.1, 0.12], end: [x(0.18), 0.09, 0.2], startRadius: [0.09, 0.085], endRadius: [0.08, 0.075], owner: `${prefix}Toe`, proximal: `${prefix}Foot`, distal: `${prefix}Toe` },
+    ];
+  }),
+];
 
 type AvatarHairStyle = "swept" | "short" | "long" | "wavy";
 
@@ -146,7 +359,7 @@ type AvatarPreset = {
   description: string;
   colors: AvatarColors;
   hairstyle: AvatarHairStyle;
-  clothing: "hoodie-vest" | "shirt-suspenders" | "streetwear-crop" | "organic-pastel" | "roblox-slim";
+  clothing: "hoodie-vest" | "shirt-suspenders" | "streetwear-crop" | "organic-pastel" | "roblox-slim" | "cewek-halus" | "cowok-kemeja" | "chibi-halus";
   accessories: readonly string[];
   perutTerbuka?: boolean;
   organicPalette?: OrganicAvatarPalette;
@@ -211,6 +424,54 @@ const AVATAR_PRESETS: readonly AvatarPreset[] = [
     clothing: "roblox-slim",
     accessories: [],
   },
+  {
+    id: "cewek-halus",
+    name: "Si Halus",
+    description: "Kuncir tinggi dan jaket denim",
+    colors: {
+      skin: CEWEK_HALUS_CONFIG.skinColor,
+      hair: CEWEK_HALUS_CONFIG.hairColor,
+      hoodie: CEWEK_HALUS_CONFIG.shirtColor,
+      vest: CEWEK_HALUS_CONFIG.jacketColor,
+      pants: CEWEK_HALUS_CONFIG.pantsColor,
+      shoes: CEWEK_HALUS_CONFIG.shoesColor,
+    },
+    hairstyle: "long",
+    clothing: "cewek-halus",
+    accessories: [],
+  },
+  {
+    id: "cowok-kemeja",
+    name: "Si Kemeja",
+    description: "Rambut pirang bob, flanel kotak, dan sneakers",
+    colors: {
+      skin: KEMEJA_CONFIG.colors.skin,
+      hair: KEMEJA_CONFIG.colors.hair,
+      hoodie: KEMEJA_CONFIG.colors.shirt,
+      vest: KEMEJA_CONFIG.colors.flannelRed,
+      pants: KEMEJA_CONFIG.colors.shorts,
+      shoes: KEMEJA_CONFIG.colors.shoes,
+    },
+    hairstyle: "short",
+    clothing: "cowok-kemeja",
+    accessories: ["kacamata-biru"],
+  },
+  {
+    id: "chibi-halus",
+    name: "Si Imut",
+    description: "Chibi bulat dengan hoodie pastel dan senyum ceria",
+    colors: {
+      skin: CHIBI_CONFIG.colors.skin,
+      hair: CHIBI_CONFIG.colors.hair,
+      hoodie: CHIBI_CONFIG.colors.hoodie,
+      vest: CHIBI_CONFIG.colors.hoodieDetail,
+      pants: CHIBI_CONFIG.colors.shorts,
+      shoes: CHIBI_CONFIG.colors.shoes,
+    },
+    hairstyle: "short",
+    clothing: "chibi-halus",
+    accessories: [],
+  },
 ];
 
 const DEFAULT_AVATAR_PRESET = AVATAR_PRESETS[0]!;
@@ -221,7 +482,8 @@ const AVATAR_STORAGE_KEY = "numatik-world-avatar";
 const readSavedAvatar = (): AvatarPresetId => {
   try {
     const savedId = window.localStorage.getItem(AVATAR_STORAGE_KEY);
-    return AVATAR_PRESETS.some((preset) => preset.id === savedId)
+    const savedPresetEnabled = savedId !== "cewek-halus" || SHOW_TEST_AVATARS;
+    return savedPresetEnabled && AVATAR_PRESETS.some((preset) => preset.id === savedId)
       ? (savedId as AvatarPresetId)
       : "anak-cokelat";
   } catch {
@@ -262,6 +524,8 @@ const NumatikWorldPage = () => {
   const jumpRequestedRef = useRef(false);
   const [selectedIsland, setSelectedIsland] = useState<IslandId>("rainbow");
   const [selectedAvatarId, setSelectedAvatarId] = useState<AvatarPresetId>(readSavedAvatar);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [avatarBuildProgress, setAvatarBuildProgress] = useState(0);
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(true);
   const [gameStarted, setGameStarted] = useState(false);
   const [score, setScore] = useState(0);
@@ -282,6 +546,7 @@ const NumatikWorldPage = () => {
   };
 
   useEffect(() => {
+    let effectDisposed = false;
     if (!gameStarted) return;
     const host = hostRef.current;
     if (!host) return;
@@ -464,6 +729,7 @@ const NumatikWorldPage = () => {
     avatarRig.scale.setScalar(AVATAR_SCALE);
     avatar.add(avatarRig);
     const textures = new Set<THREE.Texture>();
+    const skeletons = new Set<THREE.Skeleton>();
     const makeRoundedGeometry = (width: number, height: number, depth: number, radius: number) => (
       new RoundedBoxGeometry(width, height, depth, 5, radius)
     );
@@ -709,6 +975,53 @@ const NumatikWorldPage = () => {
     const gaulEyeLids: THREE.Mesh[] = [];
     let gaulNextBlinkAt = 0;
     let gaulBlinkStartedAt = -1;
+    type CewekHalusBoneName =
+      | "pelvis" | "spine1" | "spine2" | "neck" | "head" | "ponytail"
+      | "leftClavicle" | "leftUpperArm" | "leftForearm" | "leftHand" | "leftThigh" | "leftShin" | "leftFoot" | "leftToe"
+      | "rightClavicle" | "rightUpperArm" | "rightForearm" | "rightHand" | "rightThigh" | "rightShin" | "rightFoot" | "rightToe";
+    const cewekHalusLayers: THREE.Group[] = [];
+    let cewekHalusBuilt = false;
+    let cewekHalusLayer: THREE.Group | null = null;
+    let cewekHalusSkeleton: THREE.Skeleton | null = null;
+    let cewekHalusBones: Partial<Record<CewekHalusBoneName, THREE.Bone>> = {};
+    let cewekHalusBodyMesh: THREE.SkinnedMesh | null = null;
+    let cewekHalusFaceMaterial: THREE.MeshStandardMaterial | null = null;
+    let cewekHalusOpenFaceTexture: THREE.CanvasTexture | null = null;
+    let cewekHalusClosedFaceTexture: THREE.CanvasTexture | null = null;
+    let cewekHalusNextBlinkAt = 0;
+    let cewekHalusBlinkStartedAt = -1;
+    let cewekHalusRunBlend = 0;
+    let cewekHalusBreath = 0;
+    const cewekHalusBindQuaternions = new Map<string, THREE.Quaternion>();
+    const cewekHalusPoseAngles = new Map<string, number>();
+    const cewekHalusLayerQuaternion = new THREE.Quaternion();
+    const cewekHalusParentQuaternion = new THREE.Quaternion();
+    const cewekHalusParentInverse = new THREE.Quaternion();
+    const cewekHalusBodyAxisWorld = new THREE.Vector3();
+    const cewekHalusParentAxis = new THREE.Vector3();
+    const cewekHalusDeltaQuaternion = new THREE.Quaternion();
+    const cewekHalusSagittalAxis = new THREE.Vector3(1, 0, 0);
+    const cewekHalusAbductionAxis = new THREE.Vector3(0, 0, 1);
+    const setCewekHalusBodyRotation = (
+      name: string,
+      bone: THREE.Bone,
+      bodyAxis: THREE.Vector3,
+      targetAngle: number,
+      alpha: number,
+    ) => {
+      if (!cewekHalusLayer || !bone.parent) return;
+      const currentAngle = cewekHalusPoseAngles.get(name) ?? 0;
+      const angle = THREE.MathUtils.lerp(currentAngle, targetAngle, alpha);
+      cewekHalusPoseAngles.set(name, angle);
+      cewekHalusLayer.getWorldQuaternion(cewekHalusLayerQuaternion);
+      bone.parent.getWorldQuaternion(cewekHalusParentQuaternion);
+      cewekHalusParentInverse.copy(cewekHalusParentQuaternion).invert();
+      cewekHalusBodyAxisWorld.copy(bodyAxis).applyQuaternion(cewekHalusLayerQuaternion);
+      cewekHalusParentAxis.copy(cewekHalusBodyAxisWorld).applyQuaternion(cewekHalusParentInverse).normalize();
+      cewekHalusDeltaQuaternion.setFromAxisAngle(cewekHalusParentAxis, angle);
+      const bindQuaternion = cewekHalusBindQuaternions.get(name);
+      if (bindQuaternion) bone.quaternion.copy(cewekHalusDeltaQuaternion).multiply(bindQuaternion);
+    };
     type RobloxSlimArm = { upper: THREE.Group; elbow: THREE.Group; wrist: THREE.Group; limb: LimbRig; side: number };
     type RobloxSlimLeg = { upper: THREE.Group; knee: THREE.Group; ankle: THREE.Group; limb: typeof leftLeg; side: number };
     const robloxSlimLayers: THREE.Group[] = [];
@@ -718,6 +1031,52 @@ const NumatikWorldPage = () => {
     let robloxSlimTorso: THREE.Group | null = null;
     let robloxSlimUpperTorso: THREE.Group | null = null;
     let robloxSlimHead: THREE.Group | null = null;
+    type KemejaArm = {
+      shoulder: THREE.Group;
+      upper: THREE.Group;
+      elbow: THREE.Group;
+      wrist: THREE.Group;
+      hand: THREE.Group;
+      side: number;
+    };
+    type KemejaLeg = {
+      hip: THREE.Group;
+      upper: THREE.Group;
+      knee: THREE.Group;
+      ankle: THREE.Group;
+      side: number;
+    };
+    const kemejaLayers: THREE.Group[] = [];
+    const kemejaArms: KemejaArm[] = [];
+    const kemejaLegs: KemejaLeg[] = [];
+    let kemejaBuilt = false;
+    let kemejaRoot: THREE.Group | null = null;
+    let kemejaTorsoMotion: THREE.Group | null = null;
+    let kemejaHead: THREE.Group | null = null;
+    let kemejaHair: THREE.Group | null = null;
+    let kemejaFloorOffset = 0;
+    let kemejaBreath = 0;
+    let kemejaWeightShift = 0;
+    let kemejaRunBlend = 0;
+    type ChibiBoneName = typeof CEWEK_HALUS_BONE_NAMES[number];
+    const chibiLayers: THREE.Group[] = [];
+    let chibiBuilt = false;
+    let chibiLayer: THREE.Group | null = null;
+    let chibiSkeleton: THREE.Skeleton | null = null;
+    let chibiBones: Partial<Record<ChibiBoneName, THREE.Bone>> = {};
+    let chibiBodyMesh: THREE.SkinnedMesh | null = null;
+    let chibiHairRoot: THREE.Group | null = null;
+    let chibiFaceMaterial: THREE.MeshStandardMaterial | null = null;
+    let chibiFaceTextures: THREE.CanvasTexture[] = [];
+    let chibiFaceIndex = 0;
+    let chibiNextBlinkAt = 0;
+    let chibiBlinkUntil = 0;
+    let chibiNextHappyAt = 0;
+    let chibiHappyUntil = 0;
+    let chibiRunBlend = 0;
+    let chibiBreath = 0;
+    let chibiFloorOffset = 0;
+    let chibiElapsedMs = 0;
 
     const buildBlackAvatar = () => {
       if (blackAvatarBuilt) return;
@@ -1498,23 +1857,1383 @@ const NumatikWorldPage = () => {
       robloxSlimBuilt = true;
     };
 
-    const avatarLayerRegistry = new Map<AvatarPresetId, { layers: THREE.Group[]; build?: () => void }>([
+    const buildKemejaAvatar = () => {
+      if (kemejaBuilt) return;
+      const buildStartedAt = performance.now();
+      const palette = KEMEJA_CONFIG.colors;
+      const rounded = (size: readonly [number, number, number], segments = 1) => (
+        new RoundedBoxGeometry(...size, segments, Math.min(...size) * KEMEJA_CONFIG.bevelRatio)
+      );
+      const makePlaidTexture = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 256;
+        canvas.height = 256;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Canvas 2D tidak tersedia untuk tekstur kemeja flanel.");
+        context.fillStyle = palette.flannelRed;
+        context.fillRect(0, 0, 256, 256);
+        for (let offset = 0; offset < 256; offset += 64) {
+          context.fillStyle = palette.flannelBlack;
+          context.fillRect(offset + 17, 0, 15, 256);
+          context.fillRect(0, offset + 17, 256, 15);
+          context.fillStyle = palette.flannelWhite;
+          context.fillRect(offset + 8, 0, 4, 256);
+          context.fillRect(0, offset + 8, 256, 4);
+          context.fillRect(offset + 45, 0, 3, 256);
+          context.fillRect(0, offset + 45, 256, 3);
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 1.5);
+        textures.add(texture);
+        return texture;
+      };
+      const plaidMaterial = new THREE.MeshStandardMaterial({
+        map: makePlaidTexture(),
+        roughness: 0.72,
+        metalness: 0,
+      });
+      resources.add(plaidMaterial);
+      const materials = {
+        skin: makeMaterial(palette.skin, 0.62),
+        warmSkin: makeMaterial(palette.warmSkin, 0.66),
+        hair: makeMaterial(palette.hair, 0.5),
+        hairShadow: makeMaterial(palette.hairShadow, 0.62),
+        shirt: makeMaterial(palette.shirt, 0.82),
+        flannelWhite: makeMaterial(palette.flannelWhite, 0.76),
+        denim: makeMaterial(palette.shorts, 0.8),
+        denimDetail: makeMaterial(palette.denimDetail, 0.78),
+        socks: makeMaterial(palette.socks, 0.78),
+        shoes: makeMaterial(palette.shoes, 0.68),
+        sole: makeMaterial(palette.sole, 0.76),
+        glasses: makeMaterial(palette.glasses, 0.48),
+        glassesHighlight: makeMaterial(palette.glassesHighlight, 0.34),
+        lenses: new THREE.MeshStandardMaterial({
+          color: palette.lenses,
+          roughness: 0.28,
+          metalness: 0.08,
+          transparent: true,
+          opacity: 0.88,
+        }),
+        white: makeMaterial("#FFFFFF", 0.34),
+        button: makeMaterial(palette.button, 0.38),
+      };
+      resources.add(materials.lenses);
+      const root = new THREE.Group();
+      root.name = "cowok-kemeja-layer";
+      avatarRig.add(root);
+      kemejaLayers.push(root);
+      kemejaRoot = root;
+      const addKemejaMesh = (
+        geometry: THREE.BufferGeometry,
+        material: THREE.Material,
+        parent: THREE.Object3D,
+        position: [number, number, number],
+        section: string,
+        scale?: [number, number, number],
+      ) => {
+        const mesh = addMesh(geometry, material, parent, position, scale);
+        mesh.userData.kemejaSection = section;
+        return mesh;
+      };
+      const makeRoundedMesh = (
+        parent: THREE.Object3D,
+        material: THREE.Material,
+        size: readonly [number, number, number],
+        position: [number, number, number],
+        section: string,
+        segments = 1,
+      ) => addKemejaMesh(rounded(size, segments), material, parent, position, section);
+      const torsoMotion = new THREE.Group();
+      torsoMotion.position.y = KEMEJA_CONFIG.torsoY;
+      root.add(torsoMotion);
+      kemejaTorsoMotion = torsoMotion;
+      makeRoundedMesh(torsoMotion, materials.denim, KEMEJA_CONFIG.lowerTorso, [0, -0.2, 0], "celana", KEMEJA_CONFIG.pelvisSegments);
+      makeRoundedMesh(torsoMotion, materials.shirt, KEMEJA_CONFIG.upperTorso, [0, 0.035, 0], "kaus", KEMEJA_CONFIG.torsoSegments);
+
+      const flannelBack = makeRoundedMesh(
+        torsoMotion,
+        plaidMaterial,
+        [KEMEJA_CONFIG.upperTorso[0] - 0.02, KEMEJA_CONFIG.upperTorso[1] - 0.01, 0.055],
+        [0, 0.025, -0.225],
+        "kemeja",
+      );
+      flannelBack.material.side = THREE.DoubleSide;
+      [-1, 1].forEach((side) => {
+        makeRoundedMesh(torsoMotion, plaidMaterial, [0.29, 0.47, 0.08], [side * 0.17, 0.025, 0.245], "kemeja");
+        const pocket = addKemejaMesh(new THREE.PlaneGeometry(0.14, 0.12), plaidMaterial, torsoMotion, [side * 0.23, 0.13, 0.27], "detail pakaian");
+        pocket.rotation.z = side * -0.025;
+        const pocketFlap = addKemejaMesh(new THREE.PlaneGeometry(0.14, 0.025), materials.flannelWhite, torsoMotion, [side * 0.23, 0.18, 0.281], "detail pakaian");
+        pocketFlap.rotation.z = side * -0.025;
+        [-0.08, -0.16, -0.24].forEach((y) => {
+          const button = new THREE.SphereGeometry(0.018, 4, 3);
+          addKemejaMesh(button, materials.button, torsoMotion, [side * 0.018, y, 0.278], "detail pakaian");
+        });
+        const shortsHem = makeRoundedMesh(torsoMotion, materials.denimDetail, [0.35, 0.035, 0.37], [side * 0.195, -0.405, 0], "celana");
+        shortsHem.rotation.z = side * 0.02;
+        const shortsPocket = addKemejaMesh(new THREE.PlaneGeometry(0.15, 0.11), materials.denimDetail, torsoMotion, [side * 0.22, -0.19, 0.263], "detail pakaian");
+        shortsPocket.rotation.z = side * 0.04;
+      });
+      [-1, 1].forEach((side) => {
+        const collar = makeRoundedMesh(torsoMotion, plaidMaterial, [0.2, 0.13, 0.045], [side * 0.105, 0.285, 0.255], "kerah");
+        collar.rotation.z = side * 0.42;
+        const vEdge = addKemejaMesh(new THREE.PlaneGeometry(0.035, 0.2), materials.shirt, torsoMotion, [side * 0.045, 0.25, 0.265], "kaus");
+        vEdge.rotation.z = side * 0.36;
+      });
+      makeRoundedMesh(torsoMotion, materials.skin, [0.2, 0.14, 0.2], [0, 0.315, 0], "kulit");
+
+      const headPivot = new THREE.Group();
+      headPivot.position.set(0, KEMEJA_CONFIG.headPivotY, 0);
+      torsoMotion.add(headPivot);
+      kemejaHead = headPivot;
+      makeRoundedMesh(headPivot, materials.skin, KEMEJA_CONFIG.head, [0, 0, 0], "kepala", KEMEJA_CONFIG.headSegments);
+      const faceCanvas = document.createElement("canvas");
+      faceCanvas.width = 512;
+      faceCanvas.height = 512;
+      const faceContext = faceCanvas.getContext("2d");
+      if (!faceContext) throw new Error("Canvas 2D tidak tersedia untuk wajah Si Kemeja.");
+      faceContext.clearRect(0, 0, 512, 512);
+      faceContext.strokeStyle = palette.brow;
+      faceContext.lineWidth = 16;
+      faceContext.lineCap = "round";
+      faceContext.beginPath();
+      faceContext.moveTo(112, 166);
+      faceContext.quadraticCurveTo(155, 140, 199, 157);
+      faceContext.moveTo(313, 157);
+      faceContext.quadraticCurveTo(356, 140, 400, 166);
+      faceContext.stroke();
+      faceContext.strokeStyle = palette.glasses;
+      faceContext.lineWidth = 17;
+      faceContext.beginPath();
+      faceContext.moveTo(209, 353);
+      faceContext.quadraticCurveTo(255, 394, 306, 346);
+      faceContext.stroke();
+      faceContext.strokeStyle = palette.lip;
+      faceContext.lineWidth = 8;
+      faceContext.beginPath();
+      faceContext.moveTo(223, 365);
+      faceContext.quadraticCurveTo(255, 380, 291, 362);
+      faceContext.stroke();
+      faceContext.fillStyle = "rgba(201,143,107,0.5)";
+      [-1, 1].forEach((side) => {
+        faceContext.beginPath();
+        faceContext.arc(110 + (side > 0 ? 292 : 0), 294, 10, 0, Math.PI * 2);
+        faceContext.fill();
+      });
+      if (!KEMEJA_CONFIG.glasses) {
+        [-1, 1].forEach((side) => {
+          const x = side < 0 ? 155 : 357;
+          faceContext.fillStyle = "#FFFFFF";
+          faceContext.beginPath();
+          faceContext.ellipse(x, 218, 37, 46, 0, 0, Math.PI * 2);
+          faceContext.fill();
+          faceContext.fillStyle = "#513321";
+          faceContext.beginPath();
+          faceContext.ellipse(x, 224, 22, 32, 0, 0, Math.PI * 2);
+          faceContext.fill();
+          faceContext.fillStyle = "#FFFFFF";
+          faceContext.beginPath();
+          faceContext.arc(x - 9, 211, 9, 0, Math.PI * 2);
+          faceContext.arc(x + 8, 231, 4, 0, Math.PI * 2);
+          faceContext.fill();
+          faceContext.strokeStyle = "#30211C";
+          faceContext.lineWidth = 8;
+          faceContext.beginPath();
+          faceContext.moveTo(x - 36, 185);
+          faceContext.quadraticCurveTo(x, 154, x + 36, 185);
+          faceContext.stroke();
+        });
+      } else {
+        const frames = [-1, 1].map((side) => {
+          const centerX = side * 0.082;
+          const frame = new THREE.Shape();
+          frame.moveTo(centerX - 0.07, 0.035);
+          frame.bezierCurveTo(centerX - 0.075, 0.09, centerX + 0.055, 0.1, centerX + 0.07, 0.035);
+          frame.bezierCurveTo(centerX + 0.075, -0.01, centerX - 0.055, -0.02, centerX - 0.07, 0.035);
+          frame.closePath();
+          const lensHole = new THREE.Path();
+          lensHole.moveTo(centerX - 0.058, 0.035);
+          lensHole.bezierCurveTo(centerX - 0.062, 0.076, centerX + 0.043, 0.084, centerX + 0.058, 0.035);
+          lensHole.bezierCurveTo(centerX + 0.061, 0.004, centerX - 0.043, -0.004, centerX - 0.058, 0.035);
+          lensHole.closePath();
+          frame.holes.push(lensHole);
+          return frame;
+        });
+        addKemejaMesh(new THREE.ShapeGeometry(frames), materials.glasses, headPivot, [0, 0, 0.25], "kacamata");
+        addKemejaMesh(new THREE.BoxGeometry(0.042, 0.014, 0.012), materials.glasses, headPivot, [0, 0.036, 0.256], "kacamata");
+        [-1, 1].forEach((side) => {
+          addKemejaMesh(
+            new THREE.SphereGeometry(1, 8, 6),
+            materials.lenses,
+            headPivot,
+            [side * 0.082, 0.038, 0.253],
+            "kacamata",
+            [0.057, 0.04, 0.008],
+          );
+          addKemejaMesh(new THREE.SphereGeometry(0.009, 5, 4), materials.glassesHighlight, headPivot, [side * 0.064, 0.059, 0.262], "kacamata");
+        });
+        [-1, 1].forEach((side) => {
+          const arm = addKemejaMesh(new THREE.BoxGeometry(0.12, 0.014, 0.014), materials.glasses, headPivot, [side * 0.205, 0.035, 0.205], "kacamata");
+          arm.rotation.y = side * 0.18;
+        });
+      }
+      const faceTexture = new THREE.CanvasTexture(faceCanvas);
+      faceTexture.colorSpace = THREE.SRGBColorSpace;
+      textures.add(faceTexture);
+      const faceMaterial = new THREE.MeshStandardMaterial({
+        map: faceTexture,
+        transparent: true,
+        roughness: 0.72,
+        metalness: 0,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      resources.add(faceMaterial);
+      addKemejaMesh(new THREE.PlaneGeometry(0.4, 0.35), faceMaterial, headPivot, [0, 0, 0.233], "wajah");
+      addKemejaMesh(
+        new THREE.SphereGeometry(1, 8, 6),
+        materials.warmSkin,
+        headPivot,
+        [0, -0.025, 0.268],
+        "wajah",
+        [0.0375, 0.0475, 0.035],
+      );
+
+      const hairMotion = new THREE.Group();
+      headPivot.add(hairMotion);
+      kemejaHair = hairMotion;
+      addKemejaMesh(new THREE.SphereGeometry(1, 8, 6), materials.hairShadow, hairMotion, [0, -0.005, -0.005], "rambut", [0.28, 0.245, 0.25]);
+      addKemejaMesh(new THREE.SphereGeometry(1, 8, 6), materials.hair, hairMotion, [0, 0.115, 0], "rambut", [0.28, 0.17, 0.245]);
+      const lockGeometry = new THREE.SphereGeometry(1, 6, 4);
+      for (let strand = 0; strand < 12; strand += 1) {
+        const isFringe = strand < 4;
+        const angle = (strand - 4) / 8 * Math.PI * 2;
+        const x = isFringe ? -0.17 + strand * 0.11 : Math.sin(angle) * 0.245;
+        const y = isFringe ? 0.075 + strand * 0.014 : -0.045;
+        const z = isFringe ? 0.205 : Math.cos(angle) * 0.2;
+        const lock = addKemejaMesh(
+          lockGeometry,
+          strand % 3 === 0 ? materials.hairShadow : materials.hair,
+          hairMotion,
+          [x, y, z],
+          "rambut",
+          [0.072, isFringe ? 0.11 : 0.145, 0.085],
+        );
+        lock.rotation.z = isFringe ? -0.22 + strand * 0.11 : Math.sin(angle) * 0.13;
+        lock.rotation.y = isFringe ? 0 : angle;
+      }
+
+      const shoulderWidth = KEMEJA_CONFIG.shoulderWidth;
+      const upperArmGeometry = rounded(KEMEJA_CONFIG.upperArm);
+      const sleeveGeometry = rounded([0.25, 0.2, 0.25]);
+      const elbowGeometry = new THREE.SphereGeometry(0.11, 6, 4);
+      const forearmGeometry = rounded(KEMEJA_CONFIG.forearm);
+      const cuffGeometry = rounded([0.235, 0.035, 0.235]);
+      const handShape = new THREE.Shape();
+      handShape.moveTo(-0.12, 0.09);
+      handShape.lineTo(-0.12, -0.075);
+      handShape.lineTo(-0.115, -0.18);
+      handShape.quadraticCurveTo(-0.11, -0.205, -0.085, -0.205);
+      handShape.quadraticCurveTo(-0.06, -0.205, -0.058, -0.18);
+      handShape.lineTo(-0.052, -0.075);
+      handShape.lineTo(-0.033, -0.22);
+      handShape.quadraticCurveTo(-0.028, -0.245, -0.005, -0.245);
+      handShape.quadraticCurveTo(0.02, -0.245, 0.02, -0.22);
+      handShape.lineTo(0.022, -0.075);
+      handShape.lineTo(0.042, -0.215);
+      handShape.quadraticCurveTo(0.047, -0.24, 0.07, -0.237);
+      handShape.quadraticCurveTo(0.094, -0.234, 0.09, -0.207);
+      handShape.lineTo(0.085, -0.065);
+      handShape.lineTo(0.103, -0.17);
+      handShape.quadraticCurveTo(0.11, -0.195, 0.132, -0.187);
+      handShape.quadraticCurveTo(0.154, -0.18, 0.15, -0.155);
+      handShape.lineTo(0.12, 0.015);
+      handShape.quadraticCurveTo(0.105, 0.09, 0.045, 0.09);
+      handShape.closePath();
+      const handGeometry = new THREE.ExtrudeGeometry(handShape, {
+        depth: KEMEJA_CONFIG.hand[2],
+        bevelEnabled: true,
+        bevelSegments: 1,
+        steps: 1,
+        bevelSize: 0.008,
+        bevelThickness: 0.008,
+        curveSegments: 2,
+      });
+      const thumbGeometry = rounded([0.052, 0.115, 0.055]);
+      [-1, 1].forEach((side) => {
+        const shoulder = new THREE.Group();
+        shoulder.position.set(side * shoulderWidth, KEMEJA_CONFIG.shoulderY, 0);
+        root.add(shoulder);
+        kemejaLayers.push(shoulder);
+        const upper = new THREE.Group();
+        shoulder.add(upper);
+        addKemejaMesh(upperArmGeometry, materials.skin, upper, [0, -0.16, 0], "kulit");
+        addKemejaMesh(sleeveGeometry, plaidMaterial, upper, [0, -0.08, 0], "lengan");
+        const cuff = addKemejaMesh(cuffGeometry, materials.flannelWhite, upper, [0, -0.18, 0], "lengan");
+        cuff.rotation.x = Math.PI / 2;
+        const elbow = new THREE.Group();
+        elbow.position.y = -0.31;
+        upper.add(elbow);
+        addKemejaMesh(elbowGeometry, materials.skin, elbow, [0, 0, 0], "kulit", [0.108, 0.108, 0.108]);
+        const forearm = new THREE.Group();
+        elbow.add(forearm);
+        addKemejaMesh(forearmGeometry, materials.skin, forearm, [0, -0.15, 0], "kulit");
+        const wrist = new THREE.Group();
+        wrist.position.y = -0.29;
+        forearm.add(wrist);
+        const hand = new THREE.Group();
+        wrist.add(hand);
+        addKemejaMesh(handGeometry, materials.skin, hand, [0, 0, 0.02], "tangan");
+        const thumb = addKemejaMesh(thumbGeometry, materials.warmSkin, hand, [side * 0.14, -0.065, 0.015], "tangan");
+        thumb.rotation.z = -side * 0.7;
+        kemejaArms.push({ shoulder, upper, elbow, wrist, hand, side });
+
+        const hip = new THREE.Group();
+        hip.position.set(side * 0.19, KEMEJA_CONFIG.hipY, 0);
+        root.add(hip);
+        kemejaLayers.push(hip);
+        const thigh = new THREE.Group();
+        hip.add(thigh);
+        addKemejaMesh(rounded(KEMEJA_CONFIG.thigh), materials.skin, thigh, [0, -0.18, 0], "kulit");
+        const shortsLeg = makeRoundedMesh(hip, materials.denim, [0.35, 0.31, 0.36], [0, 0.02, 0], "celana");
+        shortsLeg.rotation.z = side * 0.015;
+        const knee = new THREE.Group();
+        knee.position.y = -0.34;
+        thigh.add(knee);
+        addKemejaMesh(elbowGeometry, materials.skin, knee, [0, 0, 0], "kulit", [0.125, 0.125, 0.125]);
+        const calf = new THREE.Group();
+        knee.add(calf);
+        addKemejaMesh(rounded(KEMEJA_CONFIG.calf), materials.socks, calf, [0, -0.16, 0], "kaus kaki");
+        const ankle = new THREE.Group();
+        ankle.position.y = -0.31;
+        calf.add(ankle);
+        addKemejaMesh(rounded(KEMEJA_CONFIG.shoe), materials.shoes, ankle, [0, 0.015, 0.11], "sepatu");
+        addKemejaMesh(new THREE.BoxGeometry(0.37, 0.035, 0.55), materials.sole, ankle, [0, -0.067, 0.11], "sepatu");
+        makeRoundedMesh(ankle, materials.shoes, [0.13, 0.09, 0.035], [0, 0.075, 0.12], "sepatu");
+        const lace = new THREE.BoxGeometry(0.12, 0.008, 0.008);
+        [-0.025, 0.005, 0.035].forEach((y) => {
+          const laceBar = addKemejaMesh(lace, materials.white, ankle, [0, y, 0.235], "sepatu");
+          laceBar.rotation.z = 0.12;
+        });
+        kemejaLegs.push({ hip, upper: thigh, knee, ankle, side });
+      });
+
+      avatar.updateMatrixWorld(true);
+      avatarRig.updateMatrixWorld(true);
+      const rootBounds = new THREE.Box3().setFromObject(root);
+      const toRigSpace = avatarRig.matrixWorld.clone().invert();
+      const corner = new THREE.Vector3();
+      let minimumY = Number.POSITIVE_INFINITY;
+      let maximumY = Number.NEGATIVE_INFINITY;
+      for (let index = 0; index < 8; index += 1) {
+        corner.set(
+          index & 1 ? rootBounds.max.x : rootBounds.min.x,
+          index & 2 ? rootBounds.max.y : rootBounds.min.y,
+          index & 4 ? rootBounds.max.z : rootBounds.min.z,
+        ).applyMatrix4(toRigSpace);
+        minimumY = Math.min(minimumY, corner.y);
+        maximumY = Math.max(maximumY, corner.y);
+      }
+      if (!Number.isFinite(minimumY) || !Number.isFinite(maximumY)) {
+        throw new Error("Tidak dapat menghitung batas avatar Si Kemeja.");
+      }
+      const verticalScale = KEMEJA_CONFIG.totalHeight / (maximumY - minimumY);
+      root.scale.y = verticalScale;
+      kemejaFloorOffset = KEMEJA_CONFIG.groundOffset - minimumY * verticalScale;
+      root.position.y = kemejaFloorOffset;
+      avatar.updateMatrixWorld(true);
+      root.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        const geometry = object.geometry;
+        if (!geometry.boundingBox) geometry.computeBoundingBox();
+      });
+      const sectionTriangles: Record<string, number> = {};
+      let totalTriangles = 0;
+      root.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        const geometry = object.geometry;
+        const triangles = (geometry.index?.count ?? geometry.getAttribute("position").count) / 3;
+        const section = String(object.userData.kemejaSection ?? "detail");
+        sectionTriangles[section] = (sectionTriangles[section] ?? 0) + triangles;
+        totalTriangles += triangles;
+      });
+      kemejaBuilt = true;
+      console.info("[cowok-kemeja] mesh selesai", {
+        triangles: sectionTriangles,
+        totalTriangles,
+        tinggiTotal: Number(((maximumY - minimumY) * verticalScale).toFixed(3)),
+        rasioKepala: Number((KEMEJA_CONFIG.head[1] / (maximumY - minimumY)).toFixed(3)),
+        offsetLantai: Number(kemejaFloorOffset.toFixed(4)),
+        lebarPerut: KEMEJA_CONFIG.lowerTorso[0],
+        lebarBokong: KEMEJA_CONFIG.lowerTorso[0],
+        waktuPembuatanMs: Number((performance.now() - buildStartedAt).toFixed(1)),
+      });
+    };
+
+    const buildChibiAvatar = async (onProgress?: (progress: number) => void, shouldCancel?: () => boolean) => {
+      if (chibiBuilt) return;
+      const buildStartedAt = performance.now();
+      const layer = new THREE.Group();
+      layer.name = "chibi-halus-layer";
+      avatarRig.add(layer);
+      chibiLayer = layer;
+      chibiLayers.push(layer);
+
+      const bones: THREE.Bone[] = [];
+      const boneMap: Partial<Record<ChibiBoneName, THREE.Bone>> = {};
+      const makeBone = (
+        name: ChibiBoneName,
+        parent: THREE.Object3D,
+        position: [number, number, number],
+      ) => {
+        const bone = new THREE.Bone();
+        bone.name = name;
+        bone.position.set(...position);
+        parent.add(bone);
+        bones.push(bone);
+        boneMap[name] = bone;
+        return bone;
+      };
+      const pelvis = makeBone("pelvis", layer, [0, 0.8, 0]);
+      const spine1 = makeBone("spine1", pelvis, [0, 0.12, 0]);
+      const spine2 = makeBone("spine2", spine1, [0, 0.2, 0]);
+      const neck = makeBone("neck", spine2, [0, 0.17, 0]);
+      const head = makeBone("head", neck, [0, 0.31, 0]);
+      const ponytail = makeBone("ponytail", head, [0, 0.23, -0.035]);
+      [-1, 1].forEach((side) => {
+        const prefix = side < 0 ? "left" : "right";
+        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.13, 0.21, 0]);
+        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.09, -0.04, 0]);
+        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.04, -0.26, 0]);
+        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.02, -0.23, 0]);
+        const thigh = makeBone(`${prefix}Thigh` as ChibiBoneName, pelvis, [side * 0.16, 0.03, 0]);
+        const shin = makeBone(`${prefix}Shin` as ChibiBoneName, thigh, [side * 0.02, -0.33, 0]);
+        const foot = makeBone(`${prefix}Foot` as ChibiBoneName, shin, [0, -0.32, 0]);
+        makeBone(`${prefix}Toe` as ChibiBoneName, foot, [0, -0.02, 0.08]);
+      });
+
+      const colors = Object.fromEntries(
+        Object.entries(CHIBI_CONFIG.colors).map(([name, value]) => [name, new THREE.Color(value)]),
+      ) as Record<keyof typeof CHIBI_CONFIG.colors, THREE.Color>;
+      const palette = CHIBI_CONFIG.colors;
+      const smooth = (value: number) => {
+        const t = THREE.MathUtils.clamp(value, 0, 1);
+        return t * t * (3 - 2 * t);
+      };
+      const band = (value: number, start: number, end: number, feather = 0.014) => (
+        smooth((value - start) / feather) * (1 - smooth((value - end) / feather))
+      );
+      const surfaceColorAt = (point: readonly [number, number, number], target: THREE.Color) => {
+        const [x, y, z] = point;
+        const absX = Math.abs(x);
+        target.copy(colors.skin);
+        const hoodieBody = band(y, 0.96, 1.4) * (1 - smooth((absX - 0.18) / 0.055));
+        const hoodieSleeve = band(y, 0.82, 1.39) * smooth((absX - 0.17) / 0.07);
+        const shorts = band(y, 0.63, 0.91) * (1 - smooth((absX - 0.29) / 0.06));
+        const socks = band(y, 0.15, 0.51) * smooth((absX - 0.1) / 0.05);
+        const shoes = (1 - smooth((y - 0.12) / 0.055)) * smooth((absX - 0.1) / 0.05);
+        const sole = (1 - smooth((y - 0.035) / 0.025)) * smooth((absX - 0.1) / 0.05);
+        if (hoodieBody > 0) target.lerp(colors.hoodie, hoodieBody);
+        if (hoodieSleeve > 0) target.lerp(colors.hoodie, hoodieSleeve);
+        if (shorts > 0) target.lerp(colors.shorts, shorts);
+        if (socks > 0) target.lerp(colors.socks, socks);
+        if (shoes > 0) target.lerp(colors.shoes, shoes);
+        if (sole > 0) target.lerp(colors.sole, sole);
+        const pouch = hoodieBody * band(y, 0.97, 1.04) * (1 - smooth((Math.abs(x) - 0.09) / 0.035)) * smooth((z - 0.12) / 0.04);
+        const cuff = hoodieSleeve * band(y, 0.82, 0.87);
+        const shortsHem = shorts * band(y, 0.64, 0.67);
+        if (pouch > 0) target.lerp(colors.hoodieDetail, pouch);
+        if (cuff > 0) target.lerp(colors.hoodieDetail, cuff * 0.72);
+        if (shortsHem > 0) target.lerp(colors.hoodieDetail, shortsHem * 0.28);
+      };
+      const uvAt = (point: readonly [number, number, number], target: THREE.Vector2) => {
+        const [x, y, z] = point;
+        if (y >= CHIBI_CONFIG.headBottomY && y <= CHIBI_CONFIG.headTopY && z >= CHIBI_CONFIG.faceForwardZ) {
+          target.set(
+            THREE.MathUtils.clamp(x / CHIBI_CONFIG.headWidth + 0.5, 0, 1),
+            THREE.MathUtils.clamp((y - CHIBI_CONFIG.headBottomY) / CHIBI_CONFIG.headHeight, 0, 1),
+          );
+        } else {
+          target.set(0.002, 0.002);
+        }
+      };
+      const boneIndices = new Map(CEWEK_HALUS_BONE_NAMES.map((name, index) => [name, index]));
+      const result = await buildCewekHalusGeometry({
+        skinColor: palette.skin,
+        gridStep: CHIBI_CONFIG.gridStep,
+        bounds: CHIBI_CONFIG.bounds,
+        bodyBlend: CHIBI_CONFIG.bodyBlend,
+        shoulderBlend: CHIBI_CONFIG.shoulderBlend,
+        elbowBlend: CHIBI_CONFIG.elbowBlend,
+        wristBlend: CHIBI_CONFIG.wristBlend,
+        hipBlend: CHIBI_CONFIG.hipBlend,
+        kneeBlend: CHIBI_CONFIG.kneeBlend,
+        ankleBlend: CHIBI_CONFIG.ankleBlend,
+        blendBand: CHIBI_CONFIG.blendBand,
+        blendFraction: CHIBI_CONFIG.blendFraction,
+        hipWeightFraction: CHIBI_CONFIG.hipWeightFraction,
+        groundOffset: 0,
+        shoulderBindEndY: CHIBI_CONFIG.shoulderBindEndY,
+        capsules: CHIBI_CAPSULES,
+        armWeightZone: CHIBI_CONFIG.armWeightZone,
+        legWeightZone: CHIBI_CONFIG.legWeightZone,
+        shoulderBlendRamp: CHIBI_CONFIG.shoulderBlendRamp,
+        hipBlendRamp: CHIBI_CONFIG.hipBlendRamp,
+        minimumThighGap: CHIBI_CONFIG.minimumThighGap,
+        colorAt: surfaceColorAt,
+        uvAt,
+      }, boneIndices, onProgress, shouldCancel);
+      if (!result || shouldCancel?.()) {
+        layer.clear();
+        layer.removeFromParent();
+        chibiLayers.splice(chibiLayers.indexOf(layer), 1);
+        chibiLayer = null;
+        return;
+      }
+
+      const makeFaceTexture = (expression: "open" | "blink" | "happy" | "jump") => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 512;
+        canvas.height = 512;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Canvas 2D tidak tersedia untuk wajah Si Imut.");
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        const drawEye = (x: number) => {
+          context.fillStyle = palette.faceInk;
+          if (expression === "happy") {
+            context.lineWidth = 18;
+            context.lineCap = "round";
+            context.beginPath();
+            context.moveTo(x - 35, 285);
+            context.quadraticCurveTo(x, 245, x + 35, 285);
+            context.stroke();
+            return;
+          }
+          if (expression === "blink") {
+            context.lineWidth = 17;
+            context.lineCap = "round";
+            context.beginPath();
+            context.moveTo(x - 31, 278);
+            context.quadraticCurveTo(x, 298, x + 31, 278);
+            context.stroke();
+            return;
+          }
+          context.beginPath();
+          context.ellipse(x, 278, 34, 43, 0, 0, Math.PI * 2);
+          context.fill();
+          context.fillStyle = palette.eyeHighlight;
+          context.beginPath();
+          context.arc(x - 11, 263, 11, 0, Math.PI * 2);
+          context.arc(x + 12, 290, 5, 0, Math.PI * 2);
+          context.fill();
+        };
+        context.strokeStyle = palette.faceInk;
+        context.lineWidth = 8;
+        context.lineCap = "round";
+        [-1, 1].forEach((side) => {
+          const x = 256 + side * 111;
+          context.beginPath();
+          context.moveTo(x - 30, 218);
+          context.quadraticCurveTo(x, 202, x + 30, 218);
+          context.stroke();
+          drawEye(x);
+        });
+        context.fillStyle = "rgba(238,156,167,0.82)";
+        [102, 410].forEach((x) => {
+          context.beginPath();
+          context.ellipse(x, 338, 37, 19, 0, 0, Math.PI * 2);
+          context.fill();
+        });
+        context.strokeStyle = palette.faceInk;
+        context.lineWidth = 14;
+        context.beginPath();
+        if (expression === "jump") {
+          context.ellipse(256, 391, 24, 31, 0, 0, Math.PI * 2);
+          context.fillStyle = "#6F3344";
+          context.fill();
+          context.stroke();
+        } else {
+          context.moveTo(216, 374);
+          context.bezierCurveTo(226, 424, 286, 424, 296, 374);
+          context.stroke();
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.needsUpdate = true;
+        textures.add(texture);
+        return texture;
+      };
+      chibiFaceTextures = [
+        makeFaceTexture("open"),
+        makeFaceTexture("blink"),
+        makeFaceTexture("happy"),
+        makeFaceTexture("jump"),
+      ];
+      const bodyMaterial = new THREE.MeshStandardMaterial({
+        color: "#FFFFFF",
+        map: chibiFaceTextures[0],
+        roughness: 0.6,
+        metalness: 0,
+        vertexColors: true,
+        transparent: true,
+        alphaTest: 0.01,
+        side: THREE.DoubleSide,
+      });
+      resources.add(bodyMaterial);
+      resources.add(result.geometry);
+      const body = new THREE.SkinnedMesh(result.geometry, bodyMaterial);
+      body.name = "chibi-halus-body";
+      body.frustumCulled = false;
+      layer.add(body);
+      avatar.updateMatrixWorld(true);
+      const skeleton = new THREE.Skeleton(bones);
+      skeleton.calculateInverses();
+      body.bind(skeleton, body.matrixWorld);
+      skeletons.add(skeleton);
+      chibiSkeleton = skeleton;
+      chibiBones = boneMap;
+      chibiBodyMesh = body;
+      chibiFaceMaterial = bodyMaterial;
+
+      const hairRoot = new THREE.Group();
+      hairRoot.name = "chibi-hair";
+      head.add(hairRoot);
+      chibiHairRoot = hairRoot;
+      const hairGeometry = new THREE.SphereGeometry(1, 8, 6);
+      const hairMaterial = makeMaterial(palette.hair, 0.55);
+      const shadowMaterial = makeMaterial(palette.hairShadow, 0.62);
+      const addHair = (
+        parent: THREE.Object3D,
+        material: THREE.Material,
+        position: [number, number, number],
+        scale: [number, number, number],
+        rotationZ = 0,
+      ) => {
+        const mesh = addMesh(hairGeometry, material, parent, position, scale);
+        mesh.rotation.z = rotationZ;
+      };
+      addHair(hairRoot, shadowMaterial, [0, 0.22, -0.01], [0.31, 0.22, 0.28]);
+      addHair(hairRoot, hairMaterial, [0, 0.28, 0.015], [0.3, 0.18, 0.275]);
+      for (let strand = 0; strand < 10; strand += 1) {
+        const angle = strand / 10 * Math.PI * 2;
+        const front = strand < 4;
+        const x = front ? -0.2 + strand * 0.13 : Math.sin(angle) * 0.285;
+        const y = front ? 0.08 + strand * 0.016 : 0.015;
+        const z = front ? 0.225 : Math.cos(angle) * 0.235;
+        const target = front ? hairRoot : ponytail;
+        addHair(
+          target,
+          strand % 3 === 0 ? shadowMaterial : hairMaterial,
+          [x, y, z],
+          [front ? 0.095 : 0.105, front ? 0.13 : 0.18, 0.095],
+          front ? -0.3 + strand * 0.16 : Math.sin(angle) * 0.12,
+        );
+      }
+
+      avatar.updateMatrixWorld(true);
+      body.computeBoundingBox();
+      body.computeBoundingSphere();
+      const legacyBounds = new THREE.Box3();
+      legacyLayers.forEach((legacyLayer) => legacyBounds.union(new THREE.Box3().setFromObject(legacyLayer)));
+      const toRigSpace = avatarRig.matrixWorld.clone().invert();
+      const transformBounds = (bounds: THREE.Box3) => {
+        const transformed = new THREE.Box3();
+        const point = new THREE.Vector3();
+        for (let index = 0; index < 8; index += 1) {
+          point.set(
+            index & 1 ? bounds.max.x : bounds.min.x,
+            index & 2 ? bounds.max.y : bounds.min.y,
+            index & 4 ? bounds.max.z : bounds.min.z,
+          ).applyMatrix4(toRigSpace);
+          transformed.expandByPoint(point);
+        }
+        return transformed;
+      };
+      const oldRigBounds = transformBounds(legacyBounds);
+      const newRigBounds = transformBounds(new THREE.Box3().setFromObject(layer));
+      const oldHeight = oldRigBounds.max.y - oldRigBounds.min.y;
+      const newHeight = newRigBounds.max.y - newRigBounds.min.y;
+      if (!(oldHeight > 0 && newHeight > 0)) throw new Error("Ukuran bind pose Si Imut tidak valid.");
+      layer.scale.y = oldHeight / newHeight;
+      chibiFloorOffset = oldRigBounds.min.y - newRigBounds.min.y * layer.scale.y;
+      layer.position.y = chibiFloorOffset;
+      avatar.updateMatrixWorld(true);
+
+      const totalTriangles = result.triangleCount + 12 * (hairGeometry.index?.count ?? hairGeometry.getAttribute("position").count) / 3;
+      chibiBuilt = true;
+      chibiNextBlinkAt = performance.now() + 3000 + Math.random() * 2000;
+      chibiNextHappyAt = performance.now() + 8000 + Math.random() * 4000;
+      chibiElapsedMs = performance.now() - buildStartedAt;
+      console.info("[chibi-halus] mesh selesai", {
+        triangles: { tubuhPakaianWajah: result.triangleCount, rambut: totalTriangles - result.triangleCount, total: totalTriangles },
+        vertices: result.vertexCount,
+        bones: skeleton.bones.length,
+        tinggiTotal: Number(oldHeight.toFixed(3)),
+        rasioKepala: Number((CHIBI_CONFIG.headHeight / oldHeight).toFixed(3)),
+        lebarTanganVsPergelangan: Number((CHIBI_CONFIG.handWidth / CHIBI_CONFIG.wristWidth).toFixed(2)),
+        offsetLantai: Number(chibiFloorOffset.toFixed(4)),
+        elapsedMs: Number(chibiElapsedMs.toFixed(1)),
+        gridElapsedMs: Number(result.elapsedMs.toFixed(1)),
+        minimumArmBodyGap: Number(result.minimumArmBodyGap.toFixed(3)),
+        minimumThighGap: Number(result.minimumThighGap.toFixed(3)),
+      });
+    };
+
+    const buildCewekHalusAvatar = async (onProgress?: (progress: number) => void, shouldCancel?: () => boolean) => {
+      if (cewekHalusBuilt) return;
+      if (!cewekHalusLayer) {
+        cewekHalusLayer = new THREE.Group();
+        avatarRig.add(cewekHalusLayer);
+        cewekHalusLayers.push(cewekHalusLayer);
+      }
+      const buildStartedAt = performance.now();
+      const boneList: THREE.Bone[] = [];
+      const boneMap = {} as Record<CewekHalusBoneName, THREE.Bone>;
+      const makeBone = (name: CewekHalusBoneName, parent: THREE.Object3D, position: [number, number, number]) => {
+        const bone = new THREE.Bone();
+        bone.name = name;
+        bone.position.set(...position);
+        parent.add(bone);
+        boneList.push(bone);
+        boneMap[name] = bone;
+        return bone;
+      };
+      const pelvis = makeBone("pelvis", cewekHalusLayer, [0, 0.88, 0]);
+      const spine1 = makeBone("spine1", pelvis, [0, 0.13, 0]);
+      const spine2 = makeBone("spine2", spine1, [0, 0.2, 0]);
+      const neck = makeBone("neck", spine2, [0, 0.18, 0]);
+      const head = makeBone("head", neck, [0, 0.23, 0]);
+      makeBone("ponytail", head, [0, 0.24, -0.08]);
+      [-1, 1].forEach((side) => {
+        const prefix = side < 0 ? "left" : "right";
+        const clavicle = makeBone(`${prefix}Clavicle` as CewekHalusBoneName, spine2, [side * 0.14, 0.11, 0]);
+        const upperArm = makeBone(`${prefix}UpperArm` as CewekHalusBoneName, clavicle, [side * 0.13, -0.03, 0]);
+        const forearm = makeBone(`${prefix}Forearm` as CewekHalusBoneName, upperArm, [side * 0.03, -0.27, 0]);
+        const hand = makeBone(`${prefix}Hand` as CewekHalusBoneName, forearm, [side * 0.02, -0.23, 0]);
+        const thigh = makeBone(`${prefix}Thigh` as CewekHalusBoneName, pelvis, [side * 0.15, 0, 0]);
+        const shin = makeBone(`${prefix}Shin` as CewekHalusBoneName, thigh, [side * 0.03, -0.36, 0]);
+        const foot = makeBone(`${prefix}Foot` as CewekHalusBoneName, shin, [0, -0.34, 0]);
+        makeBone(`${prefix}Toe` as CewekHalusBoneName, foot, [0, 0, 0.14]);
+        void hand;
+      });
+
+      const boneIndices = new Map(CEWEK_HALUS_BONE_NAMES.map((name, index) => [name, index]));
+      const result = await buildCewekHalusGeometry({
+        skinColor: CEWEK_HALUS_CONFIG.skinColor,
+        gridStep: CEWEK_HALUS_CONFIG.gridStep,
+        bounds: CEWEK_HALUS_CONFIG.bounds,
+        bodyBlend: CEWEK_HALUS_CONFIG.bodyBlend,
+        shoulderBlend: CEWEK_HALUS_CONFIG.shoulderBlend,
+        elbowBlend: CEWEK_HALUS_CONFIG.elbowBlend,
+        wristBlend: CEWEK_HALUS_CONFIG.wristBlend,
+        hipBlend: CEWEK_HALUS_CONFIG.hipBlend,
+        kneeBlend: CEWEK_HALUS_CONFIG.kneeBlend,
+        ankleBlend: CEWEK_HALUS_CONFIG.ankleBlend,
+        blendBand: CEWEK_HALUS_CONFIG.blendBand,
+        blendFraction: CEWEK_HALUS_CONFIG.jointBlendFraction,
+        hipWeightFraction: CEWEK_HALUS_CONFIG.hipWeightFraction,
+        groundOffset: CEWEK_HALUS_CONFIG.groundOffset,
+        shoulderBindEndY: CEWEK_HALUS_CONFIG.shoulderBindEndY,
+      }, boneIndices, onProgress, shouldCancel);
+      if (!result || shouldCancel?.()) {
+        cewekHalusLayer.clear();
+        cewekHalusLayer.removeFromParent();
+        cewekHalusLayers.splice(cewekHalusLayers.indexOf(cewekHalusLayer), 1);
+        cewekHalusLayer = null;
+        return;
+      }
+
+      const clothingRegions = {
+        shirt: (x: number, y: number, z: number) => y >= 1.15 && y <= 1.4 && Math.abs(x) < 0.13 && z > 0.035,
+        jacket: (x: number, y: number, z: number) => (
+          (y >= 1.08 && y <= 1.4 && Math.abs(x) < 0.16 && !(z > 0.035 && Math.abs(x) < 0.085))
+          || (y >= 0.76 && y <= 1.35 && Math.abs(x) >= 0.205 && Math.abs(x) <= 0.34)
+        ),
+        collar: (x: number, y: number, z: number) => y >= 1.3 && y <= 1.42 && z > 0.045
+          && Math.abs(x) >= 0.07 && Math.abs(x) <= 0.145,
+        jeans: (x: number, y: number, _z: number) => (
+          (y >= 0.75 && y <= 0.99 && Math.abs(x) <= 0.25)
+          || (y >= 0.08 && y <= 0.82 && Math.abs(x) >= 0.09 && Math.abs(x) <= 0.26)
+        ),
+        pockets: (x: number, y: number, z: number) => y >= 0.78 && y <= 0.87 && z > 0.06
+          && Math.abs(x) >= 0.12 && Math.abs(x) <= 0.225,
+        shoes: (x: number, y: number, z: number) => y >= -0.035 && y <= 0.14
+          && Math.abs(x) >= 0.09 && Math.abs(x) <= 0.27 && z >= -0.07 && z <= 0.25,
+      };
+      const sourceGeometry = result.geometry;
+      const sourceIndex = sourceGeometry.getIndex()!;
+      const sourcePosition = sourceGeometry.getAttribute("position");
+      const sourceNormal = sourceGeometry.getAttribute("normal");
+      const sourceColor = sourceGeometry.getAttribute("color");
+      const sourceSkinIndex = sourceGeometry.getAttribute("skinIndex");
+      const sourceSkinWeight = sourceGeometry.getAttribute("skinWeight");
+      const visiblePositions: number[] = [];
+      const visibleNormals: number[] = [];
+      const visibleColors: number[] = [];
+      const visibleSkinIndices: number[] = [];
+      const visibleSkinWeights: number[] = [];
+      for (let triangle = 0; triangle < sourceIndex.count; triangle += 3) {
+        const vertices = [
+          sourceIndex.getX(triangle),
+          sourceIndex.getX(triangle + 1),
+          sourceIndex.getX(triangle + 2),
+        ];
+        const center = new THREE.Vector3();
+        vertices.forEach((vertex) => center.add(new THREE.Vector3(
+          sourcePosition.getX(vertex),
+          sourcePosition.getY(vertex),
+          sourcePosition.getZ(vertex),
+        )));
+        center.multiplyScalar(1 / 3);
+        const covered = Object.values(clothingRegions).some((region) => region(center.x, center.y, center.z));
+        if (covered) continue;
+        vertices.forEach((vertex) => {
+          visiblePositions.push(sourcePosition.getX(vertex), sourcePosition.getY(vertex), sourcePosition.getZ(vertex));
+          visibleNormals.push(sourceNormal.getX(vertex), sourceNormal.getY(vertex), sourceNormal.getZ(vertex));
+          visibleColors.push(sourceColor.getX(vertex), sourceColor.getY(vertex), sourceColor.getZ(vertex));
+          for (let component = 0; component < 4; component += 1) {
+            visibleSkinIndices.push(sourceSkinIndex.getComponent(vertex, component));
+            visibleSkinWeights.push(sourceSkinWeight.getComponent(vertex, component));
+          }
+        });
+      }
+      const visibleBodyGeometry = new THREE.BufferGeometry();
+      visibleBodyGeometry.setAttribute("position", new THREE.Float32BufferAttribute(visiblePositions, 3));
+      visibleBodyGeometry.setAttribute("normal", new THREE.Float32BufferAttribute(visibleNormals, 3));
+      visibleBodyGeometry.setAttribute("color", new THREE.Float32BufferAttribute(visibleColors, 3));
+      visibleBodyGeometry.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(visibleSkinIndices, 4));
+      visibleBodyGeometry.setAttribute("skinWeight", new THREE.Float32BufferAttribute(visibleSkinWeights, 4));
+      visibleBodyGeometry.computeBoundingBox();
+      visibleBodyGeometry.computeBoundingSphere();
+      const skinMaterial = new THREE.MeshStandardMaterial({
+        color: "#ffffff",
+        roughness: 0.58,
+        metalness: 0,
+        vertexColors: true,
+        side: THREE.DoubleSide,
+      });
+      resources.add(sourceGeometry);
+      resources.add(visibleBodyGeometry);
+      resources.add(skinMaterial);
+      const bodyMesh = new THREE.SkinnedMesh(visibleBodyGeometry, skinMaterial);
+      bodyMesh.name = "cewek-halus-body";
+      bodyMesh.frustumCulled = false;
+      cewekHalusLayer.add(bodyMesh);
+      const skeleton = new THREE.Skeleton(boneList);
+      avatar.updateMatrixWorld(true);
+      skeleton.calculateInverses();
+      bodyMesh.bind(skeleton, bodyMesh.matrixWorld);
+      skeletons.add(skeleton);
+      boneList.forEach((bone) => cewekHalusBindQuaternions.set(bone.name, bone.quaternion.clone()));
+      cewekHalusSkeleton = skeleton;
+      cewekHalusBones = boneMap;
+      cewekHalusBodyMesh = bodyMesh;
+
+      const clothingTriangles: Record<string, number> = {};
+      const makeClothMaterial = (color: string, roughness = 0.82) => {
+        const material = new THREE.MeshStandardMaterial({
+          color,
+          roughness,
+          metalness: 0,
+          side: THREE.DoubleSide,
+        });
+        resources.add(material);
+        return material;
+      };
+      const addSkinnedShell = (
+        source: THREE.BufferGeometry,
+        name: string,
+        material: THREE.Material,
+        includes: (x: number, y: number, z: number) => boolean,
+        offset: number,
+      ) => {
+        const sourceIndex = source.getIndex();
+        const sourcePosition = source.getAttribute("position");
+        const sourceNormal = source.getAttribute("normal");
+        const sourceSkinIndex = source.getAttribute("skinIndex");
+        const sourceSkinWeight = source.getAttribute("skinWeight");
+        if (!sourceIndex || !sourcePosition || !sourceNormal || !sourceSkinIndex || !sourceSkinWeight) {
+          throw new Error("Geometri cewek-halus belum memiliki atribut permukaan dan skin yang lengkap.");
+        }
+        const positions: number[] = [];
+        const normals: number[] = [];
+        const skinIndices: number[] = [];
+        const skinWeights: number[] = [];
+        const indices: number[] = [];
+        for (let triangle = 0; triangle < sourceIndex.count; triangle += 3) {
+          const vertices = [
+            sourceIndex.getX(triangle),
+            sourceIndex.getX(triangle + 1),
+            sourceIndex.getX(triangle + 2),
+          ];
+          const center = new THREE.Vector3();
+          vertices.forEach((vertex) => center.add(new THREE.Vector3(
+            sourcePosition.getX(vertex),
+            sourcePosition.getY(vertex),
+            sourcePosition.getZ(vertex),
+          )));
+          center.multiplyScalar(1 / 3);
+          if (!includes(center.x, center.y, center.z)) continue;
+          vertices.forEach((vertex) => {
+            const normal = new THREE.Vector3(
+              sourceNormal.getX(vertex),
+              sourceNormal.getY(vertex),
+              sourceNormal.getZ(vertex),
+            ).normalize();
+            positions.push(
+              sourcePosition.getX(vertex) + normal.x * offset,
+              sourcePosition.getY(vertex) + normal.y * offset,
+              sourcePosition.getZ(vertex) + normal.z * offset,
+            );
+            normals.push(normal.x, normal.y, normal.z);
+            for (let component = 0; component < 4; component += 1) {
+              skinIndices.push(sourceSkinIndex.getComponent(vertex, component));
+              skinWeights.push(sourceSkinWeight.getComponent(vertex, component));
+            }
+            indices.push(indices.length);
+          });
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normals, 3));
+        geometry.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(skinIndices, 4));
+        geometry.setAttribute("skinWeight", new THREE.Float32BufferAttribute(skinWeights, 4));
+        geometry.setIndex(indices);
+        geometry.computeBoundingBox();
+        geometry.computeBoundingSphere();
+        resources.add(geometry);
+        const garment = new THREE.SkinnedMesh(geometry, material);
+        garment.name = name;
+        garment.frustumCulled = false;
+        cewekHalusLayer.add(garment);
+        avatar.updateMatrixWorld(true);
+        garment.bind(skeleton, bodyMesh.bindMatrix);
+        clothingTriangles[name] = indices.length / 3;
+        return garment;
+      };
+      const shirtMaterial = makeClothMaterial(CEWEK_HALUS_CONFIG.shirtColor);
+      const denimMaterial = makeClothMaterial(CEWEK_HALUS_CONFIG.jacketColor);
+      const denimDetailMaterial = makeClothMaterial("#7796B4");
+      const jeansMaterial = makeClothMaterial(CEWEK_HALUS_CONFIG.pantsColor);
+      const jeansDetailMaterial = makeClothMaterial("#6F8EAF");
+      addSkinnedShell(
+        sourceGeometry,
+        "kaus putih",
+        shirtMaterial,
+        clothingRegions.shirt,
+        0.012,
+      );
+      addSkinnedShell(
+        sourceGeometry,
+        "jaket denim",
+        denimMaterial,
+        clothingRegions.jacket,
+        0.016,
+      );
+      addSkinnedShell(
+        sourceGeometry,
+        "kerah jaket",
+        denimDetailMaterial,
+        clothingRegions.collar,
+        0.02,
+      );
+      addSkinnedShell(
+        sourceGeometry,
+        "jins ramping",
+        jeansMaterial,
+        clothingRegions.jeans,
+        0.014,
+      );
+      addSkinnedShell(
+        sourceGeometry,
+        "kantong jins",
+        jeansDetailMaterial,
+        clothingRegions.pockets,
+        0.018,
+      );
+
+      const shoeMaterial = makeClothMaterial(CEWEK_HALUS_CONFIG.shoesColor, 0.62);
+      const soleMaterial = makeClothMaterial("#FFFFFF", 0.72);
+      const addWeightedShoe = (
+        name: string,
+        side: number,
+        width: number,
+        height: number,
+        depth: number,
+        centerY: number,
+        material: THREE.Material,
+      ) => {
+        const geometry = new RoundedBoxGeometry(width, height, depth, 1, 0.025);
+        geometry.translate(side * 0.18, centerY, 0.105);
+        const vertexCount = geometry.getAttribute("position").count;
+        const weights = new Float32Array(vertexCount * 4);
+        const indices = new Uint16Array(vertexCount * 4);
+        const toeIndex = boneIndices.get(`${side < 0 ? "left" : "right"}Toe`)!;
+        const footIndex = boneIndices.get(`${side < 0 ? "left" : "right"}Foot`)!;
+        for (let vertex = 0; vertex < vertexCount; vertex += 1) {
+          const toeWeight = geometry.getAttribute("position").getZ(vertex) > 0.19 ? 0.65 : 0.2;
+          indices[vertex * 4] = footIndex;
+          indices[vertex * 4 + 1] = toeIndex;
+          weights[vertex * 4] = 1 - toeWeight;
+          weights[vertex * 4 + 1] = toeWeight;
+        }
+        geometry.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(indices, 4));
+        geometry.setAttribute("skinWeight", new THREE.Float32BufferAttribute(weights, 4));
+        resources.add(geometry);
+        const shoe = new THREE.SkinnedMesh(geometry, material);
+        shoe.name = name;
+        shoe.frustumCulled = false;
+        cewekHalusLayer.add(shoe);
+        avatar.updateMatrixWorld(true);
+        shoe.bind(skeleton, bodyMesh.bindMatrix);
+        clothingTriangles[name] = geometry.index
+          ? geometry.index.count / 3
+          : geometry.getAttribute("position").count / 3;
+      };
+      [-1, 1].forEach((side) => {
+        addWeightedShoe("sneaker", side, 0.15, 0.13, 0.29, 0.068, shoeMaterial);
+        addWeightedShoe("sol sneaker", side, 0.158, 0.03, 0.3, 0.015, soleMaterial);
+      });
+
+      const faceCanvasTexture = (closed: boolean) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 512;
+        canvas.height = 512;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Canvas 2D tidak tersedia untuk membuat wajah cewek-halus.");
+        const drawEye = (centerX: number) => {
+          context.save();
+          context.translate(centerX, 372);
+          if (closed) {
+            context.strokeStyle = "#392923";
+            context.lineWidth = 15;
+            context.lineCap = "round";
+            context.beginPath();
+            context.moveTo(-57, 2);
+            context.quadraticCurveTo(0, 30, 57, 2);
+            context.stroke();
+            context.lineWidth = 5;
+            context.beginPath();
+            context.moveTo(-48, 12);
+            context.lineTo(-60, 22);
+            context.moveTo(48, 12);
+            context.lineTo(60, 22);
+            context.stroke();
+          } else {
+            context.fillStyle = "#FFFFFF";
+            context.beginPath();
+            context.ellipse(0, 0, 60, 67, 0, 0, Math.PI * 2);
+            context.fill();
+            const iris = context.createRadialGradient(-9, -15, 3, 0, 4, 45);
+            iris.addColorStop(0, "#E4B66F");
+            iris.addColorStop(0.58, "#A9683B");
+            iris.addColorStop(1, "#5A321F");
+            context.fillStyle = iris;
+            context.beginPath();
+            context.ellipse(0, 8, 39, 48, 0, 0, Math.PI * 2);
+            context.fill();
+            context.fillStyle = "#1C120F";
+            context.beginPath();
+            context.ellipse(0, 13, 21, 33, 0, 0, Math.PI * 2);
+            context.fill();
+            context.fillStyle = "#FFFFFF";
+            context.beginPath();
+            context.arc(-15, -20, 13, 0, Math.PI * 2);
+            context.arc(17, 18, 7, 0, Math.PI * 2);
+            context.fill();
+            context.strokeStyle = "#30211C";
+            context.lineWidth = 13;
+            context.lineCap = "round";
+            context.beginPath();
+            context.moveTo(-58, -10);
+            context.quadraticCurveTo(0, -80, 58, -10);
+            context.stroke();
+            context.lineWidth = 5;
+            context.beginPath();
+            context.moveTo(-44, -33);
+            context.lineTo(-53, -43);
+            context.moveTo(0, -46);
+            context.lineTo(1, -57);
+            context.moveTo(44, -33);
+            context.lineTo(53, -43);
+            context.stroke();
+          }
+          context.restore();
+        };
+        [93, 419].forEach((x) => {
+          const cheek = context.createRadialGradient(x, 415, 3, x, 415, 62);
+          cheek.addColorStop(0, "rgba(244,111,144,0.58)");
+          cheek.addColorStop(1, "rgba(242,132,142,0)");
+          context.fillStyle = cheek;
+          context.beginPath();
+          context.ellipse(x, 415, 62, 42, 0, 0, Math.PI * 2);
+          context.fill();
+        });
+        drawEye(135);
+        drawEye(377);
+        context.strokeStyle = "#49332B";
+        context.lineWidth = 6;
+        context.lineCap = "round";
+        context.beginPath();
+        context.moveTo(89, 276);
+        context.quadraticCurveTo(136, 250, 177, 270);
+        context.moveTo(333, 270);
+        context.quadraticCurveTo(374, 250, 423, 276);
+        context.stroke();
+        context.fillStyle = "#E9879A";
+        context.beginPath();
+        context.moveTo(224, 468);
+        context.quadraticCurveTo(239, 448, 256, 465);
+        context.quadraticCurveTo(273, 448, 288, 468);
+        context.quadraticCurveTo(278, 491, 256, 495);
+        context.quadraticCurveTo(234, 491, 224, 468);
+        context.fill();
+        context.strokeStyle = "#B9526C";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.moveTo(228, 469);
+        context.quadraticCurveTo(256, 480, 284, 469);
+        context.stroke();
+        context.fillStyle = "rgba(255,255,255,0.82)";
+        context.beginPath();
+        context.ellipse(264, 461, 8, 3, -0.15, 0, Math.PI * 2);
+        context.fill();
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.minFilter = THREE.LinearMipmapLinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        textures.add(texture);
+        return texture;
+      };
+      cewekHalusOpenFaceTexture = faceCanvasTexture(false);
+      cewekHalusClosedFaceTexture = faceCanvasTexture(true);
+      cewekHalusFaceMaterial = new THREE.MeshStandardMaterial({
+        map: cewekHalusOpenFaceTexture,
+        transparent: true,
+        roughness: 0.62,
+        metalness: 0,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      resources.add(cewekHalusFaceMaterial);
+      const faceGeometry = new THREE.BufferGeometry();
+      const facePositions: number[] = [];
+      const faceUvs: number[] = [];
+      const faceIndices: number[] = [];
+      const faceColumns = 20;
+      const faceRows = 24;
+      for (let row = 0; row <= faceRows; row += 1) {
+        const v = row / faceRows;
+        const y = -0.02 + v * 0.35;
+        for (let column = 0; column <= faceColumns; column += 1) {
+          const u = column / faceColumns;
+          const edgeScale = 0.78 + 0.22 * Math.sin(Math.PI * v);
+          const x = (u - 0.5) * 0.49 * edgeScale;
+          const ellipse = Math.max(0.08, 1 - (x / 0.3) ** 2 - ((y - 0.095) / 0.235) ** 2);
+          const z = 0.235 * Math.sqrt(ellipse) + 0.008;
+          facePositions.push(x, y, z);
+          faceUvs.push(u, v);
+          if (row === faceRows || column === faceColumns) continue;
+          const a = row * (faceColumns + 1) + column;
+          const b = a + 1;
+          const d = a + faceColumns + 1;
+          const c = d + 1;
+          faceIndices.push(a, b, c, a, c, d);
+        }
+      }
+      faceGeometry.setAttribute("position", new THREE.Float32BufferAttribute(facePositions, 3));
+      faceGeometry.setAttribute("uv", new THREE.Float32BufferAttribute(faceUvs, 2));
+      faceGeometry.setIndex(faceIndices);
+      faceGeometry.computeVertexNormals();
+      resources.add(faceGeometry);
+      const faceMesh = new THREE.Mesh(faceGeometry, cewekHalusFaceMaterial);
+      faceMesh.name = "wajah cewek-halus";
+      head.add(faceMesh);
+      const skinDetailMaterial = makeClothMaterial(CEWEK_HALUS_CONFIG.skinColor, 0.58);
+      const faceDetailGeometries: THREE.BufferGeometry[] = [];
+      const noseGeometry = new THREE.SphereGeometry(0.014, 10, 7);
+      faceDetailGeometries.push(noseGeometry);
+      resources.add(noseGeometry);
+      const nose = new THREE.Mesh(noseGeometry, skinDetailMaterial);
+      nose.scale.set(0.8, 1.2, 0.8);
+      nose.position.set(0, 0.06, 0.245);
+      head.add(nose);
+      [-1, 1].forEach((side) => {
+        const earGeometry = new THREE.SphereGeometry(0.045, 10, 7);
+        faceDetailGeometries.push(earGeometry);
+        resources.add(earGeometry);
+        const ear = new THREE.Mesh(earGeometry, skinDetailMaterial);
+        ear.scale.set(0.72, 1.05, 0.7);
+        ear.position.set(side * 0.29, 0.08, 0);
+        head.add(ear);
+      });
+      const hairMaterial = makeClothMaterial(CEWEK_HALUS_CONFIG.hairColor, 0.78);
+      const hairGeometries: THREE.BufferGeometry[] = [];
+      const addHairMesh = (geometry: THREE.BufferGeometry, parent: THREE.Object3D, position?: [number, number, number], scale?: [number, number, number]) => {
+        resources.add(geometry);
+        hairGeometries.push(geometry);
+        const mesh = new THREE.Mesh(geometry, hairMaterial);
+        if (position) mesh.position.set(...position);
+        if (scale) mesh.scale.set(...scale);
+        parent.add(mesh);
+        return mesh;
+      };
+      const hairCap = new THREE.SphereGeometry(1, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.53);
+      addHairMesh(hairCap, head, [0, 0.2, -0.008], [0.305, 0.235, 0.244]);
+      const sideBang = new THREE.SphereGeometry(1, 12, 8);
+      addHairMesh(sideBang, head, [-0.055, 0.255, 0.145], [0.19, 0.045, 0.09]);
+      const makeHairTube = (points: [number, number, number][], radius: number, parent: THREE.Object3D) => {
+        const curve = new THREE.CatmullRomCurve3(points.map(([x, y, z]) => new THREE.Vector3(x, y, z)));
+        const tube = new THREE.TubeGeometry(curve, 12, radius, 6, false);
+        addHairMesh(tube, parent);
+        return tube;
+      };
+      makeHairTube([
+        [-0.08, 0.145, 0.07],
+        [-0.04, 0.13, 0.09],
+        [0.015, 0.095, 0.098],
+        [0.065, 0.055, 0.085],
+      ], 0.018, head);
+      [-1, 1].forEach((side) => {
+        makeHairTube([
+          [side * 0.265, 0.22, 0.105],
+          [side * 0.285, 0.13, 0.12],
+          [side * 0.28, 0.02, 0.12],
+          [side * 0.26, -0.075, 0.09],
+        ], 0.025, head);
+      });
+      const ponytail = boneMap.ponytail!;
+      const ponytailKnot = new THREE.SphereGeometry(1, 10, 8);
+      addHairMesh(ponytailKnot, ponytail, [0, -0.01, -0.045], [0.047, 0.05, 0.045]);
+      makeHairTube([
+        [0, 0, -0.045],
+        [0.012, -0.1, -0.12],
+        [0.022, -0.25, -0.18],
+        [0.006, -0.4, -0.23],
+      ], 0.04, ponytail);
+      avatar.updateMatrixWorld(true);
+      skeleton.update();
+      const layerInverse = cewekHalusLayer.matrixWorld.clone().invert();
+      const bindVertex = new THREE.Vector3();
+      let minimumAvatarY = Number.POSITIVE_INFINITY;
+      let maximumAvatarY = Number.NEGATIVE_INFINITY;
+      cewekHalusLayer.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        const positions = object.geometry.getAttribute("position");
+        for (let vertex = 0; vertex < positions.count; vertex += 1) {
+          bindVertex.fromBufferAttribute(positions, vertex);
+          if (object instanceof THREE.SkinnedMesh) object.applyBoneTransform(vertex, bindVertex);
+          bindVertex.applyMatrix4(object.matrixWorld).applyMatrix4(layerInverse);
+          minimumAvatarY = Math.min(minimumAvatarY, bindVertex.y);
+          maximumAvatarY = Math.max(maximumAvatarY, bindVertex.y);
+        }
+      });
+      if (!Number.isFinite(minimumAvatarY) || !Number.isFinite(maximumAvatarY)) {
+        throw new Error("Tidak dapat menghitung batas avatar cewek-halus pada pose ikat.");
+      }
+      const verticalScale = CEWEK_HALUS_CONFIG.bodyHeight / (maximumAvatarY - minimumAvatarY);
+      cewekHalusLayer.scale.y = verticalScale;
+      cewekHalusLayer.position.y = CEWEK_HALUS_CONFIG.groundOffset - minimumAvatarY * verticalScale;
+      avatar.updateMatrixWorld(true);
+      const avatarHeight = (maximumAvatarY - minimumAvatarY) * verticalScale;
+
+      clothingTriangles.wajah = faceIndices.length / 3;
+      clothingTriangles.rambut = hairGeometries.reduce(
+        (sum, geometry) => sum + (geometry.index?.count ?? geometry.getAttribute("position").count) / 3,
+        0,
+      );
+      clothingTriangles.detailWajah = faceDetailGeometries.reduce(
+        (sum, geometry) => sum + (geometry.index?.count ?? geometry.getAttribute("position").count) / 3,
+        0,
+      );
+      const garmentTotals = {
+        tubuh: visibleBodyGeometry.getAttribute("position").count / 3,
+        wajah: clothingTriangles.wajah,
+        rambut: clothingTriangles.rambut,
+        kaus: clothingTriangles["kaus putih"] ?? 0,
+        jaket: (clothingTriangles["jaket denim"] ?? 0) + (clothingTriangles["kerah jaket"] ?? 0),
+        jins: (clothingTriangles["jins ramping"] ?? 0) + (clothingTriangles["kantong jins"] ?? 0),
+        sepatu: (clothingTriangles.sneaker ?? 0) * 2 + (clothingTriangles["sol sneaker"] ?? 0) * 2,
+        detailWajah: clothingTriangles.detailWajah,
+      };
+      console.info("[cewek-halus] rincian segitiga", {
+        ...garmentTotals,
+        total: Object.values(garmentTotals).reduce((sum, count) => sum + count, 0),
+        segitigaMedanTubuhSebelumPakaian: result.triangleCount,
+      });
+      cewekHalusNextBlinkAt = performance.now() + 3000 + Math.random() * 2000;
+      cewekHalusBuilt = true;
+      console.info("[cewek-halus] mesh selesai", {
+        triangles: visibleBodyGeometry.getAttribute("position").count / 3,
+        vertices: result.vertexCount,
+        bones: skeleton.bones.length,
+        tinggiTotal: Number(avatarHeight.toFixed(3)),
+        rasioKepala: Number((CEWEK_HALUS_CONFIG.headHeight / avatarHeight).toFixed(3)),
+        offsetLantai: Number((CEWEK_HALUS_CONFIG.groundOffset - minimumAvatarY * verticalScale).toFixed(4)),
+        elapsedMs: Number((performance.now() - buildStartedAt).toFixed(1)),
+        gridElapsedMs: Number(result.elapsedMs.toFixed(1)),
+        minimumArmBodyGap: Number(result.minimumArmBodyGap.toFixed(3)),
+        minimumThighGap: Number(result.minimumThighGap.toFixed(3)),
+      });
+    };
+
+    const avatarLayerRegistry = new Map<AvatarPresetId, {
+      layers: THREE.Group[];
+      build?: (onProgress?: (progress: number) => void, shouldCancel?: () => boolean) => void | Promise<void>;
+    }>([
       ["anak-cokelat", { layers: legacyLayers }],
       ["kacamata-hitam", { layers: newAvatarLayers, build: buildBlackAvatar }],
       ["cewek-streetwear", { layers: streetwearLayers, build: buildStreetwearAvatar }],
       ["cewek-gaul", { layers: organicLayers, build: buildOrganicAvatar }],
       ["roblox-slim", { layers: robloxSlimLayers, build: buildRobloxSlimAvatar }],
+      ["cewek-halus", { layers: cewekHalusLayers, build: buildCewekHalusAvatar }],
+      ["cowok-kemeja", { layers: kemejaLayers, build: buildKemejaAvatar }],
+      ["chibi-halus", { layers: chibiLayers, build: buildChibiAvatar }],
     ]);
 
-    const applyAvatar = (presetId: AvatarPresetId) => {
+    const applyAvatar = async (presetId: AvatarPresetId) => {
       const selectedLayer = avatarLayerRegistry.get(presetId);
       if (!selectedLayer) return;
-      selectedLayer.build?.();
+      const needsBuildIndicator = (presetId === "cewek-halus" && !cewekHalusBuilt)
+        || (presetId === "chibi-halus" && !chibiBuilt);
+      if (needsBuildIndicator) {
+        setAvatarLoading(true);
+        setAvatarBuildProgress(0);
+      }
+      try {
+        await selectedLayer.build?.(
+          (progress) => {
+            if (!effectDisposed) setAvatarBuildProgress(Math.round(progress * 100));
+          },
+          () => effectDisposed,
+        );
+      } catch (error) {
+        if (presetId === "cewek-halus") {
+          console.warn("Avatar cewek-halus gagal dibangun; periksa geometri tubuh dan skeleton.", error);
+        } else if (presetId === "chibi-halus") {
+          console.error("Avatar Si Imut gagal dibangun.", error);
+          setAvatarLoading(false);
+          return;
+        } else {
+          throw error;
+        }
+      }
+      if (effectDisposed) return;
       avatarLayerRegistry.forEach((entry, id) => {
         entry.layers.forEach((layer) => { layer.visible = id === presetId; });
       });
+      if (presetId === "cewek-halus" && (!cewekHalusBodyMesh || !cewekHalusSkeleton || cewekHalusSkeleton.bones.length !== 22)) {
+        console.warn("Avatar cewek-halus tidak tampil: SkinnedMesh tubuh atau skeleton 22 tulang tidak terbentuk.");
+      }
+      if (presetId === "chibi-halus" && (!chibiBodyMesh || !chibiSkeleton || chibiSkeleton.bones.length !== 22)) {
+        console.error("Avatar Si Imut tidak tampil: SkinnedMesh atau skeleton 22 tulang tidak terbentuk.");
+      }
+      if (needsBuildIndicator) setAvatarLoading(false);
     };
-    applyAvatar(selectedAvatarId);
+    void applyAvatar(selectedAvatarId);
 
     const animationState = {
       phase: 0,
@@ -1667,6 +3386,19 @@ const NumatikWorldPage = () => {
       frameId = window.requestAnimationFrame(animate);
       const dt = Math.min((now - lastFrameTime) / 1000, RUN_CONFIG.maxDeltaTime);
       lastFrameTime = now;
+      if (selectedAvatarId === "cewek-halus" && cewekHalusFaceMaterial
+        && cewekHalusOpenFaceTexture && cewekHalusClosedFaceTexture) {
+        if (cewekHalusBlinkStartedAt < 0 && now >= cewekHalusNextBlinkAt) {
+          cewekHalusBlinkStartedAt = now;
+          cewekHalusFaceMaterial.map = cewekHalusClosedFaceTexture;
+          cewekHalusFaceMaterial.needsUpdate = true;
+        } else if (cewekHalusBlinkStartedAt >= 0 && now - cewekHalusBlinkStartedAt >= 130) {
+          cewekHalusBlinkStartedAt = -1;
+          cewekHalusFaceMaterial.map = cewekHalusOpenFaceTexture;
+          cewekHalusFaceMaterial.needsUpdate = true;
+          cewekHalusNextBlinkAt = now + 3000 + Math.random() * 2000;
+        }
+      }
       const input = keysRef.current;
       const forward = Number(input.has("w") || input.has("arrowup")) - Number(input.has("s") || input.has("arrowdown"));
       const sideways = Number(input.has("d") || input.has("arrowright")) - Number(input.has("a") || input.has("arrowleft"));
@@ -1812,6 +3544,354 @@ const NumatikWorldPage = () => {
       bodyRig.scale.y = 1 - animationState.landingBend * 0.06;
       head.rotation.x = -animationState.torsoLean;
       head.rotation.y = -animationState.torsoTwist;
+      if (selectedAvatarId === "cewek-halus" && cewekHalusBuilt && cewekHalusSkeleton && cewekHalusLayer && cewekHalusBodyMesh) {
+        const phase = DEBUG_FREEZE_PHASE === null
+          ? animationState.phase
+          : ((DEBUG_FREEZE_PHASE % 1) + 1) % 1 * Math.PI * 2;
+        const alpha = 1 - Math.exp(-dt / CEWEK_HALUS_CONFIG.transitionSeconds);
+        const gaitRunning = isRunning || DEBUG_FREEZE_PHASE !== null;
+        const runningTarget = gaitRunning ? 1 : 0;
+        const strideScale = input.has("shift") ? 1.08 : 1;
+        cewekHalusRunBlend = THREE.MathUtils.lerp(cewekHalusRunBlend, runningTarget, alpha);
+        cewekHalusBreath = THREE.MathUtils.lerp(
+          cewekHalusBreath,
+          grounded ? Math.sin(now * 0.0018) * CEWEK_HALUS_CONFIG.breathAmplitude : 0,
+          alpha,
+        );
+        const runBlend = cewekHalusRunBlend;
+        const wave = Math.sin(phase);
+        const idleShift = grounded && !isRunning ? Math.sin(now * 0.0011) * CEWEK_HALUS_CONFIG.idleWeightShift : 0;
+        const pelvis = cewekHalusBones.pelvis!;
+        const spine1 = cewekHalusBones.spine1!;
+        const spine2 = cewekHalusBones.spine2!;
+        const neckBone = cewekHalusBones.neck!;
+        const headBone = cewekHalusBones.head!;
+        pelvis.position.y = 0.88 + cewekHalusBreath + idleShift
+          + (gaitRunning ? Math.max(0, Math.sin(phase * 2)) * CEWEK_HALUS_CONFIG.runBounce * runBlend : 0);
+        pelvis.rotation.x = THREE.MathUtils.lerp(
+          pelvis.rotation.x,
+          gaitRunning ? CEWEK_HALUS_CONFIG.bodyLean * runBlend : 0,
+          alpha,
+        );
+        pelvis.rotation.y = THREE.MathUtils.lerp(
+          pelvis.rotation.y,
+          gaitRunning ? wave * CEWEK_HALUS_CONFIG.pelvisYaw * runBlend : idleShift,
+          alpha,
+        );
+        spine1.rotation.y = THREE.MathUtils.lerp(spine1.rotation.y, -pelvis.rotation.y * 0.55, alpha);
+        spine2.rotation.y = THREE.MathUtils.lerp(spine2.rotation.y, -pelvis.rotation.y - wave * CEWEK_HALUS_CONFIG.torsoCounterYaw * runBlend, alpha);
+        neckBone.rotation.x = THREE.MathUtils.lerp(neckBone.rotation.x, -pelvis.rotation.x * 0.3, alpha);
+        headBone.rotation.x = THREE.MathUtils.lerp(
+          headBone.rotation.x,
+          -pelvis.rotation.x * 0.7 + Math.sin(now * 0.0013) * CEWEK_HALUS_CONFIG.idleHeadNod,
+          alpha,
+        );
+        const ponytail = cewekHalusBones.ponytail!;
+        const ponytailSwing = gaitRunning
+          ? THREE.MathUtils.clamp(-Math.sin(phase - 0.65) * 0.1 * runBlend, -0.11, 0.11)
+          : Math.sin(now * 0.0012) * 0.012;
+        setCewekHalusBodyRotation("ponytail", ponytail, cewekHalusSagittalAxis, ponytailSwing, alpha);
+
+        for (let sideIndex = 0; sideIndex < 2; sideIndex += 1) {
+          const side = sideIndex === 0 ? -1 : 1;
+          const prefix = side < 0 ? "left" : "right";
+          const clavicle = cewekHalusBones[`${prefix}Clavicle` as CewekHalusBoneName]!;
+          const upperArm = cewekHalusBones[`${prefix}UpperArm` as CewekHalusBoneName]!;
+          const forearm = cewekHalusBones[`${prefix}Forearm` as CewekHalusBoneName]!;
+          const hand = cewekHalusBones[`${prefix}Hand` as CewekHalusBoneName]!;
+          const thigh = cewekHalusBones[`${prefix}Thigh` as CewekHalusBoneName]!;
+          const shin = cewekHalusBones[`${prefix}Shin` as CewekHalusBoneName]!;
+          const foot = cewekHalusBones[`${prefix}Foot` as CewekHalusBoneName]!;
+          const toe = cewekHalusBones[`${prefix}Toe` as CewekHalusBoneName]!;
+          const legWave = side * wave;
+          const armWave = -legWave;
+          const phaseLag = phase - CEWEK_HALUS_CONFIG.forearmLagCycles * Math.PI * 2;
+          const delayedArmWave = -side * Math.sin(phaseLag);
+          const jumpAmount = grounded ? 0 : 1;
+          const elbowTarget = gaitRunning
+            ? -THREE.MathUtils.clamp(
+              CEWEK_HALUS_CONFIG.elbowBend * (0.88 + 0.12 * Math.max(0, -delayedArmWave)),
+              0,
+              CEWEK_HALUS_CONFIG.elbowMaxBend,
+            )
+            : grounded ? -CEWEK_HALUS_CONFIG.idleElbowBend : -CEWEK_HALUS_CONFIG.idleElbowBend * 1.5;
+          const rearLegBend = Math.max(0, legWave);
+          const kneeTarget = !grounded
+            ? CEWEK_HALUS_CONFIG.jumpKneeBend
+            : animationState.landingBend * CEWEK_HALUS_CONFIG.landingKneeBend
+              + (gaitRunning ? rearLegBend * CEWEK_HALUS_CONFIG.kneeForwardBend : 0);
+          const boundedKnee = THREE.MathUtils.clamp(kneeTarget, 0, CEWEK_HALUS_CONFIG.kneeMaxBend);
+
+          setCewekHalusBodyRotation(
+            clavicle.name,
+            clavicle,
+            cewekHalusAbductionAxis,
+            side * (CEWEK_HALUS_CONFIG.shoulderAbduction + jumpAmount * CEWEK_HALUS_CONFIG.jumpArmRaise),
+            alpha,
+          );
+          setCewekHalusBodyRotation(
+            upperArm.name,
+            upperArm,
+            cewekHalusSagittalAxis,
+            armWave * CEWEK_HALUS_CONFIG.shoulderSwing * runBlend * strideScale
+              - jumpAmount * CEWEK_HALUS_CONFIG.jumpArmRaise * 0.4,
+            alpha,
+          );
+          setCewekHalusBodyRotation(forearm.name, forearm, cewekHalusSagittalAxis, elbowTarget, alpha);
+          setCewekHalusBodyRotation(hand.name, hand, cewekHalusSagittalAxis, -elbowTarget * 0.12, alpha);
+          setCewekHalusBodyRotation(
+            thigh.name,
+            thigh,
+            cewekHalusSagittalAxis,
+            legWave * CEWEK_HALUS_CONFIG.hipSwing * runBlend * strideScale,
+            alpha,
+          );
+          setCewekHalusBodyRotation(shin.name, shin, cewekHalusSagittalAxis, boundedKnee, alpha);
+          const thighAngle = cewekHalusPoseAngles.get(thigh.name) ?? 0;
+          const shinAngle = cewekHalusPoseAngles.get(shin.name) ?? 0;
+          const footTarget = grounded
+            ? -thighAngle - shinAngle
+            : -thighAngle - shinAngle + CEWEK_HALUS_CONFIG.ankleSwing;
+          setCewekHalusBodyRotation(
+            foot.name,
+            foot,
+            cewekHalusSagittalAxis,
+            footTarget,
+            alpha,
+          );
+          setCewekHalusBodyRotation(
+            toe.name,
+            toe,
+            cewekHalusSagittalAxis,
+            -(cewekHalusPoseAngles.get(foot.name) ?? 0) * 0.3,
+            alpha,
+          );
+
+        }
+      }
+      if (selectedAvatarId === "cowok-kemeja" && kemejaBuilt && kemejaRoot && kemejaTorsoMotion && kemejaHead) {
+        const phase = KEMEJA_DEBUG_FREEZE_PHASE === null
+          ? animationState.phase
+          : ((KEMEJA_DEBUG_FREEZE_PHASE % 1) + 1) % 1 * Math.PI * 2;
+        const alpha = 1 - Math.exp(-dt / KEMEJA_CONFIG.transitionSeconds);
+        const gaitActive = isRunning || KEMEJA_DEBUG_FREEZE_PHASE !== null;
+        const runTarget = gaitActive ? 1 : 0;
+        const runScale = input.has("shift") ? 1.08 : 1;
+        kemejaRunBlend = THREE.MathUtils.lerp(kemejaRunBlend, runTarget, alpha);
+        kemejaBreath = THREE.MathUtils.lerp(
+          kemejaBreath,
+          grounded && !isRunning ? Math.sin(now * 0.0018) * KEMEJA_CONFIG.idleBreathAmplitude : 0,
+          alpha,
+        );
+        kemejaWeightShift = THREE.MathUtils.lerp(
+          kemejaWeightShift,
+          grounded && !isRunning ? Math.sin(now * 0.0011) * KEMEJA_CONFIG.idleWeightShift : 0,
+          alpha,
+        );
+        const wave = Math.sin(phase);
+        const bounce = gaitActive
+          ? Math.max(0, Math.sin(phase * 2)) * KEMEJA_CONFIG.runBounce * kemejaRunBlend
+          : 0;
+        kemejaTorsoMotion.position.y = KEMEJA_CONFIG.torsoY + kemejaBreath + kemejaWeightShift + bounce;
+        kemejaTorsoMotion.rotation.x = THREE.MathUtils.lerp(
+          kemejaTorsoMotion.rotation.x,
+          gaitActive ? KEMEJA_CONFIG.bodyLean * kemejaRunBlend : 0,
+          alpha,
+        );
+        kemejaTorsoMotion.rotation.y = THREE.MathUtils.lerp(
+          kemejaTorsoMotion.rotation.y,
+          gaitActive ? wave * RUN_CONFIG.torsoTwist * kemejaRunBlend : kemejaWeightShift,
+          alpha,
+        );
+        kemejaHead.rotation.x = THREE.MathUtils.lerp(
+          kemejaHead.rotation.x,
+          -kemejaTorsoMotion.rotation.x + Math.sin(now * 0.0013) * 0.008,
+          alpha,
+        );
+        kemejaHead.rotation.y = THREE.MathUtils.lerp(
+          kemejaHead.rotation.y,
+          -kemejaTorsoMotion.rotation.y * 0.45,
+          alpha,
+        );
+        if (kemejaHair) {
+          kemejaHair.rotation.x = THREE.MathUtils.lerp(
+            kemejaHair.rotation.x,
+            gaitActive ? THREE.MathUtils.clamp(-Math.sin(phase - 0.45) * KEMEJA_CONFIG.hairSway, -0.035, 0.035) : 0,
+            1 - Math.exp(-8 * dt),
+          );
+        }
+        kemejaArms.forEach(({ shoulder, upper, elbow, wrist, side }) => {
+          const legWave = -side * wave;
+          const delayedWave = -side * Math.sin(phase - KEMEJA_CONFIG.forearmLagCycles * Math.PI * 2);
+          const jumpAmount = grounded ? 0 : 1;
+          shoulder.rotation.z = THREE.MathUtils.lerp(
+            shoulder.rotation.z,
+            side * (KEMEJA_CONFIG.shoulderAbduction + jumpAmount * 0.04),
+            alpha,
+          );
+          upper.rotation.x = THREE.MathUtils.lerp(
+            upper.rotation.x,
+            -legWave * KEMEJA_CONFIG.shoulderSwing * kemejaRunBlend * runScale
+              - jumpAmount * KEMEJA_CONFIG.jumpArmRaise,
+            alpha,
+          );
+          const elbowTarget = gaitActive
+            ? THREE.MathUtils.lerp(
+              KEMEJA_CONFIG.elbowBackBend,
+              KEMEJA_CONFIG.elbowFrontBend,
+              THREE.MathUtils.clamp(-delayedWave, 0, 1),
+            )
+            : grounded ? 0.14 : 0.32;
+          elbow.rotation.x = THREE.MathUtils.lerp(elbow.rotation.x, -elbowTarget, alpha);
+          wrist.rotation.x = THREE.MathUtils.lerp(
+            wrist.rotation.x,
+            gaitActive ? -elbowTarget * 0.12 + Math.sin(phase - 0.2) * 0.04 : 0,
+            alpha,
+          );
+        });
+        kemejaLegs.forEach(({ hip, upper, knee, ankle, side }) => {
+          const legWave = -side * wave;
+          const jumpAmount = grounded ? 0 : 1;
+          const airbornePulse = gaitActive ? Math.pow(Math.max(0, Math.sin(phase * 2)), 3) * 0.06 : 0;
+          const legLift = gaitActive ? Math.max(0, legWave) * 0.16 + airbornePulse : 0;
+          hip.position.y = KEMEJA_CONFIG.hipY + legLift;
+          hip.rotation.x = THREE.MathUtils.lerp(
+            hip.rotation.x,
+            legWave * 0.68 * kemejaRunBlend * runScale,
+            alpha,
+          );
+          upper.rotation.x = THREE.MathUtils.lerp(
+            upper.rotation.x,
+            jumpAmount * KEMEJA_CONFIG.jumpKneeBend * 0.2,
+            alpha,
+          );
+          const kneeTarget = !grounded
+            ? KEMEJA_CONFIG.jumpKneeBend
+            : animationState.landingBend * KEMEJA_CONFIG.landingKneeBend
+              + (gaitActive ? Math.max(0, -legWave) * KEMEJA_CONFIG.kneeBend : 0);
+          knee.rotation.x = THREE.MathUtils.lerp(
+            knee.rotation.x,
+            THREE.MathUtils.clamp(kneeTarget, 0, 1.74),
+            alpha,
+          );
+          ankle.rotation.x = THREE.MathUtils.lerp(
+            ankle.rotation.x,
+            gaitActive ? -hip.rotation.x - knee.rotation.x * 0.18 + legWave * 0.08 : -hip.rotation.x * 0.2,
+            alpha,
+          );
+        });
+      }
+      if (selectedAvatarId === "chibi-halus" && chibiBuilt && chibiLayer && chibiSkeleton && chibiBodyMesh) {
+        const frozenPhase = CHIBI_DEBUG_FREEZE_PHASE;
+        const cycle = frozenPhase === null
+          ? ((animationState.phase / (Math.PI * 2)) % 1 + 1) % 1
+          : ((frozenPhase % 1) + 1) % 1;
+        const gaitActive = isRunning || frozenPhase !== null;
+        const alpha = 1 - Math.exp(-dt / CHIBI_CONFIG.transitionSeconds);
+        const runTarget = gaitActive ? 1 : 0;
+        const runScale = input.has("shift") ? 1.08 : 1;
+        chibiRunBlend = THREE.MathUtils.lerp(chibiRunBlend, runTarget, alpha);
+        chibiBreath = THREE.MathUtils.lerp(
+          chibiBreath,
+          grounded && !isRunning ? Math.sin(now * 0.0017) * CHIBI_CONFIG.idleBreath : 0,
+          alpha,
+        );
+
+        const poses = CHIBI_CONFIG.runKeyframes;
+        const afterIndex = poses.findIndex((pose) => pose.phase >= cycle);
+        const beforeIndex = afterIndex < 0 ? poses.length - 1 : (afterIndex + poses.length - 1) % poses.length;
+        const poseBefore = poses[beforeIndex]!;
+        const poseAfter = afterIndex < 0 ? poses[0]! : poses[afterIndex]!;
+        const beforePhase = poseBefore.phase - (afterIndex === 0 ? 1 : 0);
+        const afterPhase = poseAfter.phase + (afterIndex < 0 ? 1 : 0);
+        const poseT = THREE.MathUtils.clamp((cycle - beforePhase) / (afterPhase - beforePhase), 0, 1);
+        const easedPoseT = poseT * poseT * (3 - 2 * poseT);
+        const angleAt = (name: "shoulder" | "elbow" | "hip" | "knee", sideIndex: 0 | 1) => (
+          THREE.MathUtils.lerp(poseBefore[name][sideIndex], poseAfter[name][sideIndex], easedPoseT) * Math.PI / 180
+        );
+        const heightAt = THREE.MathUtils.lerp(poseBefore.height, poseAfter.height, easedPoseT);
+        const jumpAmount = grounded ? 0 : 1;
+        const lift = gaitActive ? heightAt * chibiRunBlend : 0;
+        const idleShift = grounded && !isRunning ? Math.sin(now * 0.0011) * 0.008 : 0;
+        const pelvisBone = chibiBones.pelvis!;
+        pelvisBone.position.y = 0.8 + chibiBreath + idleShift + lift + jumpAmount * 0.045;
+        const spine1Bone = chibiBones.spine1!;
+        spine1Bone.rotation.x = gaitActive ? CHIBI_CONFIG.bodyLean * chibiRunBlend : chibiBreath * 0.2;
+        const spine2Bone = chibiBones.spine2!;
+        spine2Bone.rotation.y = gaitActive ? Math.sin(cycle * Math.PI * 2) * RUN_CONFIG.torsoTwist * chibiRunBlend : idleShift;
+        const headBone = chibiBones.head!;
+        headBone.rotation.x = -spine1Bone.rotation.x + Math.sin(now * 0.0013) * 0.006;
+        headBone.rotation.y = -spine2Bone.rotation.y * 0.45;
+
+        [-1, 1].forEach((side, sideIndex) => {
+          const index = sideIndex as 0 | 1;
+          const prefix = side < 0 ? "left" : "right";
+          const clavicle = chibiBones[`${prefix}Clavicle` as ChibiBoneName]!;
+          const upperArm = chibiBones[`${prefix}UpperArm` as ChibiBoneName]!;
+          const forearm = chibiBones[`${prefix}Forearm` as ChibiBoneName]!;
+          const wrist = chibiBones[`${prefix}Hand` as ChibiBoneName]!;
+          const armAngle = gaitActive
+            ? angleAt("shoulder", index) * chibiRunBlend * runScale
+            : 7 * Math.PI / 180;
+          clavicle.rotation.z = side * CHIBI_CONFIG.shoulderAbduction;
+          upperArm.rotation.x = -armAngle - jumpAmount * 0.72;
+          const elbowAngle = gaitActive ? angleAt("elbow", index) * chibiRunBlend : 12 * Math.PI / 180;
+          forearm.rotation.x = -elbowAngle;
+          wrist.rotation.x = gaitActive
+            ? Math.sin((cycle - CHIBI_CONFIG.forearmLagCycles) * Math.PI * 2) * 0.045
+            : 0.025;
+
+          const thigh = chibiBones[`${prefix}Thigh` as ChibiBoneName]!;
+          const shin = chibiBones[`${prefix}Shin` as ChibiBoneName]!;
+          const foot = chibiBones[`${prefix}Foot` as ChibiBoneName]!;
+          const toe = chibiBones[`${prefix}Toe` as ChibiBoneName]!;
+          const hipAngle = gaitActive ? angleAt("hip", index) * chibiRunBlend * runScale : 0;
+          const kneeAngle = gaitActive
+            ? angleAt("knee", index) * chibiRunBlend
+            : jumpAmount * 0.38;
+          thigh.rotation.x = -hipAngle + jumpAmount * 0.18;
+          shin.rotation.x = -kneeAngle;
+          foot.rotation.x = hipAngle + kneeAngle;
+          toe.rotation.x = -foot.rotation.x * 0.2;
+        });
+
+        const ponytailBone = chibiBones.ponytail!;
+        ponytailBone.rotation.x = THREE.MathUtils.clamp(
+          gaitActive ? Math.sin(cycle * Math.PI * 2 - 0.45) * CHIBI_CONFIG.hairSway : 0,
+          -0.05,
+          0.05,
+        );
+        if (chibiHairRoot) {
+          chibiHairRoot.rotation.x = THREE.MathUtils.lerp(
+            chibiHairRoot.rotation.x,
+            gaitActive ? -ponytailBone.rotation.x * 0.55 : 0,
+            1 - Math.exp(-8 * dt),
+          );
+        }
+
+        if (grounded && !isRunning) {
+          if (now >= chibiNextBlinkAt) {
+            chibiBlinkUntil = now + 130;
+            chibiNextBlinkAt = now + 3000 + Math.random() * 2000;
+          }
+          if (now >= chibiNextHappyAt) {
+            chibiHappyUntil = now + 1000;
+            chibiNextHappyAt = now + 8000 + Math.random() * 4000;
+          }
+        }
+        const nextFaceIndex = jumpAmount
+          ? 3
+          : now < chibiBlinkUntil
+            ? 1
+            : now < chibiHappyUntil
+              ? 2
+              : 0;
+        if (nextFaceIndex !== chibiFaceIndex && chibiFaceMaterial && chibiFaceTextures[nextFaceIndex]) {
+          chibiFaceIndex = nextFaceIndex;
+          chibiFaceMaterial.map = chibiFaceTextures[nextFaceIndex]!;
+        }
+        chibiLayer.updateMatrixWorld(true);
+      }
       if (selectedAvatarId === "roblox-slim" && robloxSlimBuilt && robloxSlimTorso && robloxSlimUpperTorso && robloxSlimHead) {
         const slimAlpha = 1 - Math.exp(-dt / ROBLOX_SLIM_CONFIG.transitionSeconds);
         const idleWave = Math.sin(now * 0.00125);
@@ -1936,6 +4016,7 @@ const NumatikWorldPage = () => {
     frameId = window.requestAnimationFrame(animate);
 
     return () => {
+      effectDisposed = true;
       window.cancelAnimationFrame(frameId);
       window.removeEventListener("resize", updateSize);
       window.removeEventListener("keydown", onKeyDown);
@@ -1952,6 +4033,7 @@ const NumatikWorldPage = () => {
       });
       resources.forEach((resource) => resource.dispose());
       textures.forEach((texture) => texture.dispose());
+      skeletons.forEach((skeleton) => skeleton.dispose());
       renderer.dispose();
       renderer.domElement.remove();
       keysRef.current.clear();
@@ -2088,6 +4170,32 @@ const NumatikWorldPage = () => {
         .world-avatar-gum{position:absolute;z-index:4;top:42px;left:40px;width:9px;height:9px;border-radius:50%;background:#F4A3C0}
         .world-avatar-title{margin:12px 0 4px;font:900 12px var(--font-display,'Orbitron'),sans-serif}
         .world-avatar-description{min-height:30px;color:#8195ad;font-size:11px;font-weight:600;line-height:1.4}
+        .world-avatar-loading{position:absolute;z-index:50;inset:0;display:grid;place-items:center;background:rgba(20,37,54,.36);color:#fff;font:900 12px var(--font-display,'Orbitron'),sans-serif;text-shadow:0 2px 6px rgba(0,0,0,.4);pointer-events:none}
+        .world-avatar-loading span{padding:12px 16px;border:1px solid rgba(255,255,255,.7);border-radius:12px;background:rgba(31,67,86,.88)}
+        .world-avatar-beta{display:inline-block;margin-left:7px;padding:3px 6px;border-radius:999px;background:#fff0c7;color:#8a5a00;font:800 8px var(--font-display,'Orbitron'),sans-serif;vertical-align:middle}
+        .world-avatar-card[data-avatar="cewek-halus"] .world-avatar-head{left:22px;width:40px;height:42px;border-radius:50% 50% 46% 46%;background:#F3D2BC}
+        .world-avatar-card[data-avatar="cewek-halus"] .world-avatar-head::after{position:absolute;content:"";left:8px;top:17px;width:6px;height:7px;border-radius:50%;background:#51372C;box-shadow:16px 0 #51372C,7px 12px 0 -2px #D97991}
+        .world-avatar-card[data-avatar="cewek-halus"] .world-avatar-hair{top:-1px;left:16px;width:53px;height:30px;border-radius:22px 22px 12px 10px;background:#2B1B17;box-shadow:24px 17px 0 -9px #2B1B17}
+        .world-avatar-card[data-avatar="cewek-halus"] .world-avatar-doll::after{position:absolute;z-index:1;content:"";top:21px;left:58px;width:13px;height:43px;border-radius:10px 12px 14px 14px;background:#2B1B17;transform:rotate(-12deg)}
+        .world-avatar-card[data-avatar="cewek-halus"] .world-avatar-shirt{top:48px;left:20px;width:44px;height:38px;border-radius:10px;background:#F5F5F5}
+        .world-avatar-card[data-avatar="cewek-halus"] .world-avatar-vest{z-index:2;top:49px;left:14px;width:13px;height:39px;border-radius:7px 3px 5px 8px;background:#5B7FA6;box-shadow:43px 0 #5B7FA6}
+        .world-avatar-card[data-avatar="cewek-halus"] .world-avatar-legs{top:86px;left:19px;width:46px;height:39px;background:#3E5C86}
+        .world-avatar-card[data-avatar="cewek-halus"] .world-avatar-shoes{top:119px;left:14px;background:#F2F2F2;box-shadow:30px 0 #F2F2F2}
+        .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-head{left:18px;width:48px;height:46px;border-radius:12px;background:#D8A982}
+        .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-head::before{position:absolute;content:"";left:5px;top:17px;width:33px;height:8px;border:2px solid #111820;border-radius:5px;background:#2A4D9B;box-shadow:17px 0 0 -2px #2A4D9B}
+        .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-hair{top:-1px;left:14px;width:56px;height:31px;border-radius:20px 20px 12px 12px;background:#D9A441;box-shadow:-5px 25px 0 -3px #B9822C,8px 26px 0 -3px #D9A441,28px 25px 0 -3px #B9822C}
+        .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-shirt{top:49px;left:15px;width:54px;height:43px;border-radius:9px;background:#8E949B}
+        .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-vest{z-index:2;top:51px;left:16px;width:23px;height:38px;border-radius:4px;background:repeating-linear-gradient(90deg,#B3262E 0 8px,#1A1A1A 8px 11px,#EDEDED 11px 13px);box-shadow:27px 0 #B3262E}
+        .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-legs{top:88px;left:18px;width:48px;height:27px;border-radius:5px;background:#4F78B0}
+        .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-shoes{top:118px;left:14px;background:#E6D8C3;box-shadow:30px 0 #E6D8C3;border-bottom:3px solid #B83228}
+        .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-head{left:16px;top:6px;width:58px;height:58px;border-radius:48% 48% 46% 46%;background:#D8A982;box-shadow:inset 0 -3px 0 rgba(132,75,48,.12)}
+        .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-head::before{position:absolute;content:"";left:12px;top:26px;width:9px;height:12px;border-radius:50%;background:#382B35;box-shadow:24px 0 #382B35,3px -3px 0 -2px #fff,27px -3px 0 -2px #fff}
+        .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-head::after{position:absolute;content:"";left:25px;top:41px;width:10px;height:6px;border-bottom:2px solid #382B35;border-radius:0 0 50% 50%;box-shadow:-15px -1px 0 -2px #EE9CA7,15px -1px 0 -2px #EE9CA7}
+        .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-hair{z-index:2;top:3px;left:13px;width:63px;height:32px;border-radius:30px 30px 13px 13px;background:#5A3A24;box-shadow:-4px 24px 0 -4px #5A3A24,12px 25px 0 -3px #382316,37px 24px 0 -4px #5A3A24}
+        .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-shirt{top:61px;left:17px;width:56px;height:41px;border-radius:17px 17px 13px 13px;background:#C9B6F2}
+        .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-vest{z-index:2;top:81px;left:31px;width:28px;height:10px;border-radius:4px 4px 8px 8px;background:#B39DE3}
+        .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-legs{top:98px;left:23px;width:45px;height:27px;border-radius:8px 8px 11px 11px;background:#E9D9BE}
+        .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-shoes{top:119px;left:15px;width:27px;height:15px;border-radius:10px 10px 6px 6px;background:#F2F2F2;box-shadow:31px 0 #F2F2F2;border-bottom:3px solid #D8D8D8}
         .world-avatar-pick{min-height:43px;margin-top:12px;border:0;border-radius:13px;background:linear-gradient(135deg,#29cda9,#16a991);color:#fff;font:900 11px var(--font-display,'Orbitron'),sans-serif;cursor:pointer}
         .world-avatar-pick:focus-visible,.world-avatar-change:focus-visible{outline:3px solid #ffbc58;outline-offset:3px}
         .world-avatar-change{display:flex;justify-content:center;align-items:center;width:100%;min-height:44px;margin-top:14px;border:2px solid #cce4f4;border-radius:14px;background:#f5fbff;color:#456b94;font:800 10px var(--font-display,'Orbitron'),sans-serif;cursor:pointer}
@@ -2105,6 +4213,11 @@ const NumatikWorldPage = () => {
         @media(prefers-reduced-motion:reduce){.world-answer:hover{transform:none}}
       `}</style>
       <div ref={hostRef} className="absolute inset-0">
+        {gameStarted && avatarLoading && (
+          <div className="world-avatar-loading" role="status" aria-live="polite">
+            <span>MEMUAT AVATAR {avatarBuildProgress}%</span>
+          </div>
+        )}
         {!gameStarted && (
           <section className="world-start-screen" aria-labelledby="world-start-title">
             <div className="world-start-content">
@@ -2122,7 +4235,7 @@ const NumatikWorldPage = () => {
               {avatarPickerOpen ? (
                 <section aria-labelledby="world-avatar-title">
                   <div className="world-avatar-grid">
-                    {AVATAR_PRESETS.map((preset) => (
+                    {AVATAR_PRESETS.filter((preset) => SHOW_TEST_AVATARS || preset.id !== "cewek-halus").map((preset) => (
                       <article
                         key={preset.id}
                         className="world-avatar-card"
@@ -2141,7 +4254,9 @@ const NumatikWorldPage = () => {
                             {preset.id === "kacamata-hitam" && <><span className="world-avatar-glasses" /><span className="world-avatar-gum" /></>}
                           </div>
                         </div>
-                        <h2 className="world-avatar-title" id={preset.id === "anak-cokelat" ? "world-avatar-title" : undefined}>{preset.name}</h2>
+                        <h2 className="world-avatar-title" id={preset.id === "anak-cokelat" ? "world-avatar-title" : undefined}>
+                          {preset.name}{preset.id === "cewek-halus" && <span className="world-avatar-beta">Uji</span>}
+                        </h2>
                         <span className="world-avatar-description">{preset.description}</span>
                         <button className="world-avatar-pick" type="button" aria-pressed={selectedAvatarId === preset.id} onClick={() => selectAvatar(preset.id)}>
                           {selectedAvatarId === preset.id ? "PILIH AVATAR INI" : "PILIH"}
