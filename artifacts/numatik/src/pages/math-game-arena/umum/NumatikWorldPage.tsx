@@ -236,6 +236,7 @@ const KEMEJA_CONFIG = {
 
 const KEMEJA_DEBUG_FREEZE_PHASE: number | null = null;
 const CHIBI_DEBUG_FREEZE_PHASE: number | null = null;
+const KUCING_DEBUG_FREEZE_PHASE: number | null = null;
 // Pakaian dan sepatu berbagi satu SkinnedMesh dengan tubuh; hide* akan menyembunyikan permukaan gabungan.
 const DEBUG_AVATAR = {
   enabled: false,
@@ -317,6 +318,43 @@ const CHIBI_CONFIG = {
   ],
 } as const;
 
+const KUCING_CONFIG = {
+  ...CHIBI_CONFIG,
+  colors: {
+    skin: "#D8A982",
+    blush: "#EE9CA7",
+    hair: "#2B1B17",
+    hairShadow: "#17110F",
+    shirt: "#EDEDED",
+    pants: "#E6E6E6",
+    shoes: "#F2EEE6",
+    sole: "#CFCFCF",
+    collar: "#D5D5D5",
+    seams: "#C8C8C8",
+    headset: "#2A2A2E",
+    earInner: "#F4A3C0",
+    faceInk: "#382B35",
+    eyeHighlight: "#FFFFFF",
+  },
+  headHeight: 0.76,
+  headWidth: 0.6,
+  headDepth: 0.54,
+  neckLength: 0.18,
+  neckWidth: 0.3,
+  handWidth: 0.145,
+  wristWidth: 0.12,
+  handLength: 0.19,
+  hairSway: 0.035,
+  hairChainDamping: 7.5,
+  earSway: 0.025,
+  shirtRoughness: 0.7,
+  pantsRoughness: 0.7,
+  shoeRoughness: 0.7,
+  microphone: false,
+  totalHeight: 2.1,
+  runKeyframes: CHIBI_CONFIG.runKeyframes,
+} as const;
+
 const CHIBI_CAPSULES: readonly CewekHalusCapsule[] = [
   { group: "body", start: [0, 0.72, 0], end: [0, 0.91, 0], startRadius: [0.21, 0.18], endRadius: [0.22, 0.18], owner: "pelvis", proximal: "pelvis", distal: "spine1" },
   { group: "body", start: [0, 0.88, 0], end: [0, 1.12, 0], startRadius: [0.2, 0.17], endRadius: [0.19, 0.16], owner: "spine1", proximal: "pelvis", distal: "spine2" },
@@ -369,7 +407,7 @@ type AvatarPreset = {
   description: string;
   colors: AvatarColors;
   hairstyle: AvatarHairStyle;
-  clothing: "hoodie-vest" | "shirt-suspenders" | "streetwear-crop" | "organic-pastel" | "roblox-slim" | "cewek-halus" | "cowok-kemeja" | "chibi-halus";
+  clothing: "hoodie-vest" | "shirt-suspenders" | "streetwear-crop" | "organic-pastel" | "roblox-slim" | "cewek-halus" | "cowok-kemeja" | "chibi-halus" | "chibi-kucing";
   accessories: readonly string[];
   perutTerbuka?: boolean;
   organicPalette?: OrganicAvatarPalette;
@@ -481,6 +519,22 @@ const AVATAR_PRESETS: readonly AvatarPreset[] = [
     hairstyle: "short",
     clothing: "chibi-halus",
     accessories: [],
+  },
+  {
+    id: "chibi-kucing",
+    name: "Si Kucing",
+    description: "Chibi berambut panjang dengan headset telinga kucing",
+    colors: {
+      skin: KUCING_CONFIG.colors.skin,
+      hair: KUCING_CONFIG.colors.hair,
+      hoodie: KUCING_CONFIG.colors.shirt,
+      vest: KUCING_CONFIG.colors.collar,
+      pants: KUCING_CONFIG.colors.pants,
+      shoes: KUCING_CONFIG.colors.shoes,
+    },
+    hairstyle: "long",
+    clothing: "chibi-kucing",
+    accessories: ["headset-kucing"],
   },
 ];
 
@@ -1088,6 +1142,25 @@ const NumatikWorldPage = () => {
     let chibiBreath = 0;
     let chibiFloorOffset = 0;
     let chibiElapsedMs = 0;
+    const kucingLayers: THREE.Group[] = [];
+    let kucingBuilt = false;
+    let kucingLayer: THREE.Group | null = null;
+    let kucingSkeleton: THREE.Skeleton | null = null;
+    let kucingBones: Partial<Record<ChibiBoneName, THREE.Bone>> = {};
+    let kucingHairBones: THREE.Bone[] = [];
+    let kucingEarPivots: THREE.Group[] = [];
+    let kucingBodyMesh: THREE.SkinnedMesh | null = null;
+    let kucingFaceMaterial: THREE.MeshStandardMaterial | null = null;
+    let kucingFaceTextures: THREE.CanvasTexture[] = [];
+    let kucingFaceIndex = 0;
+    let kucingNextBlinkAt = 0;
+    let kucingBlinkUntil = 0;
+    let kucingNextHappyAt = 0;
+    let kucingHappyUntil = 0;
+    let kucingRunBlend = 0;
+    let kucingBreath = 0;
+    let kucingFloorOffset = 0;
+    let kucingElapsedMs = 0;
 
     const buildBlackAvatar = () => {
       if (blackAvatarBuilt) return;
@@ -2611,6 +2684,476 @@ const NumatikWorldPage = () => {
       });
     };
 
+    const buildKucingAvatar = async (onProgress?: (progress: number) => void, shouldCancel?: () => boolean) => {
+      if (kucingBuilt) return;
+      const buildStartedAt = performance.now();
+      const layer = new THREE.Group();
+      layer.name = "chibi-kucing-layer";
+      avatarRig.add(layer);
+      kucingLayer = layer;
+      kucingLayers.push(layer);
+
+      const bones: THREE.Bone[] = [];
+      const boneMap: Partial<Record<ChibiBoneName, THREE.Bone>> = {};
+      const makeBone = (
+        name: ChibiBoneName,
+        parent: THREE.Object3D,
+        position: [number, number, number],
+      ) => {
+        const bone = new THREE.Bone();
+        bone.name = name;
+        bone.position.set(...position);
+        parent.add(bone);
+        bones.push(bone);
+        boneMap[name] = bone;
+        return bone;
+      };
+      const pelvis = makeBone("pelvis", layer, [0, 0.8, 0]);
+      const spine1 = makeBone("spine1", pelvis, [0, 0.12, 0]);
+      const spine2 = makeBone("spine2", spine1, [0, 0.2, 0]);
+      const neck = makeBone("neck", spine2, [0, 0.17, 0]);
+      const head = makeBone("head", neck, [0, 0.31, 0]);
+      const hairBack1 = makeBone("ponytail", head, [0, 0.23, -0.035]);
+      [-1, 1].forEach((side) => {
+        const prefix = side < 0 ? "left" : "right";
+        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.13, 0.21, 0]);
+        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.09, -0.04, 0]);
+        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.04, -0.26, 0]);
+        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.02, -0.23, 0]);
+        const thigh = makeBone(`${prefix}Thigh` as ChibiBoneName, pelvis, [side * 0.16, 0.03, 0]);
+        const shin = makeBone(`${prefix}Shin` as ChibiBoneName, thigh, [side * 0.02, -0.33, 0]);
+        const foot = makeBone(`${prefix}Foot` as ChibiBoneName, shin, [0, -0.32, 0]);
+        makeBone(`${prefix}Toe` as ChibiBoneName, foot, [0, -0.02, 0.08]);
+      });
+      const hairBackBones = [hairBack1];
+      let hairParent = hairBack1;
+      for (let index = 1; index < 4; index += 1) {
+        const bone = new THREE.Bone();
+        bone.name = `hairBack${index + 1}`;
+        bone.position.set(0, -0.19, -0.025);
+        hairParent.add(bone);
+        bones.push(bone);
+        hairBackBones.push(bone);
+        hairParent = bone;
+      }
+
+      const palette = KUCING_CONFIG.colors;
+      const colorValues = Object.fromEntries(
+        Object.entries(palette).map(([name, value]) => [name, new THREE.Color(value)]),
+      ) as Record<keyof typeof palette, THREE.Color>;
+      const smooth = (value: number) => {
+        const t = THREE.MathUtils.clamp(value, 0, 1);
+        return t * t * (3 - 2 * t);
+      };
+      const band = (value: number, start: number, end: number, feather = 0.014) => (
+        smooth((value - start) / feather) * (1 - smooth((value - end) / feather))
+      );
+      const surfaceColorAt = (point: readonly [number, number, number], target: THREE.Color) => {
+        const [x, y] = point;
+        const absX = Math.abs(x);
+        target.copy(colorValues.skin);
+        const pants = band(y, 0.15, 0.94) * (1 - smooth((absX - 0.29) / 0.06));
+        const shoes = (1 - smooth((y - 0.14) / 0.06)) * smooth((absX - 0.1) / 0.05);
+        const sole = (1 - smooth((y - 0.045) / 0.025)) * smooth((absX - 0.1) / 0.05);
+        if (pants > 0) target.lerp(colorValues.pants, pants);
+        if (shoes > 0) target.lerp(colorValues.shoes, shoes);
+        if (sole > 0) target.lerp(colorValues.sole, sole);
+        const shirt = band(y, 0.96, 1.4) * (1 - smooth((absX - 0.18) / 0.055));
+        const sleeves = band(y, 0.83, 1.38) * smooth((absX - 0.17) / 0.07);
+        if (shirt > 0) target.lerp(colorValues.shirt, shirt);
+        if (sleeves > 0) target.lerp(colorValues.shirt, sleeves);
+        const collar = shirt * band(y, 1.31, 1.37) * (1 - smooth((absX - 0.12) / 0.025));
+        const hem = pants * band(y, 0.19, 0.215);
+        const seam = pants * smooth((Math.abs(absX - 0.155) - 0.006) / 0.012);
+        if (collar > 0) target.lerp(colorValues.collar, collar * 0.6);
+        if (hem > 0) target.lerp(colorValues.seams, hem * 0.45);
+        if (seam > 0) target.lerp(colorValues.seams, seam * 0.12);
+      };
+      const uvAt = (point: readonly [number, number, number], target: THREE.Vector2) => {
+        const [x, y, z] = point;
+        if (y >= CHIBI_CONFIG.headBottomY && y <= CHIBI_CONFIG.headTopY && z >= CHIBI_CONFIG.faceForwardZ) {
+          target.set(
+            THREE.MathUtils.clamp(x / KUCING_CONFIG.headWidth + 0.5, 0, 1),
+            THREE.MathUtils.clamp((y - CHIBI_CONFIG.headBottomY) / KUCING_CONFIG.headHeight, 0, 1),
+          );
+        } else {
+          target.set(0.002, 0.002);
+        }
+      };
+      const kucingCapsules = CHIBI_CAPSULES.map((capsule): CewekHalusCapsule => (
+        capsule.group === "body" && capsule.owner === "neck"
+          ? {
+            ...capsule,
+            start: [0, 1.3, 0],
+            end: [0, 1.52, 0],
+            startRadius: [0.15, 0.12],
+            endRadius: [0.13, 0.11],
+          }
+          : capsule.group.endsWith("Arm") && capsule.owner.endsWith("Hand")
+            ? {
+              ...capsule,
+              end: [capsule.end[0], 0.7, capsule.end[2]],
+              startRadius: [0.0725, 0.055],
+              endRadius: [0.0725, 0.055],
+            }
+          : capsule
+      ));
+      [-1, 1].forEach((side) => {
+        const prefix = side < 0 ? "left" : "right";
+        kucingCapsules.push({
+          group: side < 0 ? "leftArm" : "rightArm",
+          start: [side * 0.3, 0.76, 0.035],
+          end: [side * 0.35, 0.71, 0.075],
+          startRadius: [0.035, 0.035],
+          endRadius: [0.03, 0.03],
+          owner: `${prefix}Hand`,
+          proximal: `${prefix}Hand`,
+          distal: `${prefix}Hand`,
+        });
+      });
+      const boneIndices = new Map(CEWEK_HALUS_BONE_NAMES.map((name, index) => [name, index]));
+      const result = await buildCewekHalusGeometry({
+        skinColor: palette.skin,
+        gridStep: KUCING_CONFIG.gridStep,
+        bounds: KUCING_CONFIG.bounds,
+        bodyBlend: KUCING_CONFIG.bodyBlend,
+        shoulderBlend: KUCING_CONFIG.shoulderBlend,
+        elbowBlend: KUCING_CONFIG.elbowBlend,
+        wristBlend: KUCING_CONFIG.wristBlend,
+        hipBlend: KUCING_CONFIG.hipBlend,
+        kneeBlend: KUCING_CONFIG.kneeBlend,
+        ankleBlend: KUCING_CONFIG.ankleBlend,
+        blendBand: KUCING_CONFIG.blendBand,
+        blendFraction: KUCING_CONFIG.blendFraction,
+        hipWeightFraction: KUCING_CONFIG.hipWeightFraction,
+        groundOffset: 0,
+        shoulderBindEndY: KUCING_CONFIG.shoulderBindEndY,
+        capsules: kucingCapsules,
+        armWeightZone: KUCING_CONFIG.armWeightZone,
+        legWeightZone: KUCING_CONFIG.legWeightZone,
+        shoulderBlendRamp: KUCING_CONFIG.shoulderBlendRamp,
+        hipBlendRamp: KUCING_CONFIG.hipBlendRamp,
+        minimumThighGap: KUCING_CONFIG.minimumThighGap,
+        colorAt: surfaceColorAt,
+        uvAt,
+      }, boneIndices, onProgress, shouldCancel);
+      if (!result || shouldCancel?.()) {
+        layer.clear();
+        layer.removeFromParent();
+        kucingLayers.splice(kucingLayers.indexOf(layer), 1);
+        kucingLayer = null;
+        return;
+      }
+      const skinWeights = result.geometry.getAttribute("skinWeight");
+      const skinIndices = result.geometry.getAttribute("skinIndex");
+      let invalidWeightVertices = 0;
+      for (let vertex = 0; vertex < result.vertexCount; vertex += 1) {
+        let sum = 0;
+        let valid = true;
+        for (let influence = 0; influence < 4; influence += 1) {
+          const weight = influence === 0 ? skinWeights.getX(vertex)
+            : influence === 1 ? skinWeights.getY(vertex)
+              : influence === 2 ? skinWeights.getZ(vertex)
+                : skinWeights.getW(vertex);
+          const boneIndex = skinIndices.getComponent(vertex, influence);
+          sum += weight;
+          valid &&= Number.isFinite(weight) && boneIndex >= 0 && boneIndex < bones.length;
+        }
+        if (!valid || Math.abs(sum - 1) > 1e-4) invalidWeightVertices += 1;
+      }
+      if (invalidWeightVertices > 0) {
+        result.geometry.dispose();
+        layer.clear();
+        layer.removeFromParent();
+        kucingLayers.splice(kucingLayers.indexOf(layer), 1);
+        kucingLayer = null;
+        throw new Error(`Si Kucing memiliki ${invalidWeightVertices} vertex dengan skin weight tidak valid.`);
+      }
+
+      const makeFaceTexture = (expression: "open" | "blink" | "happy" | "jump") => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 512;
+        canvas.height = 512;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Canvas 2D tidak tersedia untuk wajah Si Kucing.");
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(0, 0, 512, 512);
+        context.strokeStyle = palette.faceInk;
+        context.fillStyle = palette.faceInk;
+        context.lineCap = "round";
+        [-1, 1].forEach((side) => {
+          const eyeX = 256 + side * 111;
+          context.lineWidth = 8;
+          context.beginPath();
+          context.moveTo(eyeX - 30, 218);
+          context.quadraticCurveTo(eyeX, 202, eyeX + 30, 218);
+          context.stroke();
+          if (expression === "happy") {
+            context.lineWidth = 18;
+            context.beginPath();
+            context.moveTo(eyeX - 35, 285);
+            context.quadraticCurveTo(eyeX, 245, eyeX + 35, 285);
+            context.stroke();
+          } else if (expression === "blink") {
+            context.lineWidth = 17;
+            context.beginPath();
+            context.moveTo(eyeX - 31, 278);
+            context.quadraticCurveTo(eyeX, 298, eyeX + 31, 278);
+            context.stroke();
+          } else {
+            context.beginPath();
+            context.ellipse(eyeX, 278, 34, 43, 0, 0, Math.PI * 2);
+            context.fill();
+            context.fillStyle = palette.eyeHighlight;
+            context.beginPath();
+            context.arc(eyeX - 11, 263, 11, 0, Math.PI * 2);
+            context.arc(eyeX + 12, 290, 5, 0, Math.PI * 2);
+            context.fill();
+            context.fillStyle = palette.faceInk;
+          }
+        });
+        context.fillStyle = "rgba(238,156,167,0.82)";
+        [102, 410].forEach((x) => {
+          context.beginPath();
+          context.ellipse(x, 338, 37, 19, 0, 0, Math.PI * 2);
+          context.fill();
+        });
+        context.strokeStyle = palette.faceInk;
+        context.lineWidth = 14;
+        context.beginPath();
+        if (expression === "jump") {
+          context.ellipse(256, 391, 24, 31, 0, 0, Math.PI * 2);
+          context.fillStyle = "#6F3344";
+          context.fill();
+          context.stroke();
+        } else {
+          context.moveTo(216, 374);
+          context.bezierCurveTo(226, 424, 286, 424, 296, 374);
+          context.stroke();
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.needsUpdate = true;
+        textures.add(texture);
+        return texture;
+      };
+      kucingFaceTextures = [
+        makeFaceTexture("open"),
+        makeFaceTexture("blink"),
+        makeFaceTexture("happy"),
+        makeFaceTexture("jump"),
+      ];
+      const bodyMaterial = new THREE.MeshStandardMaterial({
+        color: "#FFFFFF",
+        map: kucingFaceTextures[0],
+        roughness: KUCING_CONFIG.shirtRoughness,
+        metalness: 0,
+        vertexColors: true,
+        transparent: false,
+        side: THREE.DoubleSide,
+      });
+      resources.add(bodyMaterial);
+      resources.add(result.geometry);
+      const body = new THREE.SkinnedMesh(result.geometry, bodyMaterial);
+      body.name = "chibi-kucing-body";
+      body.castShadow = true;
+      body.receiveShadow = false;
+      body.visible = !DEBUG_AVATAR.enabled
+        || !(DEBUG_AVATAR.hideBody || DEBUG_AVATAR.hideClothing || DEBUG_AVATAR.hideShoes);
+      bodyMaterial.wireframe = DEBUG_AVATAR.enabled && DEBUG_AVATAR.wireframe;
+      body.frustumCulled = false;
+      layer.add(body);
+      avatar.updateMatrixWorld(true);
+      const skeleton = new THREE.Skeleton(bones);
+      skeleton.calculateInverses();
+      body.bind(skeleton, body.matrixWorld);
+      skeletons.add(skeleton);
+      kucingSkeleton = skeleton;
+      kucingBones = boneMap;
+      kucingBodyMesh = body;
+      kucingFaceMaterial = bodyMaterial;
+
+      const hairGeometry = new THREE.SphereGeometry(1, 8, 6);
+      resources.add(hairGeometry);
+      const hairMaterial = makeMaterial(palette.hair, 0.55);
+      const hairShadowMaterial = makeMaterial(palette.hairShadow, 0.62);
+      const addHair = (
+        parent: THREE.Object3D,
+        position: [number, number, number],
+        scale: [number, number, number],
+        material: THREE.Material = hairMaterial,
+      ) => {
+        const mesh = new THREE.Mesh(hairGeometry, material);
+        mesh.position.set(...position);
+        mesh.scale.set(...scale);
+        mesh.castShadow = true;
+        mesh.receiveShadow = false;
+        mesh.visible = !DEBUG_AVATAR.enabled || !DEBUG_AVATAR.hideHair;
+        parent.add(mesh);
+        return mesh;
+      };
+      addHair(head, [0, 0.24, 0.025], [0.31, 0.19, 0.28], hairShadowMaterial);
+      addHair(head, [0, 0.29, 0.015], [0.3, 0.15, 0.27]);
+      for (let strand = 0; strand < 4; strand += 1) {
+        addHair(
+          head,
+          [-0.19 + strand * 0.125, 0.12 + (strand % 2) * 0.025, 0.225],
+          [0.1, 0.16, 0.075],
+          strand % 2 ? hairMaterial : hairShadowMaterial,
+        );
+      }
+      for (let segment = 0; segment < hairBackBones.length; segment += 1) {
+        const parent = hairBackBones[segment]!;
+        for (const side of [-1, 1]) {
+          addHair(
+            parent,
+            [side * (0.075 + segment * 0.005), -0.1, -0.065],
+            [0.095, 0.16, 0.09],
+            (segment + (side < 0 ? 1 : 0)) % 3 === 0 ? hairShadowMaterial : hairMaterial,
+          );
+        }
+      }
+      kucingHairBones = hairBackBones;
+
+      const accessoryMaterial = makeMaterial(palette.headset, 0.55);
+      const innerEarMaterial = makeMaterial(palette.earInner, 0.6);
+      const bandGeometry = new THREE.TorusGeometry(0.26, 0.027, 7, 24, Math.PI);
+      resources.add(bandGeometry);
+      const bandMesh = new THREE.Mesh(bandGeometry, accessoryMaterial);
+      bandMesh.position.set(0, 0.29, -0.055);
+      bandMesh.castShadow = true;
+      bandMesh.receiveShadow = false;
+      bandMesh.visible = !DEBUG_AVATAR.enabled || !DEBUG_AVATAR.hideHair;
+      head.add(bandMesh);
+      const earCupGeometry = new THREE.SphereGeometry(1, 10, 8);
+      resources.add(earCupGeometry);
+      [-1, 1].forEach((side) => {
+        const cup = new THREE.Mesh(earCupGeometry, accessoryMaterial);
+        cup.position.set(side * 0.275, 0.02, -0.035);
+        cup.scale.set(0.085, 0.105, 0.085);
+        cup.castShadow = true;
+        cup.receiveShadow = false;
+        cup.visible = !DEBUG_AVATAR.enabled || !DEBUG_AVATAR.hideHair;
+        head.add(cup);
+      });
+      const makeRoundedEar = (width: number, height: number, bevelSize: number) => {
+        const shape = new THREE.Shape();
+        shape.moveTo(-width * 0.5, 0);
+        shape.quadraticCurveTo(-width * 0.58, height * 0.25, -width * 0.31, height * 0.72);
+        shape.quadraticCurveTo(0, height * 1.12, width * 0.31, height * 0.72);
+        shape.quadraticCurveTo(width * 0.58, height * 0.25, width * 0.5, 0);
+        shape.quadraticCurveTo(0, -height * 0.08, -width * 0.5, 0);
+        return new THREE.ExtrudeGeometry(shape, {
+          depth: 0.025,
+          bevelEnabled: true,
+          bevelSegments: 1,
+          curveSegments: 4,
+          steps: 1,
+          bevelSize: Math.min(bevelSize, 0.006),
+          bevelThickness: 0.006,
+        });
+      };
+      const outerEarGeometry = makeRoundedEar(0.19, 0.27, 0.012);
+      const innerEarGeometry = makeRoundedEar(0.105, 0.16, 0.006);
+      resources.add(outerEarGeometry);
+      resources.add(innerEarGeometry);
+      kucingEarPivots = [];
+      [-1, 1].forEach((side) => {
+        const pivot = new THREE.Group();
+        pivot.position.set(side * 0.17, 0.37, -0.055);
+        pivot.rotation.z = side * -0.12;
+        head.add(pivot);
+        kucingEarPivots.push(pivot);
+        const outer = new THREE.Mesh(outerEarGeometry, accessoryMaterial);
+        outer.position.set(0, 0, 0);
+        outer.castShadow = true;
+        outer.receiveShadow = false;
+        outer.visible = !DEBUG_AVATAR.enabled || !DEBUG_AVATAR.hideHair;
+        pivot.add(outer);
+        const inner = new THREE.Mesh(innerEarGeometry, innerEarMaterial);
+        inner.position.set(0, 0.035, 0.032);
+        inner.castShadow = false;
+        inner.receiveShadow = false;
+        inner.visible = !DEBUG_AVATAR.enabled || !DEBUG_AVATAR.hideHair;
+        pivot.add(inner);
+      });
+      if (KUCING_CONFIG.microphone) {
+        const microphone = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.008, 0.01, 0.18, 8),
+          accessoryMaterial,
+        );
+        microphone.position.set(0.31, -0.1, 0.04);
+        microphone.rotation.z = -0.85;
+        head.add(microphone);
+        resources.add(microphone.geometry);
+      }
+      if (DEBUG_AVATAR.enabled && DEBUG_AVATAR.skeletonHelper) {
+        const helper = new THREE.SkeletonHelper(body);
+        helper.name = "chibi-kucing-debug-skeleton";
+        scene.add(helper);
+        resources.add(helper.geometry);
+        if (Array.isArray(helper.material)) helper.material.forEach((material) => resources.add(material));
+        else resources.add(helper.material);
+      }
+
+      avatar.updateMatrixWorld(true);
+      body.computeBoundingBox();
+      body.computeBoundingSphere();
+      const legacyBounds = new THREE.Box3();
+      legacyLayers.forEach((legacyLayer) => legacyBounds.union(new THREE.Box3().setFromObject(legacyLayer)));
+      const toRigSpace = avatarRig.matrixWorld.clone().invert();
+      const transformBounds = (bounds: THREE.Box3) => {
+        const transformed = new THREE.Box3();
+        const point = new THREE.Vector3();
+        for (let index = 0; index < 8; index += 1) {
+          point.set(
+            index & 1 ? bounds.max.x : bounds.min.x,
+            index & 2 ? bounds.max.y : bounds.min.y,
+            index & 4 ? bounds.max.z : bounds.min.z,
+          ).applyMatrix4(toRigSpace);
+          transformed.expandByPoint(point);
+        }
+        return transformed;
+      };
+      const oldRigBounds = transformBounds(legacyBounds);
+      const newRigBounds = transformBounds(new THREE.Box3().setFromObject(layer));
+      const oldHeight = oldRigBounds.max.y - oldRigBounds.min.y;
+      const newHeight = newRigBounds.max.y - newRigBounds.min.y;
+      if (!(oldHeight > 0 && newHeight > 0)) throw new Error("Ukuran bind pose Si Kucing tidak valid.");
+      layer.scale.y = oldHeight / newHeight;
+      kucingFloorOffset = oldRigBounds.min.y - newRigBounds.min.y * layer.scale.y;
+      layer.position.y = kucingFloorOffset;
+      avatar.updateMatrixWorld(true);
+      const minimumY = new THREE.Box3().setFromObject(layer).min.y;
+      const hairTriangles = 14 * (hairGeometry.index?.count ?? hairGeometry.getAttribute("position").count) / 3;
+      const headsetTriangles = (bandGeometry.index?.count ?? bandGeometry.getAttribute("position").count) / 3
+        + 2 * (earCupGeometry.index?.count ?? earCupGeometry.getAttribute("position").count) / 3
+        + 2 * (outerEarGeometry.index?.count ?? outerEarGeometry.getAttribute("position").count) / 3
+        + 2 * (innerEarGeometry.index?.count ?? innerEarGeometry.getAttribute("position").count) / 3;
+      const totalTriangles = result.triangleCount + hairTriangles + headsetTriangles;
+      kucingBuilt = true;
+      kucingNextBlinkAt = performance.now() + 3000 + Math.random() * 2000;
+      kucingNextHappyAt = performance.now() + 8000 + Math.random() * 4000;
+      kucingElapsedMs = performance.now() - buildStartedAt;
+      console.info("[chibi-kucing] mesh selesai", {
+        triangles: { tubuhPakaianWajah: result.triangleCount, rambut: hairTriangles, headset: headsetTriangles, total: totalTriangles },
+        vertices: result.vertexCount,
+        invalidWeightVertices,
+        bones: skeleton.bones.length,
+        tinggiTotal: Number(oldHeight.toFixed(3)),
+        rasioKepala: Number((KUCING_CONFIG.headHeight * layer.scale.y / oldHeight).toFixed(3)),
+        panjangLeher: Number(KUCING_CONFIG.neckLength.toFixed(3)),
+        lebarLeherVsKepala: Number((KUCING_CONFIG.neckWidth / KUCING_CONFIG.headWidth).toFixed(2)),
+        lebarTanganVsPergelangan: Number((KUCING_CONFIG.handWidth / KUCING_CONFIG.wristWidth).toFixed(2)),
+        offsetLantai: Number(kucingFloorOffset.toFixed(4)),
+        minimumY: Number(minimumY.toFixed(4)),
+        elapsedMs: Number(kucingElapsedMs.toFixed(1)),
+        gridElapsedMs: Number(result.elapsedMs.toFixed(1)),
+        minimumArmBodyGap: Number(result.minimumArmBodyGap.toFixed(3)),
+        minimumThighGap: Number(result.minimumThighGap.toFixed(3)),
+      });
+    };
+
     const buildCewekHalusAvatar = async (onProgress?: (progress: number) => void, shouldCancel?: () => boolean) => {
       if (cewekHalusBuilt) return;
       if (!cewekHalusLayer) {
@@ -3221,13 +3764,15 @@ const NumatikWorldPage = () => {
       ["cewek-halus", { layers: cewekHalusLayers, build: buildCewekHalusAvatar }],
       ["cowok-kemeja", { layers: kemejaLayers, build: buildKemejaAvatar }],
       ["chibi-halus", { layers: chibiLayers, build: buildChibiAvatar }],
+      ["chibi-kucing", { layers: kucingLayers, build: buildKucingAvatar }],
     ]);
 
     const applyAvatar = async (presetId: AvatarPresetId) => {
       const selectedLayer = avatarLayerRegistry.get(presetId);
       if (!selectedLayer) return;
       const needsBuildIndicator = (presetId === "cewek-halus" && !cewekHalusBuilt)
-        || (presetId === "chibi-halus" && !chibiBuilt);
+        || (presetId === "chibi-halus" && !chibiBuilt)
+        || (presetId === "chibi-kucing" && !kucingBuilt);
       if (needsBuildIndicator) {
         setAvatarLoading(true);
         setAvatarBuildProgress(0);
@@ -3246,6 +3791,10 @@ const NumatikWorldPage = () => {
           console.error("Avatar Si Imut gagal dibangun.", error);
           setAvatarLoading(false);
           return;
+        } else if (presetId === "chibi-kucing") {
+          console.error("Avatar Si Kucing gagal dibangun.", error);
+          setAvatarLoading(false);
+          return;
         } else {
           throw error;
         }
@@ -3259,6 +3808,9 @@ const NumatikWorldPage = () => {
       }
       if (presetId === "chibi-halus" && (!chibiBodyMesh || !chibiSkeleton || chibiSkeleton.bones.length !== 22)) {
         console.error("Avatar Si Imut tidak tampil: SkinnedMesh atau skeleton 22 tulang tidak terbentuk.");
+      }
+      if (presetId === "chibi-kucing" && (!kucingBodyMesh || !kucingSkeleton || kucingSkeleton.bones.length !== 25)) {
+        console.error("Avatar Si Kucing tidak tampil: SkinnedMesh atau skeleton 25 tulang tidak terbentuk.");
       }
       if (needsBuildIndicator) setAvatarLoading(false);
     };
@@ -3922,6 +4474,119 @@ const NumatikWorldPage = () => {
         chibiLayer.updateMatrixWorld(true);
         chibiDebugSkeletonHelper?.updateMatrixWorld(true);
       }
+      if (selectedAvatarId === "chibi-kucing" && kucingBuilt && kucingLayer && kucingSkeleton && kucingBodyMesh) {
+        const frozenPhase = KUCING_DEBUG_FREEZE_PHASE;
+        const cycle = frozenPhase === null
+          ? ((animationState.phase / (Math.PI * 2)) % 1 + 1) % 1
+          : ((frozenPhase % 1) + 1) % 1;
+        const gaitActive = isRunning || frozenPhase !== null;
+        const alpha = 1 - Math.exp(-dt / KUCING_CONFIG.transitionSeconds);
+        const runTarget = gaitActive ? 1 : 0;
+        const runScale = input.has("shift") ? 1.08 : 1;
+        kucingRunBlend = THREE.MathUtils.lerp(kucingRunBlend, runTarget, alpha);
+        kucingBreath = THREE.MathUtils.lerp(
+          kucingBreath,
+          grounded && !isRunning ? Math.sin(now * 0.0017) * KUCING_CONFIG.idleBreath : 0,
+          alpha,
+        );
+
+        const poses = KUCING_CONFIG.runKeyframes;
+        const afterIndex = poses.findIndex((pose) => pose.phase >= cycle);
+        const beforeIndex = afterIndex < 0 ? poses.length - 1 : (afterIndex + poses.length - 1) % poses.length;
+        const poseBefore = poses[beforeIndex]!;
+        const poseAfter = afterIndex < 0 ? poses[0]! : poses[afterIndex]!;
+        const beforePhase = poseBefore.phase - (afterIndex === 0 ? 1 : 0);
+        const afterPhase = poseAfter.phase + (afterIndex < 0 ? 1 : 0);
+        const poseT = THREE.MathUtils.clamp((cycle - beforePhase) / (afterPhase - beforePhase), 0, 1);
+        const easedPoseT = poseT * poseT * (3 - 2 * poseT);
+        const angleAt = (name: "shoulder" | "elbow" | "hip" | "knee", sideIndex: 0 | 1) => (
+          THREE.MathUtils.lerp(poseBefore[name][sideIndex], poseAfter[name][sideIndex], easedPoseT) * Math.PI / 180
+        );
+        const heightAt = THREE.MathUtils.lerp(poseBefore.height, poseAfter.height, easedPoseT);
+        const jumpAmount = grounded ? 0 : 1;
+        const lift = gaitActive ? heightAt * kucingRunBlend : 0;
+        const idleShift = grounded && !isRunning ? Math.sin(now * 0.0011) * 0.008 : 0;
+        const pelvisBone = kucingBones.pelvis!;
+        pelvisBone.position.y = 0.8 + kucingBreath + idleShift + lift + jumpAmount * 0.045;
+        const spine1Bone = kucingBones.spine1!;
+        spine1Bone.rotation.x = gaitActive ? KUCING_CONFIG.bodyLean * kucingRunBlend : kucingBreath * 0.2;
+        const spine2Bone = kucingBones.spine2!;
+        spine2Bone.rotation.y = gaitActive ? Math.sin(cycle * Math.PI * 2) * RUN_CONFIG.torsoTwist * kucingRunBlend : idleShift;
+        const headBone = kucingBones.head!;
+        headBone.rotation.x = -spine1Bone.rotation.x + Math.sin(now * 0.0013) * 0.006;
+        headBone.rotation.y = -spine2Bone.rotation.y * 0.45;
+
+        [-1, 1].forEach((side, sideIndex) => {
+          const index = sideIndex as 0 | 1;
+          const prefix = side < 0 ? "left" : "right";
+          const clavicle = kucingBones[`${prefix}Clavicle` as ChibiBoneName]!;
+          const upperArm = kucingBones[`${prefix}UpperArm` as ChibiBoneName]!;
+          const forearm = kucingBones[`${prefix}Forearm` as ChibiBoneName]!;
+          const wrist = kucingBones[`${prefix}Hand` as ChibiBoneName]!;
+          const armAngle = gaitActive
+            ? angleAt("shoulder", index) * kucingRunBlend * runScale
+            : 7 * Math.PI / 180;
+          clavicle.rotation.z = side * KUCING_CONFIG.shoulderAbduction;
+          upperArm.rotation.x = -armAngle - jumpAmount * 0.72;
+          const elbowAngle = gaitActive ? angleAt("elbow", index) * kucingRunBlend : 12 * Math.PI / 180;
+          forearm.rotation.x = -elbowAngle;
+          wrist.rotation.x = gaitActive
+            ? Math.sin((cycle - KUCING_CONFIG.forearmLagCycles) * Math.PI * 2) * 0.045
+            : 0.025;
+
+          const thigh = kucingBones[`${prefix}Thigh` as ChibiBoneName]!;
+          const shin = kucingBones[`${prefix}Shin` as ChibiBoneName]!;
+          const foot = kucingBones[`${prefix}Foot` as ChibiBoneName]!;
+          const toe = kucingBones[`${prefix}Toe` as ChibiBoneName]!;
+          const hipAngle = gaitActive ? angleAt("hip", index) * kucingRunBlend * runScale : 0;
+          const kneeAngle = gaitActive ? angleAt("knee", index) * kucingRunBlend : jumpAmount * 0.38;
+          thigh.rotation.x = -hipAngle + jumpAmount * 0.18;
+          shin.rotation.x = -kneeAngle;
+          foot.rotation.x = hipAngle + kneeAngle;
+          toe.rotation.x = -foot.rotation.x * 0.2;
+        });
+
+        kucingHairBones.forEach((bone, index) => {
+          const delay = 0.45 + index * 0.11;
+          const target = gaitActive
+            ? THREE.MathUtils.clamp(Math.sin(cycle * Math.PI * 2 - delay) * KUCING_CONFIG.hairSway, -0.07, 0.07)
+            : Math.sin(now * 0.001 + index * 0.4) * 0.006;
+          bone.rotation.x = THREE.MathUtils.lerp(
+            bone.rotation.x,
+            target,
+            1 - Math.exp(-KUCING_CONFIG.hairChainDamping * dt),
+          );
+        });
+        kucingEarPivots.forEach((pivot, index) => {
+          const side = index === 0 ? -1 : 1;
+          const target = gaitActive
+            ? Math.sin(cycle * Math.PI * 2 - 0.3) * KUCING_CONFIG.earSway * side
+            : 0;
+          pivot.rotation.z = THREE.MathUtils.lerp(pivot.rotation.z, side * -0.12 + target, 1 - Math.exp(-9 * dt));
+        });
+        if (grounded && !isRunning) {
+          if (now >= kucingNextBlinkAt) {
+            kucingBlinkUntil = now + 130;
+            kucingNextBlinkAt = now + 3000 + Math.random() * 2000;
+          }
+          if (now >= kucingNextHappyAt) {
+            kucingHappyUntil = now + 1000;
+            kucingNextHappyAt = now + 8000 + Math.random() * 4000;
+          }
+        }
+        const nextFaceIndex = jumpAmount
+          ? 3
+          : now < kucingBlinkUntil
+            ? 1
+            : now < kucingHappyUntil
+              ? 2
+              : 0;
+        if (nextFaceIndex !== kucingFaceIndex && kucingFaceMaterial && kucingFaceTextures[nextFaceIndex]) {
+          kucingFaceIndex = nextFaceIndex;
+          kucingFaceMaterial.map = kucingFaceTextures[nextFaceIndex]!;
+        }
+        kucingLayer.updateMatrixWorld(true);
+      }
       if (selectedAvatarId === "roblox-slim" && robloxSlimBuilt && robloxSlimTorso && robloxSlimUpperTorso && robloxSlimHead) {
         const slimAlpha = 1 - Math.exp(-dt / ROBLOX_SLIM_CONFIG.transitionSeconds);
         const idleWave = Math.sin(now * 0.00125);
@@ -4226,6 +4891,19 @@ const NumatikWorldPage = () => {
         .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-vest{z-index:2;top:81px;left:31px;width:28px;height:10px;border-radius:4px 4px 8px 8px;background:#B39DE3}
         .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-legs{top:98px;left:23px;width:45px;height:27px;border-radius:8px 8px 11px 11px;background:#E9D9BE}
         .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-shoes{top:119px;left:15px;width:27px;height:15px;border-radius:10px 10px 6px 6px;background:#F2F2F2;box-shadow:31px 0 #F2F2F2;border-bottom:3px solid #D8D8D8}
+        .world-avatar-card[data-avatar="chibi-kucing"] .world-avatar-head{left:16px;top:6px;width:58px;height:58px;border-radius:48% 48% 46% 46%;background:#D8A982}
+        .world-avatar-card[data-avatar="chibi-kucing"] .world-avatar-head::before{position:absolute;content:"";left:12px;top:26px;width:9px;height:12px;border-radius:50%;background:#382B35;box-shadow:24px 0 #382B35,3px -3px 0 -2px #fff,27px -3px 0 -2px #fff}
+        .world-avatar-card[data-avatar="chibi-kucing"] .world-avatar-head::after{position:absolute;content:"";left:25px;top:41px;width:10px;height:6px;border-bottom:2px solid #382B35;border-radius:0 0 50% 50%;box-shadow:-15px -1px 0 -2px #EE9CA7,15px -1px 0 -2px #EE9CA7}
+        .world-avatar-card[data-avatar="chibi-kucing"] .world-avatar-hair{z-index:3;top:3px;left:13px;width:63px;height:34px;border-radius:30px 30px 13px 13px;background:#2B1B17;box-shadow:-12px 33px 0 -3px #2B1B17,9px 37px 0 -3px #17110F,42px 33px 0 -3px #2B1B17}
+        .world-avatar-card[data-avatar="chibi-kucing"] .world-avatar-shirt{z-index:1;top:61px;left:17px;width:56px;height:41px;border-radius:17px 17px 13px 13px;background:#EDEDED}
+        .world-avatar-card[data-avatar="chibi-kucing"] .world-avatar-vest{z-index:2;top:64px;left:28px;width:34px;height:8px;border-radius:50%;background:#D5D5D5}
+        .world-avatar-card[data-avatar="chibi-kucing"] .world-avatar-legs{top:98px;left:23px;width:45px;height:27px;border-radius:8px 8px 11px 11px;background:#E6E6E6}
+        .world-avatar-card[data-avatar="chibi-kucing"] .world-avatar-shoes{top:119px;left:15px;width:27px;height:15px;border-radius:10px 10px 6px 6px;background:#F2EEE6;box-shadow:31px 0 #F2EEE6;border-bottom:3px solid #CFCFCF}
+        .world-avatar-cat-ears{position:absolute;z-index:5;top:-9px;left:12px;width:60px;height:28px}
+        .world-avatar-cat-ears::before,.world-avatar-cat-ears::after{position:absolute;content:"";top:0;width:19px;height:27px;border-radius:45% 45% 15% 15%;background:linear-gradient(135deg,#F4A3C0 0 37%,#2A2A2E 39%);clip-path:polygon(50% 0,100% 100%,0 100%)}
+        .world-avatar-cat-ears::before{left:3px;transform:rotate(-13deg)}
+        .world-avatar-cat-ears::after{right:3px;transform:rotate(13deg)}
+        .world-avatar-cat-headset{position:absolute;z-index:4;top:1px;left:14px;width:56px;height:28px;border:4px solid #2A2A2E;border-bottom:0;border-radius:30px 30px 0 0}
         .world-avatar-pick{min-height:43px;margin-top:12px;border:0;border-radius:13px;background:linear-gradient(135deg,#29cda9,#16a991);color:#fff;font:900 11px var(--font-display,'Orbitron'),sans-serif;cursor:pointer}
         .world-avatar-pick:focus-visible,.world-avatar-change:focus-visible{outline:3px solid #ffbc58;outline-offset:3px}
         .world-avatar-change{display:flex;justify-content:center;align-items:center;width:100%;min-height:44px;margin-top:14px;border:2px solid #cce4f4;border-radius:14px;background:#f5fbff;color:#456b94;font:800 10px var(--font-display,'Orbitron'),sans-serif;cursor:pointer}
@@ -4275,6 +4953,7 @@ const NumatikWorldPage = () => {
                         <div className="world-avatar-preview" aria-hidden="true">
                           <div className="world-avatar-doll">
                             <span className="world-avatar-hair" />
+                            {preset.id === "chibi-kucing" && <><span className="world-avatar-cat-ears" /><span className="world-avatar-cat-headset" /></>}
                             <span className="world-avatar-head" />
                             {preset.id === "cewek-streetwear" && <span className="world-avatar-beanie" />}
                             <span className="world-avatar-shirt" />
