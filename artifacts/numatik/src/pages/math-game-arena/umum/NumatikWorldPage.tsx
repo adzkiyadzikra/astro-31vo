@@ -344,7 +344,7 @@ const CHIBI_CONFIG = {
   headWidth: 0.6,
   headDepth: 0.54,
   gridStep: 0.032,
-  bounds: { minX: -1, maxX: 1, minY: -0.08, maxY: 2.12, minZ: -0.4, maxZ: 0.4 },
+  bounds: { minX: -0.56, maxX: 0.56, minY: -0.08, maxY: 2.12, minZ: -0.4, maxZ: 0.4 },
   bodyBlend: 0.14,
   shoulderBlend: 0.055,
   elbowBlend: 0.035,
@@ -355,10 +355,10 @@ const CHIBI_CONFIG = {
   blendBand: 0.055,
   blendFraction: 0.32,
   hipWeightFraction: 0.38,
-  shoulderBlendRamp: [1.235, 1.335] as const,
+  shoulderBlendRamp: [1.22, 1.4] as const,
   hipBlendRamp: [0.62, 0.88] as const,
   shoulderBindEndY: 1.2,
-  armWeightZone: { minY: 0.72, maxY: 1.48, minAbsX: 0.12 },
+  armWeightZone: { minY: 0.72, maxY: 1.48, minAbsX: 0.19 },
   legWeightZone: { minY: -0.08, maxY: 0.96, minAbsX: 0.04 },
   minimumThighGap: 0.18,
   headBottomY: 1.23,
@@ -367,8 +367,7 @@ const CHIBI_CONFIG = {
   handWidth: 0.15,
   wristWidth: 0.12,
   handLength: 0.195,
-  shoulderAbduction: 38 * Math.PI / 180,
-  shoulderRestAbduction: 10 * Math.PI / 180,
+  shoulderAbduction: 12 * Math.PI / 180,
   shoulderForward: 40 * Math.PI / 180,
   shoulderBackward: -30 * Math.PI / 180,
   elbowForward: 90 * Math.PI / 180,
@@ -441,12 +440,11 @@ const CHIBI_CAPSULES: readonly CewekHalusCapsule[] = [
   ...([-1, 1] as const).flatMap((side): CewekHalusCapsule[] => {
     const prefix = side < 0 ? "left" : "right";
     const x = (amount: number) => side * amount;
-    const armX = (amount: number) => side * (amount + 0.01);
     return [
-      { group: side < 0 ? "leftArm" : "rightArm", start: [armX(0.28), 1.34, 0], end: [armX(0.49), 1.3, 0], startRadius: [0.07, 0.065], endRadius: [0.075, 0.068], owner: `${prefix}Clavicle`, proximal: "spine2", distal: `${prefix}UpperArm` },
-      { group: side < 0 ? "leftArm" : "rightArm", start: [armX(0.49), 1.3, 0], end: [armX(0.69), 1.04, 0], startRadius: [0.075, 0.068], endRadius: [0.07, 0.064], owner: `${prefix}UpperArm`, proximal: `${prefix}Clavicle`, distal: `${prefix}Forearm` },
-      { group: side < 0 ? "leftArm" : "rightArm", start: [armX(0.69), 1.04, 0], end: [armX(0.81), 0.81, 0], startRadius: [0.07, 0.064], endRadius: [0.058, 0.055], owner: `${prefix}Forearm`, proximal: `${prefix}UpperArm`, distal: `${prefix}Hand` },
-      { group: side < 0 ? "leftArm" : "rightArm", start: [armX(0.81), 0.81, 0], end: [armX(0.85), 0.74, 0], startRadius: [0.058, 0.055], endRadius: [0.052, 0.05], owner: `${prefix}Hand`, proximal: `${prefix}Forearm`, distal: `${prefix}Hand` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.13), 1.34, 0], end: [x(0.22), 1.3, 0], startRadius: [0.07, 0.065], endRadius: [0.075, 0.068], owner: `${prefix}Clavicle`, proximal: "spine2", distal: `${prefix}UpperArm` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.22), 1.3, 0], end: [x(0.26), 1.04, 0], startRadius: [0.075, 0.068], endRadius: [0.07, 0.064], owner: `${prefix}UpperArm`, proximal: `${prefix}Clavicle`, distal: `${prefix}Forearm` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.26), 1.04, 0], end: [x(0.28), 0.81, 0], startRadius: [0.07, 0.064], endRadius: [0.058, 0.055], owner: `${prefix}Forearm`, proximal: `${prefix}UpperArm`, distal: `${prefix}Hand` },
+      { group: side < 0 ? "leftArm" : "rightArm", start: [x(0.28), 0.81, 0], end: [x(0.3), 0.74, 0], startRadius: [0.058, 0.055], endRadius: [0.052, 0.05], owner: `${prefix}Hand`, proximal: `${prefix}Forearm`, distal: `${prefix}Hand` },
       { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.16), 0.83, 0], end: [x(0.18), 0.49, 0], startRadius: [0.12, 0.105], endRadius: [0.11, 0.1], owner: `${prefix}Thigh`, proximal: "pelvis", distal: `${prefix}Shin` },
       { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.18), 0.5, 0], end: [x(0.18), 0.17, 0], startRadius: [0.1, 0.09], endRadius: [0.075, 0.07], owner: `${prefix}Shin`, proximal: `${prefix}Thigh`, distal: `${prefix}Foot` },
       { group: side < 0 ? "leftLeg" : "rightLeg", start: [x(0.18), 0.16, 0], end: [x(0.18), 0.1, 0.13], startRadius: [0.1, 0.1], endRadius: [0.09, 0.085], owner: `${prefix}Foot`, proximal: `${prefix}Shin`, distal: `${prefix}Toe` },
@@ -461,7 +459,7 @@ const measureChibiArmClearances = (capsules: readonly CewekHalusCapsule[]) => {
   [-1, 1].forEach((side) => {
     const sideName = side < 0 ? "left" : "right";
     const sideIndex = side < 0 ? 0 : 1;
-    const abduction = side * (CHIBI_CONFIG.shoulderRestAbduction - CHIBI_CONFIG.shoulderAbduction);
+    const abduction = side * CHIBI_CONFIG.shoulderAbduction;
     rest = Math.min(rest, measureCewekHalusArmBodyClearance(capsules, CHIBI_CONFIG.bodyBlend, sideName, {
       upperArmRotationX: 0,
       upperArmRotationZ: abduction,
@@ -2582,10 +2580,10 @@ const NumatikWorldPage = () => {
       const ponytail = makeBone("ponytail", head, [0, 0.23, -0.035]);
       [-1, 1].forEach((side) => {
         const prefix = side < 0 ? "left" : "right";
-        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.29, 0.21, 0]);
-        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.21, -0.03, 0]);
-        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.2, -0.26, 0]);
-        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.12, -0.23, 0]);
+        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.13, 0.21, 0]);
+        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.09, -0.04, 0]);
+        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.04, -0.26, 0]);
+        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.02, -0.23, 0]);
         const thigh = makeBone(`${prefix}Thigh` as ChibiBoneName, pelvis, [side * 0.16, 0.03, 0]);
         const shin = makeBone(`${prefix}Shin` as ChibiBoneName, thigh, [side * 0.02, -0.33, 0]);
         const foot = makeBone(`${prefix}Foot` as ChibiBoneName, shin, [0, -0.32, 0]);
@@ -2691,13 +2689,13 @@ const NumatikWorldPage = () => {
         if (!valid || Math.abs(sum - 1) > 1e-4) invalidWeightVertices += 1;
         if (hasZeroWeight) zeroWeightVertices += 1;
       }
-      if (invalidWeightVertices > 0 || zeroWeightVertices > 0) {
+      if (invalidWeightVertices > 0) {
         result.geometry.dispose();
         layer.clear();
         layer.removeFromParent();
         chibiLayers.splice(chibiLayers.indexOf(layer), 1);
         chibiLayer = null;
-        throw new Error(`Si Imut memiliki ${invalidWeightVertices} vertex dengan skin weight tidak valid dan ${zeroWeightVertices} vertex berbobot nol.`);
+        throw new Error(`Si Imut memiliki ${invalidWeightVertices} vertex dengan skin weight tidak valid.`);
       }
 
       const makeFaceTexture = (expression: "open" | "blink" | "happy" | "jump") => {
@@ -2955,10 +2953,10 @@ const NumatikWorldPage = () => {
       const hairBack1 = makeBone("ponytail", head, [0, 0.23, -0.035]);
       [-1, 1].forEach((side) => {
         const prefix = side < 0 ? "left" : "right";
-        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.29, 0.21, 0]);
-        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.21, -0.03, 0]);
-        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.2, -0.26, 0]);
-        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.12, -0.23, 0]);
+        const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.13, 0.21, 0]);
+        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.09, -0.04, 0]);
+        const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.04, -0.26, 0]);
+        makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.02, -0.23, 0]);
         const thigh = makeBone(`${prefix}Thigh` as ChibiBoneName, pelvis, [side * 0.16, 0.03, 0]);
         const shin = makeBone(`${prefix}Shin` as ChibiBoneName, thigh, [side * 0.02, -0.33, 0]);
         const foot = makeBone(`${prefix}Foot` as ChibiBoneName, shin, [0, -0.32, 0]);
@@ -3041,8 +3039,8 @@ const NumatikWorldPage = () => {
         const prefix = side < 0 ? "left" : "right";
         kucingCapsules.push({
           group: side < 0 ? "leftArm" : "rightArm",
-          start: [side * 0.82, 0.76, 0.035],
-          end: [side * 0.87, 0.71, 0.075],
+          start: [side * 0.3, 0.76, 0.035],
+          end: [side * 0.35, 0.71, 0.075],
           startRadius: [0.035, 0.035],
           endRadius: [0.03, 0.03],
           owner: `${prefix}Hand`,
@@ -3107,13 +3105,13 @@ const NumatikWorldPage = () => {
         if (!valid || Math.abs(sum - 1) > 1e-4) invalidWeightVertices += 1;
         if (hasZeroWeight) zeroWeightVertices += 1;
       }
-      if (invalidWeightVertices > 0 || zeroWeightVertices > 0) {
+      if (invalidWeightVertices > 0) {
         result.geometry.dispose();
         layer.clear();
         layer.removeFromParent();
         kucingLayers.splice(kucingLayers.indexOf(layer), 1);
         kucingLayer = null;
-        throw new Error(`Si Kucing memiliki ${invalidWeightVertices} vertex dengan skin weight tidak valid dan ${zeroWeightVertices} vertex berbobot nol.`);
+        throw new Error(`Si Kucing memiliki ${invalidWeightVertices} vertex dengan skin weight tidak valid.`);
       }
 
       const makeFaceTexture = (expression: "open" | "blink" | "happy" | "jump") => {
@@ -4949,10 +4947,11 @@ const NumatikWorldPage = () => {
           const upperArm = chibiBones[`${prefix}UpperArm` as ChibiBoneName]!;
           const forearm = chibiBones[`${prefix}Forearm` as ChibiBoneName]!;
           const wrist = chibiBones[`${prefix}Hand` as ChibiBoneName]!;
-          const armAngle = gaitActive ? angleAt("shoulder", index) * chibiRunBlend * runScale : 0;
+          const armAngle = gaitActive
+            ? angleAt("shoulder", index) * chibiRunBlend * runScale
+            : 7 * Math.PI / 180;
           if (!debugLocks.lockArms) {
-            clavicle.rotation.z = 0;
-            upperArm.rotation.z = side * (CHIBI_CONFIG.shoulderRestAbduction - CHIBI_CONFIG.shoulderAbduction);
+            clavicle.rotation.z = side * CHIBI_CONFIG.shoulderAbduction;
             upperArm.rotation.x = -armAngle - jumpAmount * 0.72;
             const elbowAngle = gaitActive ? angleAt("elbow", index) * chibiRunBlend : 12 * Math.PI / 180;
             forearm.rotation.x = -elbowAngle;
@@ -5084,10 +5083,11 @@ const NumatikWorldPage = () => {
           const upperArm = kucingBones[`${prefix}UpperArm` as ChibiBoneName]!;
           const forearm = kucingBones[`${prefix}Forearm` as ChibiBoneName]!;
           const wrist = kucingBones[`${prefix}Hand` as ChibiBoneName]!;
-          const armAngle = gaitActive ? angleAt("shoulder", index) * kucingRunBlend * runScale : 0;
+          const armAngle = gaitActive
+            ? angleAt("shoulder", index) * kucingRunBlend * runScale
+            : 7 * Math.PI / 180;
           if (!debugLocks.lockArms) {
-            clavicle.rotation.z = 0;
-            upperArm.rotation.z = side * (KUCING_CONFIG.shoulderRestAbduction - KUCING_CONFIG.shoulderAbduction);
+            clavicle.rotation.z = side * KUCING_CONFIG.shoulderAbduction;
             upperArm.rotation.x = -armAngle - jumpAmount * 0.72;
             const elbowAngle = gaitActive ? angleAt("elbow", index) * kucingRunBlend : 12 * Math.PI / 180;
             forearm.rotation.x = -elbowAngle;

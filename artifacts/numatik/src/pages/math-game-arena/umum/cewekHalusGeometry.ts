@@ -371,32 +371,14 @@ export const buildCewekHalusGeometry = async (
     const side = point[0] < 0 ? "left" : "right";
     const armZone = config.armWeightZone ?? { minY: 0.72, maxY: 1.4, minAbsX: 0.2 };
     const legZone = config.legWeightZone ?? { minY: -0.08, maxY: 1, minAbsX: 0.12 };
-    const armCandidates = capsules.filter((capsule) => (
-      capsule.group === `${side}Arm`
-      && point[1] >= armZone.minY
-      && point[1] <= armZone.maxY
-      && Math.abs(point[0]) >= armZone.minAbsX
-    ));
-    const nearestArm = armCandidates
-      .map((capsule) => ({ capsule, ...capsuleDistance(point, capsule) }))
-      .sort((first, second) => first.distance - second.distance)[0];
-    const armField = armCandidates.length > 0
-      ? groupDistance(point[0], point[1], point[2], `${side}Arm`, [config.elbowBlend, config.wristBlend])
-      : Number.POSITIVE_INFINITY;
-    const bodyField = armCandidates.length > 0
-      ? bodyDistance(point[0], point[1], point[2])
-      : Number.POSITIVE_INFINITY;
-    const isShoulderRoot = (nearestArm?.capsule.owner.endsWith("Clavicle") && nearestArm.t >= 0.75)
-      || (nearestArm?.capsule.owner.endsWith("UpperArm") && nearestArm.t <= 0.25);
-    const shoulderBlendWidth = config.shoulderBlend + step * 0.1;
-    const armWeightAllowed = armCandidates.length > 0 && (
-      armField <= bodyField
-      || (isShoulderRoot && armField - bodyField <= shoulderBlendWidth)
-    );
+    const inArmZone = config.armWeightZone
+      ? point[1] >= armZone.minY && point[1] <= armZone.maxY && Math.abs(point[0]) >= armZone.minAbsX
+      : (point[1] >= 1.22 && Math.abs(point[0]) >= 0.12)
+        || (point[1] < 1.22 && point[1] >= 0.72 && Math.abs(point[0]) >= 0.2);
     const allowed = capsules.filter((capsule) => {
       if (capsule.group === "body") return true;
       if (capsule.group.endsWith("Arm")) {
-        return armWeightAllowed && capsule.group === `${side}Arm` && armCandidates.includes(capsule);
+        return capsule.group === `${side}Arm` && inArmZone;
       }
       const inLegZone = point[1] >= legZone.minY
         && point[1] <= legZone.maxY
@@ -438,23 +420,17 @@ export const buildCewekHalusGeometry = async (
       strongest = [[owner, 1]];
     }
     const totalWeight = strongest.reduce((sum, [, weight]) => sum + weight, 0);
-    if (!armWeightAllowed && strongest.some(([name]) => /^(left|right)(Clavicle|UpperArm|Forearm|Hand)$/.test(name))) {
+    if (!inArmZone && strongest.some(([name]) => /^(left|right)(Clavicle|UpperArm|Forearm|Hand)$/.test(name))) {
       armWeightLeakVertexCount += 1;
     }
-    const normalized: Array<readonly [number, number]> = totalWeight > 0
+    const normalized = totalWeight > 0
       ? strongest.map(([name, weight]) => [boneIndices.get(name) ?? 0, weight / totalWeight] as const)
-      : [[0, 1]];
-    const paddingCount = 4 - normalized.length;
-    const paddingWeight = 1e-6;
-    const retainedWeight = 1 - paddingCount * paddingWeight;
+      : [[0, 1] as const];
+    while (normalized.length < 4) normalized.push([normalized[0]![0], 0]);
     normalized.forEach(([bone, weight]) => {
       skinIndices.push(bone);
-      skinWeights.push(weight * retainedWeight);
+      skinWeights.push(weight);
     });
-    for (let influence = 0; influence < paddingCount; influence += 1) {
-      skinIndices.push(normalized[0]![0]);
-      skinWeights.push(paddingWeight);
-    }
 
     let vertexWeightSum = 0;
     let invalidWeight = false;
