@@ -236,6 +236,16 @@ const KEMEJA_CONFIG = {
 
 const KEMEJA_DEBUG_FREEZE_PHASE: number | null = null;
 const CHIBI_DEBUG_FREEZE_PHASE: number | null = null;
+// Pakaian dan sepatu berbagi satu SkinnedMesh dengan tubuh; hide* akan menyembunyikan permukaan gabungan.
+const DEBUG_AVATAR = {
+  enabled: false,
+  skeletonHelper: false,
+  wireframe: false,
+  hideBody: false,
+  hideClothing: false,
+  hideShoes: false,
+  hideHair: false,
+} as const;
 
 const CHIBI_CONFIG = {
   colors: {
@@ -272,7 +282,7 @@ const CHIBI_CONFIG = {
   hipBlendRamp: [0.62, 0.88] as const,
   shoulderBindEndY: 1.2,
   armWeightZone: { minY: 0.72, maxY: 1.48, minAbsX: 0.19 },
-  legWeightZone: { minY: -0.08, maxY: 0.96, minAbsX: 0.12 },
+  legWeightZone: { minY: -0.08, maxY: 0.96, minAbsX: 0.04 },
   minimumThighGap: 0.18,
   headBottomY: 1.23,
   headTopY: 2.03,
@@ -1066,6 +1076,7 @@ const NumatikWorldPage = () => {
     let chibiBones: Partial<Record<ChibiBoneName, THREE.Bone>> = {};
     let chibiBodyMesh: THREE.SkinnedMesh | null = null;
     let chibiHairRoot: THREE.Group | null = null;
+    let chibiDebugSkeletonHelper: THREE.SkeletonHelper | null = null;
     let chibiFaceMaterial: THREE.MeshStandardMaterial | null = null;
     let chibiFaceTextures: THREE.CanvasTexture[] = [];
     let chibiFaceIndex = 0;
@@ -2478,14 +2489,18 @@ const NumatikWorldPage = () => {
         roughness: 0.6,
         metalness: 0,
         vertexColors: true,
-        transparent: true,
-        alphaTest: 0.01,
+        transparent: false,
         side: THREE.DoubleSide,
       });
       resources.add(bodyMaterial);
       resources.add(result.geometry);
       const body = new THREE.SkinnedMesh(result.geometry, bodyMaterial);
       body.name = "chibi-halus-body";
+      body.castShadow = true;
+      body.receiveShadow = false;
+      body.visible = !DEBUG_AVATAR.enabled
+        || !(DEBUG_AVATAR.hideBody || DEBUG_AVATAR.hideClothing || DEBUG_AVATAR.hideShoes);
+      bodyMaterial.wireframe = DEBUG_AVATAR.enabled && DEBUG_AVATAR.wireframe;
       body.frustumCulled = false;
       layer.add(body);
       avatar.updateMatrixWorld(true);
@@ -2497,9 +2512,21 @@ const NumatikWorldPage = () => {
       chibiBones = boneMap;
       chibiBodyMesh = body;
       chibiFaceMaterial = bodyMaterial;
+      if (DEBUG_AVATAR.enabled && DEBUG_AVATAR.skeletonHelper) {
+        chibiDebugSkeletonHelper = new THREE.SkeletonHelper(body);
+        chibiDebugSkeletonHelper.name = "chibi-halus-debug-skeleton";
+        scene.add(chibiDebugSkeletonHelper);
+        resources.add(chibiDebugSkeletonHelper.geometry);
+        if (Array.isArray(chibiDebugSkeletonHelper.material)) {
+          chibiDebugSkeletonHelper.material.forEach((material) => resources.add(material));
+        } else {
+          resources.add(chibiDebugSkeletonHelper.material);
+        }
+      }
 
       const hairRoot = new THREE.Group();
       hairRoot.name = "chibi-hair";
+      hairRoot.visible = !DEBUG_AVATAR.enabled || !DEBUG_AVATAR.hideHair;
       head.add(hairRoot);
       chibiHairRoot = hairRoot;
       const hairGeometry = new THREE.SphereGeometry(1, 8, 6);
@@ -2514,6 +2541,8 @@ const NumatikWorldPage = () => {
       ) => {
         const mesh = addMesh(hairGeometry, material, parent, position, scale);
         mesh.rotation.z = rotationZ;
+        mesh.castShadow = true;
+        mesh.receiveShadow = false;
       };
       addHair(hairRoot, shadowMaterial, [0, 0.22, -0.01], [0.31, 0.22, 0.28]);
       addHair(hairRoot, hairMaterial, [0, 0.28, 0.015], [0.3, 0.18, 0.275]);
@@ -3891,6 +3920,7 @@ const NumatikWorldPage = () => {
           chibiFaceMaterial.map = chibiFaceTextures[nextFaceIndex]!;
         }
         chibiLayer.updateMatrixWorld(true);
+        chibiDebugSkeletonHelper?.updateMatrixWorld(true);
       }
       if (selectedAvatarId === "roblox-slim" && robloxSlimBuilt && robloxSlimTorso && robloxSlimUpperTorso && robloxSlimHead) {
         const slimAlpha = 1 - Math.exp(-dt / ROBLOX_SLIM_CONFIG.transitionSeconds);

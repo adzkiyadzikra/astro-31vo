@@ -323,10 +323,18 @@ export const buildCewekHalusGeometry = async (
         });
       });
     }
-    const strongest = [...contributions.entries()].sort((first, second) => second[1] - first[1]).slice(0, 4);
-    const totalWeight = strongest.reduce((sum, [, weight]) => sum + weight, 0) || 1;
-    const normalized = strongest.map(([name, weight]) => [boneIndices.get(name) ?? 0, weight / totalWeight] as const);
-    while (normalized.length < 4) normalized.push([0, 0]);
+    let strongest = [...contributions.entries()].sort((first, second) => second[1] - first[1]).slice(0, 4);
+    if (strongest.length === 0 && allowed.length > 0) {
+      const owner = allowed
+        .map((capsule) => ({ capsule, ...capsuleDistance(point, capsule) }))
+        .sort((first, second) => first.distance - second.distance)[0]!.capsule.owner;
+      strongest = [[owner, 1]];
+    }
+    const totalWeight = strongest.reduce((sum, [, weight]) => sum + weight, 0);
+    const normalized = totalWeight > 0
+      ? strongest.map(([name, weight]) => [boneIndices.get(name) ?? 0, weight / totalWeight] as const)
+      : [[0, 1] as const];
+    while (normalized.length < 4) normalized.push([normalized[0]![0], 0]);
     normalized.forEach(([bone, weight]) => {
       skinIndices.push(bone);
       skinWeights.push(weight);
