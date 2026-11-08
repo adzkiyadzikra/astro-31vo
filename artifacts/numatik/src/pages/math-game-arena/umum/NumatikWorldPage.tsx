@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import * as THREE from "three";
@@ -401,11 +402,12 @@ const KUCING_CONFIG = {
     blush: "#EE9CA7",
     hair: "#2B1B17",
     hairShadow: "#17110F",
-    shirt: "#EDEDED",
+    shirt: "#FFFFFF",
+    sleeve: "#5269A9",
     pants: "#E6E6E6",
-    shoes: "#F2EEE6",
-    sole: "#CFCFCF",
-    collar: "#D5D5D5",
+    shoes: "#5269A9",
+    sole: "#293558",
+    collar: "#E0AA48",
     seams: "#C8C8C8",
     headset: "#2A2A2E",
     earInner: "#F4A3C0",
@@ -420,6 +422,7 @@ const KUCING_CONFIG = {
   handWidth: 0.145,
   wristWidth: 0.12,
   handLength: 0.19,
+  armWeightZone: { minY: 0.58, maxY: 1.48, minAbsX: 0.19 },
   hairSway: 0.035,
   hairChainDamping: 7.5,
   earSway: 0.025,
@@ -428,7 +431,16 @@ const KUCING_CONFIG = {
   shoeRoughness: 0.7,
   microphone: false,
   totalHeight: 2.1,
-  runKeyframes: CHIBI_CONFIG.runKeyframes,
+  runKeyframes: [
+    { phase: 0, shoulder: [-24, 30], elbow: [30, 60], hip: [28, -24], knee: [10, 72], height: 0 },
+    { phase: 0.125, shoulder: [-5, 10], elbow: [38, 45], hip: [5, -5], knee: [24, 22], height: -0.02 },
+    { phase: 0.25, shoulder: [18, -15], elbow: [60, 38], hip: [-14, 15], knee: [45, 78], height: 0 },
+    { phase: 0.375, shoulder: [30, -24], elbow: [65, 32], hip: [-24, 30], knee: [72, 50], height: 0.045 },
+    { phase: 0.5, shoulder: [30, -24], elbow: [65, 32], hip: [-24, 30], knee: [75, 10], height: 0 },
+    { phase: 0.625, shoulder: [10, -5], elbow: [45, 38], hip: [-5, 5], knee: [22, 24], height: -0.02 },
+    { phase: 0.75, shoulder: [-15, 22], elbow: [38, 58], hip: [14, -14], knee: [78, 45], height: 0 },
+    { phase: 0.875, shoulder: [-24, 30], elbow: [30, 60], hip: [28, -24], knee: [50, 72], height: 0.045 },
+  ],
 } as const;
 
 const CHIBI_CAPSULES: readonly CewekHalusCapsule[] = [
@@ -581,7 +593,7 @@ type AvatarPreset = {
   description: string;
   colors: AvatarColors;
   hairstyle: AvatarHairStyle;
-  clothing: "hoodie-vest" | "shirt-suspenders" | "streetwear-crop" | "organic-pastel" | "roblox-slim" | "cewek-halus" | "cowok-kemeja" | "chibi-halus" | "chibi-kucing";
+  clothing: "hoodie-vest" | "shirt-suspenders" | "streetwear-crop" | "organic-pastel" | "roblox-slim" | "cewek-halus" | "cowok-kemeja" | "petualang-flanel" | "chibi-halus" | "chibi-kucing";
   accessories: readonly string[];
   perutTerbuka?: boolean;
   organicPalette?: OrganicAvatarPalette;
@@ -676,6 +688,22 @@ const AVATAR_PRESETS: readonly AvatarPreset[] = [
     },
     hairstyle: "short",
     clothing: "cowok-kemeja",
+    accessories: ["kacamata-biru"],
+  },
+  {
+    id: "petualang-flanel",
+    name: "Si Petualang",
+    description: "Tubuh kokoh, rambut pirang, flanel kotak, dan kacamata biru",
+    colors: {
+      skin: KEMEJA_CONFIG.colors.skin,
+      hair: KEMEJA_CONFIG.colors.hair,
+      hoodie: KEMEJA_CONFIG.colors.shirt,
+      vest: KEMEJA_CONFIG.colors.flannelRed,
+      pants: KEMEJA_CONFIG.colors.shorts,
+      shoes: KEMEJA_CONFIG.colors.shoes,
+    },
+    hairstyle: "short",
+    clothing: "petualang-flanel",
     accessories: ["kacamata-biru"],
   },
   {
@@ -1305,8 +1333,11 @@ const NumatikWorldPage = () => {
     const kemejaLayers: THREE.Group[] = [];
     const kemejaArms: KemejaArm[] = [];
     const kemejaLegs: KemejaLeg[] = [];
+    const petualangFlanelLayers: THREE.Group[] = [];
+    const petualangFlanelPosePairs: Array<{ source: THREE.Object3D; target: THREE.Object3D }> = [];
     let kemejaBuilt = false;
     let kemejaRoot: THREE.Group | null = null;
+    let petualangFlanelRoot: THREE.Group | null = null;
     let kemejaTorsoMotion: THREE.Group | null = null;
     let kemejaHead: THREE.Group | null = null;
     let kemejaHair: THREE.Group | null = null;
@@ -2445,17 +2476,17 @@ const NumatikWorldPage = () => {
         kemejaLayers.push(shoulder);
         const upper = new THREE.Group();
         shoulder.add(upper);
-        addKemejaMesh(upperArmGeometry, materials.skin, upper, [0, -0.16, 0], "kulit");
+        addKemejaMesh(upperArmGeometry, materials.skin, upper, [0, -0.16, 0], "kulit lengan atas");
         addKemejaMesh(sleeveGeometry, plaidMaterial, upper, [0, -0.08, 0], "lengan");
         const cuff = addKemejaMesh(cuffGeometry, materials.flannelWhite, upper, [0, -0.18, 0], "lengan");
         cuff.rotation.x = Math.PI / 2;
         const elbow = new THREE.Group();
         elbow.position.y = -0.31;
         upper.add(elbow);
-        addKemejaMesh(elbowGeometry, materials.skin, elbow, [0, 0, 0], "kulit", [0.108, 0.108, 0.108]);
+        addKemejaMesh(elbowGeometry, materials.skin, elbow, [0, 0, 0], "kulit siku", [0.108, 0.108, 0.108]);
         const forearm = new THREE.Group();
         elbow.add(forearm);
-        addKemejaMesh(forearmGeometry, materials.skin, forearm, [0, -0.15, 0], "kulit");
+        addKemejaMesh(forearmGeometry, materials.skin, forearm, [0, -0.15, 0], "kulit lengan bawah");
         const wrist = new THREE.Group();
         wrist.position.y = -0.29;
         forearm.add(wrist);
@@ -2546,6 +2577,46 @@ const NumatikWorldPage = () => {
         lebarBokong: KEMEJA_CONFIG.lowerTorso[0],
         waktuPembuatanMs: Number((performance.now() - buildStartedAt).toFixed(1)),
       });
+    };
+
+    const buildPetualangFlanelAvatar = () => {
+      if (petualangFlanelRoot) return;
+      buildKemejaAvatar();
+      if (!kemejaRoot) throw new Error("Avatar Si Kemeja belum tersedia untuk membuat Si Petualang.");
+
+      const root = kemejaRoot.clone(true);
+      root.name = "petualang-flanel-layer";
+      petualangFlanelPosePairs.length = 0;
+      const pairPose = (source: THREE.Object3D, target: THREE.Object3D) => {
+        petualangFlanelPosePairs.push({ source, target });
+        source.children.forEach((child, index) => {
+          const targetChild = target.children[index];
+          if (targetChild) pairPose(child, targetChild);
+        });
+      };
+      pairPose(kemejaRoot, root);
+      root.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        const section = String(object.userData.kemejaSection ?? "");
+        const widthScale: Record<string, number> = {
+          kaus: 1.08,
+          kemeja: 1.08,
+          celana: 1.08,
+          "kulit lengan atas": 1.12,
+          "kulit siku": 1.08,
+          "kulit lengan bawah": 1.1,
+          lengan: 1.1,
+          tangan: 1.12,
+          "kaus kaki": 1.06,
+          sepatu: 1.08,
+        };
+        const width = widthScale[section];
+        if (width) object.scale.x *= width;
+        if (section === "sepatu") object.scale.z *= 1.08;
+      });
+      avatarRig.add(root);
+      petualangFlanelRoot = root;
+      petualangFlanelLayers.push(root);
     };
 
     const buildChibiAvatar = async (onProgress?: (progress: number) => void, shouldCancel?: () => boolean) => {
@@ -2954,7 +3025,7 @@ const NumatikWorldPage = () => {
       [-1, 1].forEach((side) => {
         const prefix = side < 0 ? "left" : "right";
         const clavicle = makeBone(`${prefix}Clavicle` as ChibiBoneName, spine2, [side * 0.13, 0.21, 0]);
-        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.09, -0.04, 0]);
+        const upperArm = makeBone(`${prefix}UpperArm` as ChibiBoneName, clavicle, [side * 0.14, -0.04, 0]);
         const forearm = makeBone(`${prefix}Forearm` as ChibiBoneName, upperArm, [side * 0.04, -0.26, 0]);
         makeBone(`${prefix}Hand` as ChibiBoneName, forearm, [side * 0.02, -0.23, 0]);
         const thigh = makeBone(`${prefix}Thigh` as ChibiBoneName, pelvis, [side * 0.16, 0.03, 0]);
@@ -2989,20 +3060,36 @@ const NumatikWorldPage = () => {
         const [x, y] = point;
         const absX = Math.abs(x);
         target.copy(colorValues.skin);
+        const isArm = absX >= 0.23 && absX <= 0.46;
+        if (isArm && y >= 1.04 && y < 1.07) {
+          target.copy(colorValues.collar);
+          return;
+        }
+        if (isArm && y >= 1.07 && y < 1.34) {
+          target.copy(colorValues.sleeve);
+          return;
+        }
+        if (isArm && y >= 0.59 && y < 0.79) return;
+        if (isArm && y >= 0.79 && y < 0.84) {
+          target.copy(colorValues.collar);
+          return;
+        }
         const pants = band(y, 0.15, 0.94) * (1 - smooth((absX - 0.29) / 0.06));
-        const shoes = (1 - smooth((y - 0.14) / 0.06)) * smooth((absX - 0.1) / 0.05);
+        const shoes = (1 - smooth((y - 0.19) / 0.06)) * smooth((absX - 0.1) / 0.05);
         const sole = (1 - smooth((y - 0.045) / 0.025)) * smooth((absX - 0.1) / 0.05);
         if (pants > 0) target.lerp(colorValues.pants, pants);
         if (shoes > 0) target.lerp(colorValues.shoes, shoes);
         if (sole > 0) target.lerp(colorValues.sole, sole);
-        const shirt = band(y, 0.96, 1.4) * (1 - smooth((absX - 0.18) / 0.055));
-        const sleeves = band(y, 0.83, 1.38) * smooth((absX - 0.17) / 0.07);
+        const shirt = band(y, 0.96, 1.3) * (1 - smooth((absX - 0.18) / 0.055));
+        const sleeves = band(y, 1.18, 1.3) * smooth((absX - 0.17) / 0.07);
         if (shirt > 0) target.lerp(colorValues.shirt, shirt);
         if (sleeves > 0) target.lerp(colorValues.shirt, sleeves);
-        const collar = shirt * band(y, 1.31, 1.37) * (1 - smooth((absX - 0.12) / 0.025));
+        const sleeveCuff = band(y, 1.16, 1.19) * smooth((absX - 0.17) / 0.07);
         const hem = pants * band(y, 0.19, 0.215);
         const seam = pants * smooth((Math.abs(absX - 0.155) - 0.006) / 0.012);
-        if (collar > 0) target.lerp(colorValues.collar, collar * 0.6);
+        const neckDivider = band(y, 1.39, 1.42, 0.008);
+        if (neckDivider > 0) target.lerp(colorValues.collar, neckDivider);
+        if (sleeveCuff > 0) target.lerp(colorValues.seams, sleeveCuff * 0.18);
         if (hem > 0) target.lerp(colorValues.seams, hem * 0.45);
         if (seam > 0) target.lerp(colorValues.seams, seam * 0.12);
       };
@@ -3017,32 +3104,40 @@ const NumatikWorldPage = () => {
           target.set(0.002, 0.002);
         }
       };
-      const kucingCapsules = CHIBI_CAPSULES.map((capsule): CewekHalusCapsule => (
-        capsule.group === "body" && capsule.owner === "neck"
-          ? {
+      const kucingCapsules = CHIBI_CAPSULES.map((capsule): CewekHalusCapsule => {
+        if (capsule.group === "body" && capsule.owner === "neck") {
+          return {
             ...capsule,
             start: [0, 1.3, 0],
             end: [0, 1.52, 0],
             startRadius: [0.15, 0.12],
             endRadius: [0.13, 0.11],
+          };
+        }
+        if (!capsule.group.endsWith("Arm") || capsule.owner.endsWith("Clavicle")) return capsule;
+        const side = capsule.start[0] < 0 ? -1 : 1;
+        const shifted = {
+          ...capsule,
+          start: [capsule.start[0] + side * 0.05, capsule.start[1], capsule.start[2]] as [number, number, number],
+          end: [capsule.end[0] + side * 0.05, capsule.end[1], capsule.end[2]] as [number, number, number],
+        };
+        return capsule.owner.endsWith("Hand")
+          ? {
+            ...shifted,
+            end: [shifted.end[0], 0.69, shifted.end[2]],
+            startRadius: [0.074, 0.06],
+            endRadius: [0.074, 0.06],
           }
-          : capsule.group.endsWith("Arm") && capsule.owner.endsWith("Hand")
-            ? {
-              ...capsule,
-              end: [capsule.end[0], 0.7, capsule.end[2]],
-              startRadius: [0.0725, 0.055],
-              endRadius: [0.0725, 0.055],
-            }
-          : capsule
-      ));
+          : shifted;
+      });
       [-1, 1].forEach((side) => {
         const prefix = side < 0 ? "left" : "right";
         kucingCapsules.push({
           group: side < 0 ? "leftArm" : "rightArm",
-          start: [side * 0.3, 0.76, 0.035],
-          end: [side * 0.35, 0.71, 0.075],
-          startRadius: [0.035, 0.035],
-          endRadius: [0.03, 0.03],
+          start: [side * 0.35, 0.75, 0.035],
+          end: [side * 0.41, 0.66, 0.06],
+          startRadius: [0.066, 0.058],
+          endRadius: [0.058, 0.052],
           owner: `${prefix}Hand`,
           proximal: `${prefix}Hand`,
           distal: `${prefix}Hand`,
@@ -4033,6 +4128,7 @@ const NumatikWorldPage = () => {
       ["roblox-slim", { layers: robloxSlimLayers, build: buildRobloxSlimAvatar }],
       ["cewek-halus", { layers: cewekHalusLayers, build: buildCewekHalusAvatar }],
       ["cowok-kemeja", { layers: kemejaLayers, build: buildKemejaAvatar }],
+      ["petualang-flanel", { layers: petualangFlanelLayers, build: buildPetualangFlanelAvatar }],
       ["chibi-halus", { layers: chibiLayers, build: buildChibiAvatar }],
       ["chibi-kucing", { layers: kucingLayers, build: buildKucingAvatar }],
     ]);
@@ -4773,7 +4869,8 @@ const NumatikWorldPage = () => {
 
         }
       }
-      if (selectedAvatarId === "cowok-kemeja" && kemejaBuilt && kemejaRoot && kemejaTorsoMotion && kemejaHead) {
+      if ((selectedAvatarId === "cowok-kemeja" || selectedAvatarId === "petualang-flanel")
+        && kemejaBuilt && kemejaRoot && kemejaTorsoMotion && kemejaHead) {
         const phase = KEMEJA_DEBUG_FREEZE_PHASE === null
           ? animationState.phase
           : ((KEMEJA_DEBUG_FREEZE_PHASE % 1) + 1) % 1 * Math.PI * 2;
@@ -4884,6 +4981,12 @@ const NumatikWorldPage = () => {
             alpha,
           );
         });
+        if (selectedAvatarId === "petualang-flanel" && petualangFlanelRoot) {
+          petualangFlanelPosePairs.forEach(({ source, target }) => {
+            target.position.copy(source.position);
+            target.quaternion.copy(source.quaternion);
+          });
+        }
       }
       if (selectedAvatarId === "chibi-halus" && chibiBuilt && chibiLayer && chibiSkeleton && chibiBodyMesh) {
         const debugLocks = DEBUG_PANEL ? debugOptionsRef.current : INITIAL_DEBUG_PANEL_OPTIONS;
@@ -5576,6 +5679,13 @@ const NumatikWorldPage = () => {
         .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-vest{z-index:2;top:51px;left:16px;width:23px;height:38px;border-radius:4px;background:repeating-linear-gradient(90deg,#B3262E 0 8px,#1A1A1A 8px 11px,#EDEDED 11px 13px);box-shadow:27px 0 #B3262E}
         .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-legs{top:88px;left:18px;width:48px;height:27px;border-radius:5px;background:#4F78B0}
         .world-avatar-card[data-avatar="cowok-kemeja"] .world-avatar-shoes{top:118px;left:14px;background:#E6D8C3;box-shadow:30px 0 #E6D8C3;border-bottom:3px solid #B83228}
+        .world-avatar-card[data-avatar="petualang-flanel"] .world-avatar-head{left:18px;width:48px;height:46px;border-radius:12px;background:#D8A982}
+        .world-avatar-card[data-avatar="petualang-flanel"] .world-avatar-head::before{position:absolute;content:"";left:5px;top:17px;width:33px;height:8px;border:2px solid #111820;border-radius:5px;background:#2A4D9B;box-shadow:17px 0 0 -2px #2A4D9B}
+        .world-avatar-card[data-avatar="petualang-flanel"] .world-avatar-hair{top:-1px;left:14px;width:56px;height:31px;border-radius:20px 20px 12px 12px;background:#D9A441;box-shadow:-5px 25px 0 -3px #B9822C,8px 26px 0 -3px #D9A441,28px 25px 0 -3px #B9822C}
+        .world-avatar-card[data-avatar="petualang-flanel"] .world-avatar-shirt{top:49px;left:12px;width:60px;height:43px;border-radius:9px;background:#8E949B}
+        .world-avatar-card[data-avatar="petualang-flanel"] .world-avatar-vest{z-index:2;top:51px;left:13px;width:26px;height:38px;border-radius:4px;background:repeating-linear-gradient(90deg,#B3262E 0 8px,#1A1A1A 8px 11px,#EDEDED 11px 13px);box-shadow:29px 0 #B3262E}
+        .world-avatar-card[data-avatar="petualang-flanel"] .world-avatar-legs{top:88px;left:16px;width:52px;height:27px;border-radius:5px;background:#4F78B0}
+        .world-avatar-card[data-avatar="petualang-flanel"] .world-avatar-shoes{top:118px;left:13px;background:#E6D8C3;box-shadow:32px 0 #E6D8C3;border-bottom:3px solid #B83228}
         .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-head{left:16px;top:6px;width:58px;height:58px;border-radius:48% 48% 46% 46%;background:#D8A982;box-shadow:inset 0 -3px 0 rgba(132,75,48,.12)}
         .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-head::before{position:absolute;content:"";left:12px;top:26px;width:9px;height:12px;border-radius:50%;background:#382B35;box-shadow:24px 0 #382B35,3px -3px 0 -2px #fff,27px -3px 0 -2px #fff}
         .world-avatar-card[data-avatar="chibi-halus"] .world-avatar-head::after{position:absolute;content:"";left:25px;top:41px;width:10px;height:6px;border-bottom:2px solid #382B35;border-radius:0 0 50% 50%;box-shadow:-15px -1px 0 -2px #EE9CA7,15px -1px 0 -2px #EE9CA7}

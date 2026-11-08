@@ -10,7 +10,6 @@
 				"@workspace/numatik",
 				"run",
 				"dev",
-				"--",
 				"--port",
 				"5173"
 			],
